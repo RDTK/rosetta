@@ -35,7 +35,23 @@
 		:cl-protobuf
 		:yacc
 		:cxml-location)
-  :components  ((:module     "yarp"
+  :components  ((:module     "ros-frontend"
+		 :pathname   "src/ros/frontend"
+		 :components ((:file       "package")
+			      (:file       "serialization"
+			       :depends-on ("package")) ;; TODO more like backend
+
+			      (:file       "lexer"
+			       :depends-on ("package"))
+			      (:file       "message"
+			       :depends-on ("package" "lexer"))
+			      (:file       "service"
+			       :depends-on ("package" "lexer" "message"))
+
+			      (:file       "pack"
+			       :depends-on ("package" "message" "service"))))
+
+		(:module     "yarp"
 		 :pathname   "src/yarp"
 		 :components ((:file       "package")
 			      (:file       "types"
