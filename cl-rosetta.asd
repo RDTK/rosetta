@@ -24,10 +24,35 @@
 
 (in-package :cl-rosetta-system)
 
+
+;;; Version stuff
+;;
+
+(defconstant +version-major+ 0
+  "Major component of version number.")
+
+(defconstant +version-minor+ 1
+  "Minor component of version number.")
+
+(defconstant +version-revision+ 0
+  "Revision component of version number.")
+
+(defun version ()
+  "Return a version of the form (MAJOR MINOR REVISION) "
+  (list +version-major+ +version-minor+ +version-revision+))
+
+(defun version/string ()
+  "Return a version string of the form \"MAJOR.MINOR.REVISION\"."
+  (format nil "~{~A.~A.~A~}" (version)))
+
+
+;;; System definitions
+;;
+
 (defsystem :cl-rosetta
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
@@ -42,7 +67,7 @@
 (defsystem :cl-rosetta-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     "0.1.0"
+  :version     #. (version/string)
   :license     "GP3L; see COPYING file for details."
   :description "Unit tests for the cl-rosetta system."
   :depends-on  (:cl-rosetta
