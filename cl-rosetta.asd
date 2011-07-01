@@ -35,35 +35,7 @@
 		:cl-protobuf
 		:yacc
 		:cxml-location)
-  :components  ((:module     "ros-frontend"
-		 :pathname   "src/ros/frontend"
-		 :components ((:file       "package")
-			      (:file       "serialization"
-			       :depends-on ("package")) ;; TODO more like backend
-
-			      (:file       "lexer"
-			       :depends-on ("package"))
-			      (:file       "message"
-			       :depends-on ("package" "lexer"))
-			      (:file       "service"
-			       :depends-on ("package" "lexer" "message"))
-
-			      (:file       "pack"
-			       :depends-on ("package" "message" "service"))))
-
-		(:module     "yarp"
-		 :pathname   "src/yarp"
-		 :components ((:file       "package")
-			      (:file       "types"
-			       :depends-on ("package"))
-			      (:file       "bottle"
-			       :depends-on ("package" "types"))))
-
-		(:module     "yarp-backend"
-		 :pathname   "src/yarp/backend"
-		 :components ((:file       "package")
-			      (:file       "serialization"
-			       :depends-on ("package")))))
+  :components  ()
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 
@@ -81,3 +53,56 @@
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
+
+
+;;; ROS
+;;
+
+(defsystem :cl-rosetta-ros
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     "0.1.0"
+  :license     "GPL3; see COPYING file for details."
+  :description "Support for the Robot Operating System (ROS)."
+  :depends-on  (:cl-rosetta)
+  :components  ((:module     "ros-frontend"
+		 :pathname   "src/ros/frontend"
+		 :components ((:file       "package")
+			      (:file       "serialization"
+			       :depends-on ("package")) ;; TODO more like backend
+
+			      (:file       "lexer"
+			       :depends-on ("package"))
+			      (:file       "message"
+			       :depends-on ("package" "lexer"))
+			      (:file       "service"
+			       :depends-on ("package" "lexer" "message"))
+
+			      (:file       "pack"
+			       :depends-on ("package" "message" "service"))))))
+
+
+;;; YARP
+;;
+
+(defsystem :cl-rosetta-yarp
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     "0.1.0"
+  :license     "GPL3; see COPYING file for details."
+  :description "Support for the Yet Another Robot Platform (YARP)
+framework."
+  :depends-on  (:cl-rosetta)
+  :components  ((:module     "yarp"
+		 :pathname   "src/yarp"
+		 :components ((:file       "package")
+			      (:file       "types"
+			       :depends-on ("package"))
+			      (:file       "bottle"
+			       :depends-on ("package" "types"))))
+
+		(:module     "yarp-backend"
+		 :pathname   "src/yarp/backend"
+		 :components ((:file       "package")
+			      (:file       "serialization"
+			       :depends-on ("package"))))))
