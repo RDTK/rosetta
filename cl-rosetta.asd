@@ -60,7 +60,11 @@
 		:cl-protobuf
 		:yacc
 		:cxml-location)
-  :components  ()
+  :components  ((:module     "serialization"
+		 :pathname   "src/serialization"
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package")))))
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 
