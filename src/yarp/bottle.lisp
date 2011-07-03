@@ -61,7 +61,7 @@ return nil."
   "Return a type tag for VALUE."
   (etypecase value
     (integer                    :int)
-    ((eql :vocab)               :vocab) ;;; TODO(jmoringe):
+    (keyword                    :vocab)
     (double-float               :double)
     (string                     :string)
     ((vector (unsigned-byte 8)) :blob)
@@ -83,6 +83,10 @@ integer."
   (declare (ignore value))
   4)
 
+(defun size-of-vocab (value)
+  "Return the number of octets required for encoding the \"Vocab\"
+VALUE."
+  4)
 
 (defun size-of-double (value)
   "Return the number of octets required for encoding the double
@@ -123,7 +127,7 @@ is of TYPE and potentially SUB-TYPE. Space for encoding the type of
 VALUE is not considered."
   (ecase type
     (:int    (size-of-int value))
-    (:vocab  (size-of-int value))
+    (:vocab  (size-of-vocab value))
     (:double (size-of-double value))
     (:string (size-of-string value))
     (:blob   (size-of-blob value))
@@ -140,6 +144,16 @@ VALUE is not considered."
 (defun decode-int (buffer &optional (start 0))
   "Decode and return a 32-bit integer at START in BUFFER."
   (binio:decode-uint32-le buffer start))
+
+(defun decode-vocab (buffer &optional (start 0))
+  "Decode and return a 32-bit \"Vocab\" value at START in BUFFER."
+  (values
+   (nth-value
+    0 (make-keyword
+       (iter (for code in-vector buffer :from start :below (+ start 4))
+	     (while (plusp code))
+	     (collect (code-char code) :result-type 'string))))
+   4))
 
 (defun decode-double (buffer &optional (start 0))
   "Decode and return a little-endian encoded double at START in
@@ -200,7 +214,7 @@ and return it."
 and potentially SUB-TYPE."
   (ecase type
     (:int    (decode-int buffer start))
-    (:vocab  (decode-int buffer start))
+    (:vocab  (decode-vocab buffer start))
     (:double (decode-double buffer start))
     (:string (decode-string buffer start))
     (:blob   (decode-blob buffer start))
@@ -218,6 +232,18 @@ and potentially SUB-TYPE."
   "Encode VALUE as a 32-bit integer at offset START of BUFFER. Return
 two values: the number of octets produced and BUFFER."
   (binio::encode-uint32-le value buffer start))
+
+(defun encode-vocab (value buffer &optional (start 0))
+  "Encode the keyword VALUE as a 32-bit integer at offset START of
+BUFFER. Return two values: the number of octets produced and BUFFER."
+  (let ((string (string value)))
+    (iter (for char in-vector string)
+	  (for i :from start)
+	  (setf (aref buffer i) (char-code char)))
+    (iter (repeat (- 4 (length string)))
+	  (for i :from (+ start (length string)))
+	  (setf (aref buffer i) 0)))
+  (values 4 buffer))
 
 (defun encode-double (value buffer &optional (start 0))
   "Encode the double VALUE at offset START of BUFFER. Return two
@@ -280,7 +306,7 @@ of type TYPE and potentially SUB-TYPE. Return two values: the number
 of octets produced and BUFFER."
   (ecase type
     (:int    (encode-int value buffer start))
-    (:vocab  (encode-int value buffer start))
+    (:vocab  (encode-vocab value buffer start))
     (:double (encode-double value buffer start))
     (:string (encode-string value buffer start))
     (:blob   (encode-blob value buffer start))
