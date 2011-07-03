@@ -94,7 +94,13 @@
   :license     "GPL3; see COPYING file for details."
   :description "Support for the Robot Operating System (ROS)."
   :depends-on  (:cl-rosetta)
-  :components  ((:module     "ros-frontend"
+  :components  ((:module     "ros"
+		 :pathname   "src/ros"
+		 :components ((:file       "package")
+			      (:file       "util"
+			       :depends-on ("package"))))
+
+		(:module     "ros-frontend"
 		 :pathname   "src/ros/frontend"
 		 :components ((:file       "package")
 			      (:file       "serialization"
