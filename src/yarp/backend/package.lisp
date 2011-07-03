@@ -24,7 +24,13 @@
    :cl
    :alexandria
    :iterate
-   :bind)
+   :bind
+
+   :rosetta.serialization
+   :rosetta.yarp)
 
   (:documentation
-   "TODO"))
+   "This package contains the functionality of the yarp.backend module
+of cl-rosetta. This includes:
++ generation of (de)serializers for the YARP bottle serialization
+  format"))

@@ -142,6 +142,7 @@ framework."
 
 		(:module     "yarp-backend"
 		 :pathname   "src/yarp/backend"
+		 :depends-on ("yarp")
 		 :components ((:file       "package")
 			      (:file       "serialization"
 			       :depends-on ("package"))))))

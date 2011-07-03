@@ -19,9 +19,6 @@
 
 (in-package :rosetta.yarp.backend)
 
-(defmethod bottle-unpack ((buffer t) (object symbol))
-  (bottle-unpack buffer (make-instance (find-class object))))
-
 
 ;;; Serializer
 ;;
@@ -43,7 +40,9 @@ bottle format."))
 	   (name1 (pbb::intern* (pbb::make-lisp-class-name name pbb::parent))))
       (with-unique-names (buffer-var object-var offset-var)
 	(eval
-	 `(defmethod bottle-pack ((,buffer-var simple-array) (,object-var ,name1))
+	 `(defmethod pack ((mechanism   (eql :yarp-bottle))
+			   (,buffer-var simple-array)
+			   (,object-var ,name1))
 	    (check-type ,buffer-var binio:octet-vector)
 
 	    (let ((,offset-var 0))
