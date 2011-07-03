@@ -64,7 +64,16 @@
 		 :pathname   "src/serialization"
 		 :components ((:file       "package")
 			      (:file       "protocol"
-			       :depends-on ("package")))))
+			       :depends-on ("package"))))
+
+		(:module     "backend"
+		 :pathname   "src/backend"
+		 :depends-on ("serialization")
+		 :components ((:file       "package")
+			      (:file       "macros"
+			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package" "macros")))))
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 
