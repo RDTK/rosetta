@@ -20,7 +20,8 @@
 (in-package :cl-user)
 
 (defpackage :rosetta.ros.frontend
-  (:nicknames :rsf.ros)
+  (:nicknames
+   :rs.ros.f)
 
   (:use
    :cl
