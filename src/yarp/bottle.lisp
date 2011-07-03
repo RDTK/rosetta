@@ -40,7 +40,8 @@ none."
 	     :test #'=)))
 
 (defun tag->wire-code (tag)
-  "TODO(jmoringe): document"
+  "Return the wire-code of TAG. TAG can either one of the keywords in
+`*tag-codes*' or a list of the form (:list SUB-TYPE)."
   (if (listp tag)
       (logior (tag->wire-code (first tag))
 	      (tag->wire-code (second tag)))
@@ -49,24 +50,27 @@ none."
 		 :test #'eq))))
 
 (defun list->sub-tag (value)
-  "TODO(jmoringe): document"
+  "Try to determine a sub-type tag for the values of the list
+VALUE. If all values are of a common type, return that type. Otherwise
+return nil."
   (let ((types (map 'list #'value->tag value)))
     (when (every #'eq types (rest types))
       (first types))))
 
 (defun value->tag (value)
- (etypecase value
-   (integer                    :int)
-   ((eql :vocab)               :vocab) ;;; TODO(jmoringe):
-   (double-float               :double)
-   (string                     :string)
-   ((vector (unsigned-byte 8)) :blob)
-   (list
-    (let ((sub-tag (list->sub-tag value)))
-      (if sub-tag (list :list sub-tag) :list)))))
+  "Return a type tag for VALUE."
+  (etypecase value
+    (integer                    :int)
+    ((eql :vocab)               :vocab) ;;; TODO(jmoringe):
+    (double-float               :double)
+    (string                     :string)
+    ((vector (unsigned-byte 8)) :blob)
+    (list
+     (let ((sub-tag (list->sub-tag value)))
+       (if sub-tag (list :list sub-tag) :list)))))
 
 (defun value->wire-code (value)
-  "TODO(jmoringe): document"
+  "Return the wire-code for the type-tag of VALUE."
   (tag->wire-code (value->tag value)))
 
 
@@ -74,25 +78,31 @@ none."
 ;;
 
 (defun size-of-int (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding VALUE as 32-bit
+integer."
   (declare (ignore value))
   4)
 
+
 (defun size-of-double (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding the double
+VALUE."
   (declare (ignore value))
   8)
 
 (defun size-of-string (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding the string
+VALUE."
   (+ 4 (length value) 1))
 
 (defun size-of-blob (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding the blob VALUE."
   (+ 4 (length value) 1))
 
 (defun size-of-list (value &optional type)
-  "TODO(jmoringe): document"
+  "Return the number octets required for encoding the contents of the
+list VALUE. When non-nil, TYPE specifies the common type of the
+elements of the list VALUE."
   (+ (size-of-int (length value))
      (iter (for item in value)
 	   (sum (if type
@@ -100,14 +110,17 @@ none."
 		    (size-of-value item))))))
 
 (defun size-of-value (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding VALUE together
+with the type of VALUE."
   (bind (((main-tag &optional sub-tag)
 	  (ensure-list (value->tag value))))
    (+ (size-of-int value)
       (size-of-value/typed value main-tag sub-tag))))
 
 (defun size-of-value/typed (value type &optional sub-type)
-  "TODO(jmoringe): document"
+  "Return the number of octets required for encoding VALUE assuming it
+is of TYPE and potentially SUB-TYPE. Space for encoding the type of
+VALUE is not considered."
   (ecase type
     (:int    (size-of-int value))
     (:vocab  (size-of-int value))
@@ -117,23 +130,24 @@ none."
     (:list   (size-of-list value sub-type))))
 
 (defun size-of-bottle (value)
-  "TODO(jmoringe): document"
+  "Return the number of octets required to encode the bottle VALUE."
   (size-of-value value))
 
 
-;;; Decoding
+;;; Decoding of values
 ;;
 
 (defun decode-int (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Decode and return a 32-bit integer at START in BUFFER."
   (binio:decode-uint32-le buffer start))
 
 (defun decode-double (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Decode and return a little-endian encoded double at START in
+BUFFER. "
   (binio:decode-double-le buffer start))
 
 (defun decode-string (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Decode and return a string at START of BUFFER."
   (let ((length (decode-int buffer start)))
     (values
      (sb-ext:octets-to-string buffer
@@ -143,7 +157,7 @@ none."
      (+ 4 length))))
 
 (defun decode-blob (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Decode and return a blob at START of BUFFER. "
   (let ((length (decode-int buffer start)))
     (values
      (subseq buffer (+ start 4) (+ start 4 length))
@@ -153,7 +167,7 @@ none."
 		    &optional
 		    (start 0)
 		    type)
-  "TODO(jmoringe): document"
+  "Decode and return a list at START of BUFFER."
   (let ((length (decode-int buffer start)))
     (iter (repeat length)
 	  (with   offset = (+ start 4))
@@ -166,7 +180,8 @@ none."
 	  (finally (return (values values (- offset start)))))))
 
 (defun decode-value (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Determine the type of the value stored at START of BUFFER, decode
+and return it."
   (bind ((wire-code (decode-int buffer start))
 	 (type-code (logand wire-code #xff))
 	 (list-code (logand wire-code #x100))
@@ -181,7 +196,8 @@ none."
     (values value (+ 4 consumed))))
 
 (defun decode-value/typed (buffer start type &optional sub-type)
-  "TODO(jmoringe): document"
+  "Decode the value at START of BUFFER assuming it of TYPE,
+and potentially SUB-TYPE."
   (ecase type
     (:int    (decode-int buffer start))
     (:vocab  (decode-int buffer start))
@@ -191,23 +207,26 @@ none."
     (:list   (decode-list buffer start sub-type))))
 
 (defun decode-bottle (buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "The the bottle stored at START or BUFFER."
   (decode-value buffer start))
 
 
-;;;
+;;; Encoding of values
 ;;
 
 (defun encode-int (value buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Encode VALUE as a 32-bit integer at offset START of BUFFER. Return
+two values: the number of octets produced and BUFFER."
   (binio::encode-uint32-le value buffer start))
 
 (defun encode-double (value buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Encode the double VALUE at offset START of BUFFER. Return two
+values: the number of octets produced and BUFFER."
   (binio::encode-double-le value buffer start))
 
 (defun encode-string (value buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Encode the string VALUE at offset START of BUFFER. Return two
+values: the number of octets produced and BUFFER."
   (let ((length (1+ (length value))))
     (encode-int length buffer start)
     (replace buffer
@@ -218,7 +237,8 @@ none."
     (values (+ 4 length) buffer)))
 
 (defun encode-blob (value buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Encode the blob VALUE at offset START of BUFFER. Return two values:
+the number of octets produced and BUFFER."
   (let ((length (length value)))
     (encode-int length buffer start)
     (replace buffer value :start1 (+ 4 start))
@@ -228,7 +248,8 @@ none."
 		    &optional
 		    (start 0)
 		    type)
-  "TODO(jmoringe): document"
+  "Encode the list VALUE at offset START of BUFFER. Return two values:
+the number of octets produced and BUFFER."
   (encode-int (length value) buffer start)
   (iter (for  item   in value)
 	(with offset =  (+ start 4))
@@ -239,18 +260,24 @@ none."
 	(finally (return (values (- offset start) buffer)))))
 
 (defun encode-value (value buffer &optional (start 0))
-  "TODO(jmoringe): document"
+  "Encode the value VALUE at offset START of BUFFER. Return two
+values: the number of octets produced and BUFFER. The type of VALUE is
+inferred and stored with the value of VALUE."
   (bind ((tag (value->tag value))
 	 ((main-tag &optional sub-tag) (ensure-list tag))
 	 (wire-code (tag->wire-code tag)))
+    ;; Encode the type of VALUE.
     (encode-int wire-code buffer start)
+    ;; Encode the value of VALUE.
     (values
      (+ 4 (encode-value/typed
 	   value buffer (+ start 4) main-tag sub-tag))
      buffer)))
 
 (defun encode-value/typed (value buffer start type &optional sub-type)
-  "TODO(jmoringe): document"
+  "Encode the value VALUE at offset START of BUFFER assuming VALUE is
+of type TYPE and potentially SUB-TYPE. Return two values: the number
+of octets produced and BUFFER."
   (ecase type
     (:int    (encode-int value buffer start))
     (:vocab  (encode-int value buffer start))
