@@ -20,7 +20,7 @@
 (in-package :cl-user)
 
 (defpackage :rosetta.yarp
-  (:nicknames rs.yarp)
+  (:nicknames :rs.yarp)
 
   (:use
    :cl
