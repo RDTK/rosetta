@@ -103,8 +103,6 @@
 		(:module     "ros-frontend"
 		 :pathname   "src/ros/frontend"
 		 :components ((:file       "package")
-			      (:file       "serialization"
-			       :depends-on ("package")) ;; TODO more like backend
 
 			      (:file       "lexer"
 			       :depends-on ("package"))
@@ -114,7 +112,13 @@
 			       :depends-on ("package" "lexer" "message"))
 
 			      (:file       "pack"
-			       :depends-on ("package" "message" "service"))))))
+			       :depends-on ("package" "message" "service"))))
+
+		(:module     "ros-backend"
+		 :pathname   "src/ros/backend"
+		 :components ((:file       "package")
+			      (:file       "serialization"
+			       :depends-on ("package"))))))
 
 
 ;;; YARP

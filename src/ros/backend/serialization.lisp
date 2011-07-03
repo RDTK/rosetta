@@ -17,19 +17,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rosetta.ros.frontend)
-
-;; TODO this should be in the backend
-
-(defmethod ros-unpack ((buffer t) (object symbol))
-  (ros-unpack buffer (make-instance (find-class object))))
+(in-package :rosetta.ros.backend)
 
 (defclass pbb::target-ros-deserializer (pbb::code-generating-target-mixin)
   ()
   (:documentation
    "TODO(jmoringe): document"))
 
-(defmethod pbb:emit ((node   pb::message-desc)
+(defmethod pbb:emit ((node   pb:message-desc)
 		     (target pbb::target-ros-deserializer)
 		     &key)
   (pbb::with-emit-symbols
@@ -41,7 +36,9 @@
       ;; (map 'nil #'recur nested)
       (with-unique-names (buffer-var object-var offset-var)
 	(eval
-	 `(defmethod ros-unpack ((,buffer-var simple-array) (,object-var ,name1))
+	 `(defmethod unpack ((mechanism   (eql :ros-msg))
+			     (,buffer-var simple-array)
+			     (,object-var ,name1))
 	    (check-type ,buffer-var binio:octet-vector)
 
 	    (let ((,offset-var 0))
@@ -49,7 +46,7 @@
 		      (appending (funcall field buffer-var offset-var object-var))))
 	    ,object-var)))))) ;; TODO return values
 
-(defmethod pbb:emit ((node   pb::field-desc)
+(defmethod pbb:emit ((node   pb:field-desc)
 		     (target pbb::target-ros-deserializer)
 		     &key)
   "Generate code to unpack a single slot"
