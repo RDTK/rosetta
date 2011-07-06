@@ -20,12 +20,6 @@
 (in-package :rosetta.backend)
 
 
-;;; Backend Documentation
-;;
-
-(intern "TARGET") ;; for (documentation :TARGET 'rosetta.backend:target)
-
-
 ;;; Special variables
 ;;
 
@@ -40,6 +34,38 @@ calls which describe what is being emitted.")
 (defvar *emit-print* nil
   "When non-nil, print concise messages to `*standard-output*' during
 `emit' calls. Analogue to `*load-print*'.")
+
+
+;;; Targets
+;;
+
+(intern "TARGET") ;; for (documentation :TARGET 'rosetta.backend:target)
+
+(dynamic-classes:define-findable-class-family target
+    "This family consists of target classes. Each target class is used
+to control the emission of one kind of thing based on an abstract
+description in form of model component instances.")
+
+(defmethod documentation ((thing t) (type (eql 'target)))
+  "Obtain documentation of type TARGET from the target class
+designated by THING."
+  (documentation (find-target-class thing) t))
+
+
+;;; Languages
+;;
+
+(intern "LANGUAGE") ;; for (documentation :LANGUAGE 'rosetta.backend:language)
+
+(dynamic-classes:define-findable-class-family language
+    "This family consists of language classes. Each language class is
+used to control the output language when emitting things based on an
+abstract description in form of model component instances.")
+
+(defmethod documentation ((thing t) (type (eql 'language)))
+  "Obtain documentation of type LANGUAGE from the language class
+designated by THING."
+  (documentation (find-language-class thing) t))
 
 
 ;;; Backend Context
@@ -109,7 +135,7 @@ state of a particular emission process. This state consists of:
   "This variable holds the emission context of the current thread.")
 
 
-;;;
+;;; Emit protocol
 ;;
 
 (defgeneric emit (node target language
@@ -127,21 +153,31 @@ state of a particular emission process. This state consists of:
 
 (defmethod emit ((node t) (target list) (language t)
 		 &key)
-  (let* ((target-name (first target))
-	 (class-name  (or (find-symbol
-			   (format nil "TARGET-~A" target-name)
-			   :rosetta.backend)
-			  (error 'no-such-target
-				 :name target-name)))
-	 (class       (or (find-class class-name)
-			  (error 'no-such-target
-				 :name class-name)))
-	 (target1     (apply #'make-instance class (rest target))))
-    (emit node target1 language)))
+  (bind (((target-name &rest target-args) target)
+	 (target-class    (find-target-class target-name))
+	 (target-instance (apply #'make-instance
+				 target-class target-args)))
+    (emit node target-instance language)))
 
 (defmethod emit ((node t) (target symbol) (language t)
 		 &key)
   (emit node (list target) language))
+
+
+;;; Language class lookup
+;;
+
+(defmethod emit ((node t) (target t) (language list)
+		 &key)
+  (bind (((language-name &rest language-args) language)
+	 (language-class    (find-language-class language-name))
+	 (language-instance (apply #'make-instance
+				 language-class language-args)))
+    (emit node target language-instance)))
+
+(defmethod emit ((node t) (target t) (language symbol)
+		 &key)
+  (emit node target (list language)))
 
 
 ;;; Housekeeping and such

@@ -53,6 +53,18 @@
    :recur
    :intern*)
 
+  ;; Targets
+  (:export
+   :no-such-target
+   :find-target-class
+   :target-classes)
+
+  ;; Languages
+  (:export
+   :no-such-language
+   :find-language-class
+   :language-classes)
+
   (:documentation
    "This package contains backend-related protocols and infrastructure
 of the cl-rosetta compiler."))

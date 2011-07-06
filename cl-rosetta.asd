@@ -59,7 +59,8 @@
 		:split-sequence
 		:cl-protobuf
 		:yacc
-		:cxml-location)
+		:cxml-location
+		:cl-dynamic-classes)
   :components  ((:module     "serialization"
 		 :pathname   "src/serialization"
 		 :components ((:file       "package")
