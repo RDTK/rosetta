@@ -25,7 +25,8 @@
    "This class is intended to be mixed into format classes for binary
 formats."))
 
-(defmethod parse ((format binary-format-mixin) (source pathname))
+(defmethod parse ((format binary-format-mixin) (source pathname)
+		  &key)
   "Open a binary input stream for the file designated by SOURCE and
 call a method specialized on streams."
   (with-input-from-file (stream source :element-type '(unsigned-byte 8))
