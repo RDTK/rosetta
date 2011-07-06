@@ -65,6 +65,9 @@
    :find-language-class
    :language-classes)
 
+  (:export
+   :code-generating-target-mixin)
+
   ;; Serialization-related target classes
   (:export
    :target-packed-size
