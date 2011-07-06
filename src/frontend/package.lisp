@@ -20,6 +20,9 @@
 (in-package :cl-user)
 
 (defpackage :rosetta.frontend
+  (:nicknames
+   :rs.f)
+
   (:use
    :cl
    :alexandria
