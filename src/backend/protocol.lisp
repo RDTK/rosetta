@@ -219,11 +219,12 @@ state of a particular emission process. This state consists of:
   "File; default behavior is recursion over enums, messages, services,
 extensions and options."
   (with-emit-symbols
-    (map nil #'recur (pb::file-desc-enum-type    node))
-    (map nil #'recur (pb::file-desc-service      node))
-    (map nil #'recur (pb::file-desc-extension    node))
-    (map nil #'recur (pb::file-desc-options      node))
-    (map 'list #'recur (pb::file-desc-message-type node)))) ;;; TODO(jmoringe): temp
+    (nconc
+     (map 'list #'recur (pb::file-desc-enum-type    node))
+     (map 'list #'recur (pb::file-desc-service      node))
+     (map 'list #'recur (pb::file-desc-extension    node))
+     (map 'list #'recur (pb::file-desc-options      node))
+     (map 'list #'recur (pb::file-desc-message-type node)))))
 
 (defmethod emit ((node pb:message-desc) (target t) (language t)
 		 &key)
