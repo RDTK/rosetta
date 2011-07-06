@@ -46,7 +46,7 @@ calls which describe what is being emitted.")
 to control the emission of one kind of thing based on an abstract
 description in form of model component instances.")
 
-(defmethod documentation ((thing t) (type (eql 'target)))
+(defmethod documentation ((thing symbol) (type (eql 'target)))
   "Obtain documentation of type TARGET from the target class
 designated by THING."
   (documentation (find-target-class thing) t))
@@ -62,7 +62,7 @@ designated by THING."
 used to control the output language when emitting things based on an
 abstract description in form of model component instances.")
 
-(defmethod documentation ((thing t) (type (eql 'language)))
+(defmethod documentation ((thing symbol) (type (eql 'language)))
   "Obtain documentation of type LANGUAGE from the language class
 designated by THING."
   (documentation (find-language-class thing) t))
