@@ -20,6 +20,9 @@
 (in-package :cl-user)
 
 (defpackage :rosetta.serialization
+  (:nicknames
+   :rs.s)
+
   (:use
    :cl
    :alexandria
