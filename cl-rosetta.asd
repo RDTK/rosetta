@@ -67,6 +67,12 @@
 			      (:file       "protocol"
 			       :depends-on ("package"))))
 
+		(:module     "frontend"
+		 :pathname   "src/frontend"
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))))
+
 		(:module     "backend"
 		 :pathname   "src/backend"
 		 :depends-on ("serialization")
