@@ -77,10 +77,13 @@
 		 :pathname   "src/backend"
 		 :depends-on ("serialization")
 		 :components ((:file       "package")
+			      (:file       "variables"
+			       :depends-on ("package"))
 			      (:file       "macros"
 			       :depends-on ("package"))
 			      (:file       "protocol"
-			       :depends-on ("package" "macros"))
+			       :depends-on ("package" "variables"
+					    "macros"))
 
 			      (:file       "code-generating-target-mixin"
 			       :depends-on ("package"))

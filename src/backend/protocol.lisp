@@ -20,22 +20,6 @@
 (in-package :rosetta.backend)
 
 
-;;; Special variables
-;;
-
-(declaim (special *emit-verbose*))
-
-(defvar *emit-verbose* nil
-  "When non-nil, print strings to `*standard-output*' during `emit'
-calls which describe what is being emitted.")
-
-(declaim (special *emit-print*))
-
-(defvar *emit-print* nil
-  "When non-nil, print concise messages to `*standard-output*' during
-`emit' calls. Analogue to `*load-print*'.")
-
-
 ;;; Targets
 ;;
 
