@@ -34,6 +34,25 @@
   (:export
    :emit)
 
+  ;; Context
+  (:export
+   :*context*
+
+   :context
+   :context-target
+   :context-language
+   :context-stack
+   :context-package
+   :context-get
+
+   :with-emit-symbols
+   :package
+   :parent
+   :grandparent
+   :ancestors
+   :recur
+   :intern*)
+
   (:documentation
    "This package contains backend-related protocols and infrastructure
 of the cl-rosetta compiler."))
