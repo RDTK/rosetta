@@ -74,7 +74,13 @@
 			      (:file       "macros"
 			       :depends-on ("package"))
 			      (:file       "protocol"
-			       :depends-on ("package" "macros")))))
+			       :depends-on ("package" "macros"))
+
+			      (:file       "code-generating-target-mixin"
+			       :depends-on ("package"))
+
+			      (:file       "target-serializer"
+			       :depends-on ("package" "code-generating-target-mixin")))))
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 

@@ -65,6 +65,14 @@
    :find-language-class
    :language-classes)
 
+  ;; Serialization-related target classes
+  (:export
+   :target-packed-size
+
+   :target-serializer
+
+   :target-deserializer)
+
   (:documentation
    "This package contains backend-related protocols and infrastructure
 of the cl-rosetta compiler."))
