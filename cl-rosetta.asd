@@ -71,7 +71,12 @@
 		 :pathname   "src/frontend"
 		 :components ((:file       "package")
 			      (:file       "protocol"
-			       :depends-on ("package"))))
+			       :depends-on ("package"))
+
+			      (:file       "text-format-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "binary-format-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "backend"
 		 :pathname   "src/backend"

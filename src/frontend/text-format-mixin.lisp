@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for frontend module.
+;;; text-format-mixin.lisp --- Mixin class for format classes for text formats.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,35 +17,24 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :cl-user)
+(in-package :rosetta.frontend)
 
-(defpackage :rosetta.frontend
-  (:use
-   :cl
-   :alexandria
-   :metabang-bind)
-
-  ;; Parse protocol
-  (:export
-   :parse)
-
-  ;; Format class family
-  (:export
-   :no-such-format-class
-   :find-format-class
-   :format-classes)
-
-  ;; `binary-format-mixin' mixin class
-  (:export
-   :binary-format-mixin)
-
-  ;; `text-format-mixin' mixin class
-  (:export
-   :text-format-mixin)
-
+(defclass text-format-mixin ()
+  ()
   (:documentation
-   "This package contains frontend-related protocols and
-infrastructure of the cl-rosetta compiler.
+   "This class is intended to be mixed into format classes that
+operate on textual input data."))
 
-In particular the `parse' generic function and function and some
-default methods are contained in this package."))
+(defmethod parse ((format text-format-mixin) (source pathname)
+		  &key)
+  "Open a character input stream for the file designated by SOURCE and
+call a method specialized on streams."
+  (with-input-from-file (stream source)
+    (parse format stream)))
+
+(defmethod parse ((format text-format-mixin) (source string)
+		  &key)
+  "Create an input stream for the content of SOURCE and call a method
+specialized on streams."
+  (with-input-from-string (stream source)
+    (parse format stream)))
