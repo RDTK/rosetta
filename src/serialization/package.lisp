@@ -40,6 +40,12 @@
    :offset
    :extract)
 
+  ;; Mechanism class family
+  (:export
+   :no-such-mechanism-class
+   :find-mechanism-class
+   :mechanism-classes)
+
   (:documentation
    "This package contains protocols and functionality related to
 serialization and deserialization using different serialization
