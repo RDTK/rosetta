@@ -23,14 +23,19 @@
 ;;; Formats
 ;;
 
-(intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:target)
+(intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:format)
 
 (dynamic-classes:define-findable-class-family format
-    ""
+    "This family consists of input format classes. Each input format
+class is associated with input sources, encodings and syntax. Input
+formats may be file-based, stream-based, buffer-based, may use textual
+or binary encodings and may be expressed using different kind of
+grammars. Furthermore, input formats may describe semantically
+different aspects like data types and software system components."
   (:package *package*))
 
 (defmethod documentation ((thing symbol) (type (eql 'format)))
-  "Obtain documentation of type TARGET from the target class
+  "Obtain documentation of type FORMAT from the target class
 designated by THING."
   (documentation (find-format-class thing) t))
 
