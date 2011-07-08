@@ -29,6 +29,17 @@
    :metabang-bind
    :iterate)
 
+  ;; Conditions
+  (:export
+   :serialization-error
+   :serialization-error-mechanism
+   :serialization-error-source
+   :serialization-error-destination
+
+   :pack-error
+
+   :unpack-error)
+
   ;; Serialization and deserialization protocol
   (:export
    :packed-size

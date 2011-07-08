@@ -64,6 +64,8 @@
   :components  ((:module     "serialization"
 		 :pathname   "src/serialization"
 		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
 			      (:file       "protocol"
 			       :depends-on ("package"))))
 
