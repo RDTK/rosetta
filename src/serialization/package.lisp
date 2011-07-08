@@ -62,6 +62,10 @@
   (:export
    :textual-mixin)
 
+  ;; `binary-mixin' mixin class
+  (:export
+   :binary-mixin)
+
   (:documentation
    "This package contains protocols and functionality related to
 serialization and deserialization using different serialization
