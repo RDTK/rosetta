@@ -77,6 +77,10 @@
 			      (:file       "data-holder-mixin"
 			       :depends-on ("package" "protocol"))))
 
+		(:module     "model-data"
+		 :pathname   "src/model/data"
+		 :components ((:file       "package")))
+
 		(:module     "frontend"
 		 :pathname   "src/frontend"
 		 :components ((:file       "package")
