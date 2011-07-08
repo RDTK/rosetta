@@ -113,6 +113,19 @@ state of a particular emission process. This state consists of:
 			       (key       symbol))
   (setf (gethash key (first (%context-environment context))) new-value))
 
+(defmethod print-object ((object context) stream)
+  (bind (((:accessors-r/o (target   context-target)
+			  (language context-language)
+			  (stack    context-stack)
+			  (package  context-package)) object))
+   (print-unreadable-object (object stream :type t :identity t)
+     (format stream "~A [~:[no package~;~:*~A~]] ~A ~A (S ~D) (E ~D)"
+	     (first stack)
+	     (when package
+	       (package-name package))
+	     target language (length stack)
+	     (hash-table-count (first (%context-environment object)))))))
+
 (declaim (special *context*))
 
 (defvar *context* (make-instance 'context)
