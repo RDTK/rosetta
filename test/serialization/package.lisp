@@ -24,6 +24,7 @@
    :cl
    :alexandria
    :bind
+   :flexi-streams
    :lift
 
    :rosetta.serialization

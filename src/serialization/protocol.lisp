@@ -119,46 +119,6 @@ instance."
 SOURCE into the instance."
   (apply #'unpack mechanism source (find-class destination) args))
 
-(defmethod unpack ((mechanism t) (source stream) (destination t)
-		   &rest args
-		   &key
-		   (start 0)
-		   end)
-  "Unpack OBJECT from stream SOURCE."
-  (unless (zerop start)
-    (iter (repeat start) (read-byte source)))
-
-  (bind (((:flet read-whole-stream ())
-	  (let ((buffer (make-array 0
-				    :element-type '(unsigned-byte 8)
-				    :fill-pointer 0)))
-	    (iter (for c in-stream source :using #'read-byte)
-		  (vector-push-extend c buffer))
-	    (coerce buffer '(simple-array (unsigned-byte 8) (*)))))
-	 ((:flet read-range ())
-	  (let ((buffer (make-array (- end start)
-				    :element-type '(unsigned-byte 8))))
-	    (read-sequence buffer source)
-	    buffer))
-	 (buffer (if end (read-range) (read-whole-stream))))
-    (apply #'unpack mechanism buffer destination
-	   (remove-from-plist args :start :end))))
-
-(defmethod unpack ((mechanism t) (source pathname) (destination t)
-		   &rest args
-		   &key
-		   (start 0)
-		   end)
-  "Open a stream for SOURCE and, potentially seek to START, then
-unpack the contents into DESTINATION."
-  (with-input-from-file (stream source
-				:element-type '(unsigned-byte 8))
-    (unless (zerop start)
-      (file-position stream start))
-    (apply #'unpack mechanism stream destination
-	   :end (- (or end (file-length stream)) start)
-	   (remove-from-plist args :start :end))))
-
 
 ;;; Partial deserializtion protocol
 ;;

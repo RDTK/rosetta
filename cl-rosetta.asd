@@ -57,6 +57,7 @@
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
 		:split-sequence
+		:flexi-streams
 		:cl-protobuf
 		:yacc
 		:cxml-location
@@ -70,6 +71,8 @@
 			       :depends-on ("package"))
 
 			      (:file       "textual-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "binary-mixin"
 			       :depends-on ("package" "protocol"))))
 
 		(:module     "frontend"
@@ -119,6 +122,8 @@
 		 :depends-on ("package")
 		 :components ((:file       "package")
 			      (:file       "textual-mixin"
+			       :depends-on ("package"))
+			      (:file       "binary-mixin"
 			       :depends-on ("package")))))
 
   :in-order-to ((test-op (load-op :cl-rosetta-test))))
