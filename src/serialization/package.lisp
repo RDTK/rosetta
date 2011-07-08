@@ -58,6 +58,10 @@
    :find-mechanism-class
    :mechanism-classes)
 
+  ;; `textual-mixin' mixin class
+  (:export
+   :textual-mixin)
+
   (:documentation
    "This package contains protocols and functionality related to
 serialization and deserialization using different serialization

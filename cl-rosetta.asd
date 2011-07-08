@@ -67,7 +67,10 @@
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "protocol"
-			       :depends-on ("package"))))
+			       :depends-on ("package"))
+
+			      (:file       "textual-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"
@@ -103,13 +106,21 @@
 (defsystem :cl-rosetta-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #. (version/string)
+  :version     #.(version/string)
   :license     "GP3L; see COPYING file for details."
   :description "Unit tests for the cl-rosetta system."
   :depends-on  (:cl-rosetta
 		:lift)
   :components  ((:file         "package"
-		 :pathname     "test/package"))
+		 :pathname     "test/package")
+
+		(:module     "serialization"
+		 :pathname   "test/serialization"
+		 :depends-on ("package")
+		 :components ((:file       "package")
+			      (:file       "textual-mixin"
+			       :depends-on ("package")))))
+
   :in-order-to ((test-op (load-op :cl-rosetta-test))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rosetta-test))))
