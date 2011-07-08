@@ -36,6 +36,12 @@
   (let ((result (format nil "~S" source)))
     (values (length result) result)))
 
+(defmethod unpack ((mechanism   mechanism-mock-for-textual-mixin)
+		   (source      string)
+		   (destination t)
+		   &key)
+  (read-from-string source))
+
 
 ;;; Test suite
 ;;
@@ -92,3 +98,33 @@
       (ensure-same destination pathname        :test #'eq)
       (ensure-same size        expected-size   :test #'=)
       (ensure-same output      expected-output :test #'string=))))
+
+(addtest (textual-mixin-root
+          :documentation
+	  "Test method on `unpack' for stream source.")
+  unpack/stream
+
+  (ensure-cases (source expected-output expected-size)
+      '((":FOO" :foo 4)
+	("5"    5    1))
+
+    (with-input-from-string (stream source)
+      (bind (((:values output size)
+	      (unpack simple-mechanism stream :unused)))
+	(ensure-same output expected-output :test #'equalp)
+	(ensure-same size   expected-size   :test #'=)))))
+
+(addtest (textual-mixin-root
+          :documentation
+	  "Test method on `unpack' for pathname source.")
+  unpack/pathname
+
+  (ensure-cases (input pathname expected-output expected-size)
+      '((":FOO" #P"/tmp/foo.txt" :foo 4)
+	("5"    #P"/tmp/foo"     5    1))
+
+    (write-string-into-file input pathname :if-exists :supersede)
+    (bind (((:values output size)
+	    (unpack simple-mechanism pathname :unused)))
+      (ensure-same output expected-output :test #'equalp)
+      (ensure-same size   expected-size   :test #'=))))
