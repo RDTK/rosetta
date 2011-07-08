@@ -20,7 +20,13 @@
 (in-package :rosetta.backend)
 
 (defclass code-generating-target-mixin ()
-  ()
+  ((optimization-settings :initarg  :optimization-settings
+			  :type     list
+			  :accessor target-optimzation-settings
+			  :initform nil
+			  :documentation
+			  "Optimization settings that should be used
+when generating code."))
   (:documentation
    "This class can be used as a superclass for target classes that
 represent a code generation target."))
