@@ -66,6 +66,10 @@
   (:export
    :binary-mixin)
 
+  ;; `data-holder' mixin class
+  (:export
+   :data-holder-mixin)
+
   (:documentation
    "This package contains protocols and functionality related to
 serialization and deserialization using different serialization

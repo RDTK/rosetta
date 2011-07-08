@@ -73,6 +73,8 @@
 			      (:file       "textual-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "binary-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "data-holder-mixin"
 			       :depends-on ("package" "protocol"))))
 
 		(:module     "frontend"
@@ -124,6 +126,8 @@
 			      (:file       "textual-mixin"
 			       :depends-on ("package"))
 			      (:file       "binary-mixin"
+			       :depends-on ("package"))
+			      (:file       "data-holder-mixin"
 			       :depends-on ("package")))))
 
   :in-order-to ((test-op (load-op :cl-rosetta-test))))

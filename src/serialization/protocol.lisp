@@ -71,23 +71,10 @@ and the number of consumed octets."))
 ;;
 
 (defmethod pack* ((mechanism t) (source t)
-		  &rest args
-		  &key)
+		  &rest args &key)
   "Default behavior is to use a nil destination and return the created
 destination instead of the amount of produced data."
   (nth-value 1 (apply #'pack mechanism source nil args)))
-
-(defmethod unpack ((mechanism t) (source t) (destination class)
-		   &rest args &key)
-  "Make an instance of the class DESTINATION and load SOURCE into the
-instance."
-  (apply #'unpack mechanism source (make-instance destination) args))
-
-(defmethod unpack ((mechanism t) (source t) (destination symbol)
-		   &rest args &key)
-  "Make an instance of the class designated by DESTINATION and load
-SOURCE into the instance."
-  (apply #'unpack mechanism source (find-class destination) args))
 
 
 ;;; Partial deserializtion protocol
@@ -115,8 +102,7 @@ of the PART of SCHEMA occurs."))
 		   args (make-list (length args) :initial-element t))))
 	 `(progn
 	    (defmethod ,method ((mechanism list) ,@args/typed
-				&rest rest-args
-				&key)
+				&rest rest-args &key)
 	      (bind (((mechanism-name &rest mechanism-args) mechanism)
 		     (mechanism-class    (find-mechanism-class mechanism-name))
 		     (mechanism-instance
@@ -124,8 +110,7 @@ of the PART of SCHEMA occurs."))
 		(apply #',method mechanism-instance ,@args rest-args)))
 
 	    (defmethod ,method ((mechanism symbol) ,@args/typed
-				&rest rest-args
-				&key)
+				&rest rest-args &key)
 	      (apply #',method (list mechanism) ,@args rest-args))))))
 
   (define-mechanism-lookup packed-size (source))
