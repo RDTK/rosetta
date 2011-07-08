@@ -29,11 +29,12 @@ represent binary serialization mechanisms."))
 		 (source      t)
 		 (destination (eql 'binio:octet-vector))
 		 &rest args
-		 &key)
+		 &key
+		 (start 0))
   "The value of DESTINATION indicates that an octet-vector should be
 created as destination. Use `packed-size' to determine the required
 size and create such an octet-vector."
-  (let ((size (packed-size mechanism source)))
+  (let ((size (+ start (packed-size mechanism source))))
     (apply #'pack mechanism source (binio:make-octet-vector size) args)))
 
 (defmethod pack ((mechanism   binary-mixin)
@@ -59,12 +60,18 @@ size and create such an octet-vector."
 		 (source      t)
 		 (destination pathname)
 		 &rest args
-		 &key)
+		 &key
+		 (start 0))
   "Write packing result to file designated by pathname DESTINATION."
   (with-output-to-file (stream destination
 			       :element-type '(unsigned-byte 8)
 			       :if-exists    :supersede)
-    (values (apply #'pack mechanism source stream args) destination)))
+    (when (plusp start)
+      (file-position stream start))
+    (values
+     (apply #'pack mechanism source stream 
+	    (remove-from-plist args :start))
+     destination)))
 
 (defmethod unpack ((mechanism   binary-mixin)
 		   (source      stream)

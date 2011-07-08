@@ -36,10 +36,12 @@
 
 (defmethod pack ((mechanism   mechanism-mock-for-binary-mixin)
 		 (source      t)
-		 (destination (eql 'binio:octet-vector))
-		 &key)
+		 (destination simple-array)
+		 &key
+		 (start 0))
   (let ((result (sb-ext:string-to-octets (format nil "~S" source))))
-    (values (length result) result)))
+    (replace destination result :start1 start)
+    (values (length result) destination)))
 
 (defmethod unpack ((mechanism   mechanism-mock-for-binary-mixin)
 		   (source      simple-array)
@@ -68,12 +70,19 @@
 	  "Test method on `pack' for nil destination.")
   pack/nil
 
-  (ensure-cases (source expected-size expected-destination)
-      `((:foo 4 ,(octetify ":FOO"))
-	(5    1 ,(octetify "5")))
+  (ensure-cases (source start expected-size expected-destination)
+      `((:foo nil 4 ,(octetify ":FOO"))
+	(5    nil 1 ,(octetify "5"))
+	(:foo 0   4 ,(octetify ":FOO"))
+	(5    0   1 ,(octetify "5"))
+	;; (:foo 1   4 ,(octetify "0:FOO"))
+	;; (5    1   1 ,(octetify "05"))
+	)
 
     (bind (((:values size destination)
-	    (pack simple-mechanism source nil)))
+	    (if start
+		(pack simple-mechanism source nil :start start)
+		(pack simple-mechanism source nil))))
       (ensure-same size        expected-size        :test #'=)
       (ensure-same destination expected-destination :test #'equalp))))
 
@@ -82,13 +91,20 @@
 	  "Test method on `pack' for stream destinations.")
   pack/stream
 
-  (ensure-cases (source expected-size expected-output)
-      `((:foo 4 ,(octetify ":FOO"))
-	(5    1 ,(octetify "5")))
+  (ensure-cases (source start expected-size expected-output)
+      `((:foo nil 4 ,(octetify ":FOO"))
+	(5    nil 1 ,(octetify "5"))
+	(:foo 0   4 ,(octetify ":FOO"))
+	(5    0   1 ,(octetify "5"))
+	;; (:foo 1   4 ,(octetify "0:FOO"))
+	;; (5    1   1 ,(octetify "05"))
+	)
 
     (bind ((stream (make-in-memory-output-stream))
 	   ((:values size destination)
-	    (pack simple-mechanism source stream))
+	    (if start
+		(pack simple-mechanism source stream :start start)
+		(pack simple-mechanism source stream)))
 	   (output (get-output-stream-sequence stream)))
       (ensure-same destination stream          :test #'eq)
       (ensure-same size        expected-size   :test #'=)
@@ -99,13 +115,18 @@
 	  "Test method on `pack' for pathname destinations.")
   pack/pathname
 
-  (ensure-cases (source pathname expected-size expected-output)
-      `((:foo #P"/tmp/foo.bin" 4 ,(octetify ":FOO"))
-	(:foo #P"/tmp/foo.bin" 4 ,(octetify ":FOO")) ;; requires superseding the file
-	(5    #P"/tmp/foo"     1 ,(octetify "5")))   ;; no file type
+  (ensure-cases (source start pathname expected-size expected-output)
+      `((:foo nil #P"/tmp/foo.bin" 4 ,(octetify ":FOO"))
+	(:foo nil #P"/tmp/foo.bin" 4 ,(octetify ":FOO")) ;; requires superseding the file
+	(5    nil #P"/tmp/foo"     1 ,(octetify "5"))    ;; no file type
+	(:foo 0   #P"/tmp/foo.bin" 4 ,(octetify ":FOO"))
+	;; (:foo 1   #P"/tmp/foo.bin" 4 ,(octetify "0:FOO"))
+	)
 
     (bind (((:values size destination)
-	    (pack simple-mechanism source pathname))
+	    (if start
+		(pack simple-mechanism source pathname :start start)
+		(pack simple-mechanism source pathname)))
 	   (output (read-file-into-byte-vector pathname)))
       (ensure-same destination pathname        :test #'eq)
       (ensure-same size        expected-size   :test #'=)
@@ -116,13 +137,19 @@
 	  "Test method on `unpack' for stream source.")
   unpack/stream
 
-  (ensure-cases (source expected-output expected-size)
-      `((,(octetify ":FOO") :foo 4)
-	(,(octetify "5")    5    1))
+  (ensure-cases (source start expected-output expected-size)
+      `((,(octetify ":FOO")  nil :foo 4)
+	(,(octetify "5")     nil 5    1)
+	(,(octetify ":FOO")  0   :foo 4)
+	(,(octetify "5")     0   5    1)
+	(,(octetify "_:FOO") 1   :foo 4)
+	(,(octetify "_5")    1   5    1))
 
     (with-input-from-sequence (stream source)
       (bind (((:values output size)
-	      (unpack simple-mechanism stream :unused)))
+	      (if start
+		  (unpack simple-mechanism stream :unused :start start)
+		  (unpack simple-mechanism stream :unused))))
 	(ensure-same output expected-output :test #'equalp)
 	(ensure-same size   expected-size   :test #'=)))))
 
@@ -131,12 +158,18 @@
 	  "Test method on `unpack' for pathname source.")
   unpack/pathname
 
-  (ensure-cases (input pathname expected-output expected-size)
-      '((":FOO" #P"/tmp/foo.txt" :foo 4)
-	("5"    #P"/tmp/foo"     5    1))
+  (ensure-cases (input pathname start expected-output expected-size)
+      `((,(octetify ":FOO")  #P"/tmp/foo.txt" nil :foo 4)
+	(,(octetify "5")     #P"/tmp/foo"     nil 5    1)
+	(,(octetify ":FOO")  #P"/tmp/foo.txt" 0   :foo 4)
+	(,(octetify "5")     #P"/tmp/foo"     0   5    1)
+	(,(octetify "_:FOO") #P"/tmp/foo.txt" 1   :foo 4)
+	(,(octetify "_5")    #P"/tmp/foo"     1   5    1))
 
-    (write-string-into-file input pathname :if-exists :supersede)
+    (write-byte-vector-into-file input pathname :if-exists :supersede)
     (bind (((:values output size)
-	    (unpack simple-mechanism pathname :unused)))
+	    (if start
+		(unpack simple-mechanism pathname :unused :start start)
+		(unpack simple-mechanism pathname :unused))))
       (ensure-same output expected-output :test #'equalp)
       (ensure-same size   expected-size   :test #'=))))
