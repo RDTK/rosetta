@@ -180,7 +180,9 @@ state of a particular emission process. This state consists of:
 ;;; Housekeeping and such
 ;;
 
-(defmethod emit :before ((node t) (target t) (language t)
+(defmethod emit :before ((node     standard-object)
+			 (target   standard-object)
+			 (language standard-object)
 			 &key
 			 (verbose *emit-verbose*)
 			 (print   *emit-print*))
@@ -191,7 +193,9 @@ state of a particular emission process. This state consists of:
   (when print
     (format *standard-output* "~@<; ~@;emitting (~A)~@:>~%" (type-of node))))
 
-(defmethod emit :around ((node t) (target t) (language t)
+(defmethod emit :around ((node     standard-object)
+			 (target   standard-object)
+			 (language standard-object)
 			 &key)
   (with-emit-restarts node target
     (with-updated-context (node target language)
