@@ -44,7 +44,8 @@
   (:export
    :packed-size
 
-   :pack :unpack)
+   :pack :unpack
+   :pack*)
 
   ;; Partial deserialization protocol
   (:export

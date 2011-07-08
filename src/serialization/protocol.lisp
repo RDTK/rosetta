@@ -53,6 +53,12 @@ MECHANISM and store it in DESTINATION.
 Two values are returned: the number of emitted octets and
 DESTINATION."))
 
+(defgeneric pack* (mechanism source &key &allow-other-keys)
+  (:documentation
+   "Convenience function for `pack' that does not take destination
+argument and tries to figure out suitable default destination. The
+created destination is returned as the first value."))
+
 (defgeneric unpack (mechanism source destination &key &allow-other-keys)
   (:documentation
    "Decode the object that is stored in SOURCE in the serialization
@@ -87,11 +93,19 @@ and the number of consumed octets."))
 
   (define-mechanism-lookup packed-size (source))
   (define-mechanism-lookup pack        (source destination))
+  (define-mechanism-lookup pack*       (source))
   (define-mechanism-lookup unpack      (source destination)))
 
 
 ;;; Default behavior
 ;;
+
+(defmethod pack* ((mechanism t) (source t)
+		  &rest args
+		  &key)
+  "Default behavior is to use a nil destination and return the created
+destination instead of the amount of produced data."
+  (nth-value 1 (apply #'pack mechanism source nil args)))
 
 (defmethod unpack ((mechanism t) (source t) (destination class)
 		   &rest args &key)
