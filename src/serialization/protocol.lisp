@@ -61,6 +61,35 @@ Two values are returned: the modified DESTINATION (or a new object)
 and the number of consumed octets."))
 
 
+;;; Mechanism class lookup
+;;
+
+
+(macrolet
+    ((define-mechanism-lookup (method args)
+       (let ((args/typed
+	      (map 'list #'list
+		   args (make-list (length args) :initial-element t))))
+	 `(progn
+	    (defmethod ,method ((mechanism list) ,@args/typed
+				&rest rest-args
+				&key)
+	      (bind (((mechanism-name &rest mechanism-args) mechanism)
+		     (mechanism-class    (find-mechanism-class mechanism-name))
+		     (mechanism-instance
+		      (apply #'make-instance mechanism-class mechanism-args)))
+		(apply #',method mechanism-instance ,@args rest-args)))
+
+	    (defmethod ,method ((mechanism symbol) ,@args/typed
+				&rest rest-args
+				&key)
+	      (apply #',method (list mechanism) ,@args rest-args))))))
+
+  (define-mechanism-lookup packed-size (source))
+  (define-mechanism-lookup pack        (source destination))
+  (define-mechanism-lookup unpack      (source destination)))
+
+
 ;;; Default behavior
 ;;
 
