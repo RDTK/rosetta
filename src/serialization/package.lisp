@@ -62,6 +62,10 @@
   (:export
    :textual-mixin)
 
+  ;; `textual-stream-mixin' mixin class
+  (:export
+   :textual-stream-mixin)
+
   ;; `binary-mixin' mixin class
   (:export
    :binary-mixin)

@@ -72,6 +72,9 @@
 
 			      (:file       "textual-mixin"
 			       :depends-on ("package" "protocol"))
+			      (:file       "textual-stream-mixin"
+			       :depends-on ("package" "protocol"
+					    "textual-mixin"))
 			      (:file       "binary-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "data-holder-mixin"
