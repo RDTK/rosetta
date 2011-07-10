@@ -24,6 +24,24 @@
    :cl
    :alexandria)
 
+  ;; Data type protocol
+  (:export
+   :data-type-name
+   :data-type-documentation)
+
+  ;; Composite data type protocol
+  (:export
+   :data-type-composite?
+   :data-type-parent
+   :composite-children
+   :composite-child)
+
+  ;; Field protocol
+  (:export
+   :field-name
+   :field-type
+   :field-optional?)
+
   (:documentation
    "This package contains protocols and classes which can be used to
 define data-type classes for use with the cl-rosetta backend. In
