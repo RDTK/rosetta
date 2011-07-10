@@ -50,21 +50,21 @@ when represented in the serialization format of MECHANISM."))
   (:documentation
    "Convert SOURCE to a representation in the serialization format of
 MECHANISM and store it in DESTINATION.
-Two values are returned: the number of emitted octets and
+Two values are returned: the number of emitted octets or nil and
 DESTINATION."))
 
 (defgeneric pack* (mechanism source &key &allow-other-keys)
   (:documentation
    "Convenience function for `pack' that does not take destination
 argument and tries to figure out suitable default destination. The
-created destination is returned as the first value."))
+created destination is returned."))
 
 (defgeneric unpack (mechanism source destination &key &allow-other-keys)
   (:documentation
    "Decode the object that is stored in SOURCE in the serialization
 format of MECHANISM into DESTINATION.
 Two values are returned: the modified DESTINATION (or a new object)
-and the number of consumed octets."))
+and the number of consumed octets or nil."))
 
 
 ;;; Default behavior

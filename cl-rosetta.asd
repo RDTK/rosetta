@@ -134,6 +134,8 @@
 			       :depends-on ("package"))
 			      (:file       "textual-mixin"
 			       :depends-on ("package"))
+			      (:file       "textual-stream-mixin"
+			       :depends-on ("package" "textual-mixin"))
 			      (:file       "binary-mixin"
 			       :depends-on ("package"))
 			      (:file       "data-holder-mixin"

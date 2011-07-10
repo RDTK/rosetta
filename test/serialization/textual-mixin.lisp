@@ -51,80 +51,91 @@
   (:documentation
    "Unit tests for the `textual-mixin' mixin class."))
 
-(addtest (textual-mixin-root
-          :documentation
-	  "Test method on `pack' for nil destination.")
-  pack/nil
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro define-basic-textual-mechanism-tests (class)
+    (let ((suite-name (symbolicate class "-ROOT")))
+      `(progn
+	 (addtest (,suite-name
+		   :documentation
+		   "Test method on `pack' for nil destination.")
+	   pack/nil
 
-  (ensure-cases (source expected-size expected-destination)
-      '((:foo 4 ":FOO")
-	(5    1 "5"))
+	   (ensure-cases (source expected-size expected-destination)
+	       '((:foo 4 ":FOO")
+		 (5    1 "5"))
 
-    (bind (((:values size destination)
-	    (pack simple-mechanism source nil)))
-      (ensure-same size        expected-size        :test #'=)
-      (ensure-same destination expected-destination :test #'string=))))
+	     (bind (((:values size destination)
+		     (pack simple-mechanism source nil)))
+	       (when size
+		 (ensure-same size expected-size :test #'=))
+	       (ensure-same destination expected-destination :test #'string=))))
 
-(addtest (textual-mixin-root
-          :documentation
-	  "Test method on `pack' for stream destinations.")
-  pack/stream
+	 (addtest (,suite-name
+		   :documentation
+		   "Test method on `pack' for stream destinations.")
+	   pack/stream
 
-  (ensure-cases (source expected-size expected-output)
-      '((:foo 4 ":FOO")
-	(5    1 "5"))
+	   (ensure-cases (source expected-size expected-output)
+	       '((:foo 4 ":FOO")
+		 (5    1 "5"))
 
-    (bind ((stream (make-string-output-stream))
-	   ((:values size destination)
-	    (pack simple-mechanism source stream))
-	   (output (get-output-stream-string stream)))
-      (ensure-same destination stream          :test #'eq)
-      (ensure-same size        expected-size   :test #'=)
-      (ensure-same output      expected-output :test #'string=))))
+	     (bind ((stream (make-string-output-stream))
+		    ((:values size destination)
+		     (pack simple-mechanism source stream))
+		    (output (get-output-stream-string stream)))
+	       (ensure-same destination stream :test #'eq)
+	       (when size
+		 (ensure-same size expected-size :test #'=))
+	       (ensure-same output expected-output :test #'string=))))
 
-(addtest (textual-mixin-root
-          :documentation
-	  "Test method on `pack' for pathname destinations.")
-  pack/pathname
+	 (addtest (,suite-name
+		   :documentation
+		   "Test method on `pack' for pathname destinations.")
+	   pack/pathname
 
-  (ensure-cases (source pathname expected-size expected-output)
-      '((:foo #P"/tmp/foo.txt" 4 ":FOO")
-	(:foo #P"/tmp/foo.txt" 4 ":FOO") ;; required superseding the file
-	(5    #P"/tmp/foo"     1 "5"))   ;; no file type
+	   (ensure-cases (source pathname expected-size expected-output)
+	       '((:foo #P"/tmp/foo.txt" 4 ":FOO")
+		 (:foo #P"/tmp/foo.txt" 4 ":FOO") ;; requires superseding the file
+		 (5    #P"/tmp/foo"     1 "5"))   ;; no file type
 
-    (bind (((:values size destination)
-	    (pack simple-mechanism source pathname))
-	   (output (read-file-into-string pathname)))
-      (ensure-same destination pathname        :test #'eq)
-      (ensure-same size        expected-size   :test #'=)
-      (ensure-same output      expected-output :test #'string=))))
+	     (bind (((:values size destination)
+		     (pack simple-mechanism source pathname))
+		    (output (read-file-into-string pathname)))
+	       (ensure-same destination pathname :test #'eq)
+	       (when size
+		 (ensure-same size expected-size :test #'=))
+	       (ensure-same output expected-output :test #'string=))))
 
-(addtest (textual-mixin-root
-          :documentation
-	  "Test method on `unpack' for stream source.")
-  unpack/stream
+	 (addtest (,suite-name
+		   :documentation
+		   "Test method on `unpack' for stream source.")
+	   unpack/stream
 
-  (ensure-cases (source expected-output expected-size)
-      '((":FOO" :foo 4)
-	("5"    5    1))
+	   (ensure-cases (source expected-output expected-size)
+	       '((":FOO" :foo 4)
+		 ("5"    5    1))
 
-    (with-input-from-string (stream source)
-      (bind (((:values output size)
-	      (unpack simple-mechanism stream :unused)))
-	(ensure-same output expected-output :test #'equalp)
-	(ensure-same size   expected-size   :test #'=)))))
+	     (with-input-from-string (stream source)
+	       (bind (((:values output size)
+		       (unpack simple-mechanism stream :unused)))
+		 (ensure-same output expected-output :test #'equalp)
+		 (when size
+		   (ensure-same size expected-size :test #'=))))))
 
-(addtest (textual-mixin-root
-          :documentation
-	  "Test method on `unpack' for pathname source.")
-  unpack/pathname
+	 (addtest (,suite-name
+		   :documentation
+		   "Test method on `unpack' for pathname source.")
+	   unpack/pathname
 
-  (ensure-cases (input pathname expected-output expected-size)
-      '((":FOO" #P"/tmp/foo.txt" :foo 4)
-	("5"    #P"/tmp/foo"     5    1))
+	   (ensure-cases (input pathname expected-output expected-size)
+	       '((":FOO" #P"/tmp/foo.txt" :foo 4)
+		 ("5"    #P"/tmp/foo"     5    1))
 
-    (write-string-into-file input pathname :if-exists :supersede)
-    (bind (((:values output size)
-	    (unpack simple-mechanism pathname :unused)))
-      (ensure-same output expected-output :test #'equalp)
-      (ensure-same size   expected-size   :test #'=))))
+	     (write-string-into-file input pathname :if-exists :supersede)
+	     (bind (((:values output size)
+		     (unpack simple-mechanism pathname :unused)))
+	       (ensure-same output expected-output :test #'equalp)
+	       (when size
+		 (ensure-same size expected-size :test #'=)))))))))
+
+(define-basic-textual-mechanism-tests textual-mixin)
