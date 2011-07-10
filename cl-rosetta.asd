@@ -130,6 +130,8 @@
 		 :pathname   "test/serialization"
 		 :depends-on ("package")
 		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
 			      (:file       "textual-mixin"
 			       :depends-on ("package"))
 			      (:file       "binary-mixin"
