@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for model.data module.
+;;; named-mixin.lisp --- A mixin class for named data type classes.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,36 +17,18 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :cl-user)
+(in-package :rosetta.model.data)
 
-(defpackage :rosetta.model.data
-  (:use
-   :cl
-   :alexandria)
-
-  ;; Data type protocol
-  (:export
-   :data-type-name
-   :data-type-documentation)
-
-  ;; Composite data type protocol
-  (:export
-   :data-type-composite?
-   :data-type-parent
-   :composite-children
-   :composite-child)
-
-  ;; Field protocol
-  (:export
-   :field-name
-   :field-type
-   :field-optional?)
-
-  ;; `named-mixin' mixin class
-  (:export
-   :named-mixin)
-
+(defclass named-mixin ()
+  ((name :initarg  :name
+	 :type     string
+	 :reader   data-type-name
+	 :documentation
+	 "Stores the name of the data type."))
   (:documentation
-   "This package contains protocols and classes which can be used to
-define data-type classes for use with the cl-rosetta backend. In
-Addition, some classes for common data-types are included."))
+   "This class is intended to be mixed into data type classes
+instances of which represent named data types."))
+
+(defmethod print-object ((object named-mixin) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~S" (data-type-name object))))

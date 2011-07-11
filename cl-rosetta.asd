@@ -84,7 +84,10 @@
 		 :pathname   "src/model/data"
 		 :components ((:file       "package")
 			      (:file       "protocol"
-			       :depends-on ("package"))))
+			       :depends-on ("package"))
+
+			      (:file       "named-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"
