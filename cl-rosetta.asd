@@ -60,7 +60,6 @@
 		:flexi-streams
 		:cl-protobuf
 		:yacc
-		:cxml-location
 		:cl-dynamic-classes)
   :components  ((:module     "src"
 		 :components ((:file       "package")
