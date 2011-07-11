@@ -62,7 +62,14 @@
 		:yacc
 		:cxml-location
 		:cl-dynamic-classes)
-  :components  ((:module     "serialization"
+  :components  ((:module     "src"
+		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
+			      (:file       "print-items"
+			       :depends-on ("package"))))
+
+		(:module     "serialization"
 		 :pathname   "src/serialization"
 		 :components ((:file       "package")
 			      (:file       "conditions"
