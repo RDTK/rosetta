@@ -55,7 +55,9 @@ designated by THING."
 ;;; Backend Context
 ;;
 
-(defgeneric context-get (context key)
+(defgeneric context-get (context key
+			 &key
+			 default)
   (:documentation
    "Retrieve the item designated by KEY from CONTEXT."))
 
@@ -103,10 +105,15 @@ state of a particular emission process. This state consists of:
 + the stack of nodes currently being processed
 + the package to which symbols are currently emitted"))
 
-(defmethod context-get ((context context) (key symbol))
-  (iter (for bla in (%context-environment context))
-	(let ((value (gethash key bla)))
-	  (when value (return value)))))
+(defmethod context-get ((context context) (key symbol)
+			&key
+			default)
+  (or (some #'(lambda (env) (gethash key env))
+	    (%context-environment context))
+      (if (eq default :error)
+	  (error "~@<Required environment entry ~S is missing.~@:>"
+		 key)
+	  default)))
 
 (defmethod (setf context-get) ((new-value t)
 			       (context   context)
