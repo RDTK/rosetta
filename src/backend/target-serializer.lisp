@@ -19,6 +19,19 @@
 
 (in-package :rosetta.backend)
 
+(defclass serialization-mixin ()
+  ((mechanism :initarg  :mechanism
+	      :type     symbol
+	      :reader   target-mechanism
+	      :documentation
+	      "Stores the name of the mechanism class for which the
+serialization-related code is `emit' ted."))
+  (:documentation
+   "This class is intended to be mixed into target classes which are
+used for generating serialization-related code. It provides a slot for
+storing the mechanism for which the serialization code is `emit'
+ted."))
+
 
 ;;; Packed Size
 ;;
@@ -26,13 +39,14 @@
 (defmethod find-target-class ((spec (eql :packed-size)))
   (find-class 'target-packed-size))
 
-(defclass target-packed-size (code-generating-target-mixin)
+(defclass target-packed-size (code-generating-target-mixin
+			      serialization-mixin)
   ()
   (:documentation
-   "Target class for \"packed-size\" target which, for example, emits
-methods on `rosetta.serialization:packed-size' or otherwise generates
-code for given serialization mechanisms and classes described by model
-component instances."))
+   "Target class for the \"packed-size\" target which, for example,
+emits methods on `rosetta.serialization:packed-size' or otherwise
+generates code for given serialization mechanisms and classes
+described by model component instances."))
 
 
 ;;; Full (De)serialization
@@ -41,18 +55,21 @@ component instances."))
 (defmethod find-target-class ((spec (eql :pack)))
   (find-class 'target-pack))
 
-(defclass target-pack (code-generating-target-mixin)
+(defclass target-pack (code-generating-target-mixin
+		       serialization-mixin)
   ()
   (:documentation
-   "Target class for \"pack\" target which, for example, emits methods
-on `rosetta.serialization:pack' or otherwise generates code for given
-serialization mechanisms and classes described by model component
-instances."))
+   "Target class for the \"pack\" target which, for example, emits
+methods on `rosetta.serialization:pack' or otherwise generates code
+for given serialization mechanisms and classes described by model
+component instances."))
 
+;;; TODO(jmoringe): do we really need this target?
 (defmethod find-target-class ((spec (eql :before-pack)))
   (find-class 'target-before-pack))
 
-(defclass target-before-pack (code-generating-target-mixin)
+(defclass target-before-pack (code-generating-target-mixin
+			      serialization-mixin)
   ()
   (:documentation
    "Helper target class for pack target."))
@@ -60,10 +77,11 @@ instances."))
 (defmethod find-target-class ((spec (eql :unpack)))
   (find-class 'target-unpack))
 
-(defclass target-unpack (code-generating-target-mixin)
+(defclass target-unpack (code-generating-target-mixin
+			 serialization-mixin)
   ()
   (:documentation
-   "Target class for \"unpack\" target which, for example, emits
+   "Target class for the \"unpack\" target which, for example, emits
 methods on `rosetta.serialization:unpack' or otherwise generates code
 for given serialization mechanisms and classes described by model
 component instances."))

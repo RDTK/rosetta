@@ -73,6 +73,9 @@
 
   ;; Serialization-related target classes
   (:export
+   :serializtion-mixin
+   :target-mechanism
+
    :target-packed-size
 
    :target-pack :target-unpack)
