@@ -22,7 +22,9 @@
 (defpackage :rosetta.model.data
   (:use
    :cl
-   :alexandria)
+   :alexandria
+
+   :rosetta)
 
   ;; Data type protocol
   (:export

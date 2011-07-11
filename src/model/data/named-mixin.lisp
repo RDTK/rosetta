@@ -29,6 +29,5 @@
    "This class is intended to be mixed into data type classes
 instances of which represent named data types."))
 
-(defmethod print-object ((object named-mixin) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~S" (data-type-name object))))
+(defmethod print-items append ((object named-mixin))
+  (list (list :name (data-type-name object) "~S")))
