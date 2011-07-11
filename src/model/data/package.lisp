@@ -48,6 +48,18 @@
   (:export
    :named-mixin)
 
+  ;; `composite-mixin' mixin class
+  (:export
+   :composite-mixin)
+
+  ;; `field-mixin' mixin class
+  (:export
+   :field-mixin)
+
+  ;; `structure-mixin' mixin class
+  (:export
+   :structure-mixin)
+
   (:documentation
    "This package contains protocols and classes which can be used to
 define data-type classes for use with the cl-rosetta backend. In

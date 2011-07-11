@@ -94,7 +94,15 @@
 			       :depends-on ("package"))
 
 			      (:file       "named-mixin"
-			       :depends-on ("package" "protocol"))))
+			       :depends-on ("package" "protocol"))
+			      (:file       "composite-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "field-mixin"
+			       :depends-on ("package" "protocol"
+					    "named-mixin"))
+			      (:file       "structure-mixin"
+			       :depends-on ("package" "protocol"
+					    "composite-mixin" "field-mixin"))))
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"
