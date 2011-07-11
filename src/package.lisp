@@ -22,7 +22,7 @@
 (defpackage :rosetta
   (:use
    :cl
-   :iterate)
+   :metabang-bind)
 
   ;; Conditions
   (:export
