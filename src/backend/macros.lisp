@@ -23,7 +23,7 @@
 ;;; Housekeeping macros
 ;;
 
-(defmacro with-emit-restarts (node target &body body)
+(defmacro with-emit-restarts ((node target) &body body)
   "Establish restarts."
   (with-unique-names (result-var read-value-var)
     (once-only (node target)
@@ -93,28 +93,31 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 
 (defmacro with-emit-symbols (&body body)
   "Execute BODY with the following symbols added to the lexical scope:
-+ package            :: The package that is the current target of the
-                        emission process.
-+ parent             :: The parent of the current node or nil.
-+ grandparent        :: The parent of the parent of the current node
-                        or nil.
-+ ancestors          :: List of all ancestor nodes.
-+ parent-is-message? :: non-nil if parent is non-nil and of a subtype
-                        of `message-desc'.
-+ recur              :: A closure that accepts a node and calls `emit'
-                        with the current target on that node.
-+ intern*            :: Similar to `intern' but use the context package."
-  `(symbol-macrolet ((package            (context-package *context*))
-		     (stack              (context-stack *context*))
-		     (parent             (second (context-stack *context*)))
-		     (grandparent        (third (context-stack *context*)))
-		     (ancestors          (rest (context-stack *context*)))
-		     (parent-is-message? (typep parent 'pb::message-desc)))
++ package           :: The package that is the current target of the
+                       emission process.
++ parent            :: The parent of the current node or nil.
++ grandparent       :: The parent of the parent of the current node
+                       or nil.
++ ancestors         :: List of all ancestor nodes.
++ recur             :: A closure that accepts a node and calls `emit'
+                       with the current target and language on that node.
++ cget, (setf cget) :: Retrieve and store values in the current
+                       environment of context.
++ intern*           :: Similar to `intern' but use the context package."
+  `(symbol-macrolet ((package     (context-package *context*))
+		     (stack       (context-stack *context*))
+		     (parent      (second (context-stack *context*)))
+		     (grandparent (third (context-stack *context*)))
+		     (ancestors   (rest (context-stack *context*))))
      (flet ((recur (node)
 	      (emit node
 		    (context-target *context*)
 		    (context-language *context*)))
+	    (cget (key)
+	      (context-get *context* key))
+	    ((setf cget) (new-value key)
+	      (setf (context-get *context* key) new-value))
 	    (intern* (name) ;; TODO rename
 	      (intern name package)))
-       (declare (ignorable #'recur #'intern*))
+       (declare (ignorable #'recur #'cget #'(setf cget) #'intern*))
        ,@body)))

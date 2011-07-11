@@ -197,7 +197,7 @@ state of a particular emission process. This state consists of:
 			 (target   standard-object)
 			 (language standard-object)
 			 &key)
-  (with-emit-restarts node target
+  (with-emit-restarts (node target)
     (with-updated-context (node target language)
       (call-next-method))))
 
