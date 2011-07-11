@@ -69,50 +69,70 @@ size and create such an octet-vector."
     (when (plusp start)
       (file-position stream start))
     (values
-     (apply #'pack mechanism source stream 
+     (apply #'pack mechanism source stream
 	    (remove-from-plist args :start))
      destination)))
 
-(defmethod unpack ((mechanism   binary-mixin)
-		   (source      stream)
-		   (destination t)
-		   &rest args
-		   &key
-		   (start 0)
-		   end)
-  "Unpack OBJECT from stream SOURCE."
-  (unless (zerop start)
-    (iter (repeat start) (read-byte source)))
+(macrolet
+    ((define-unpack-method (name (&rest extra-args))
+       `(progn
+	  (defmethod ,name ((mechanism   binary-mixin)
+			    (source      stream)
+			    ,@extra-args
+			    &rest args
+			    &key
+			    (start 0)
+			    end)
+	    ,(format nil "Prepare stream SOURCE, then ~(~A~)." name)
+	    (apply #',name mechanism
+		   (%prepare-binary-unpack-from-stream source start end)
+		   ,@(map 'list #'first extra-args)
+		   (remove-from-plist args :start :end)))
 
+	  (defmethod ,name ((mechanism   binary-mixin)
+			    (source      pathname)
+			    ,@extra-args
+			    &rest args
+			    &key
+			    (start 0)
+			    end)
+	    ,(format nil "Open a stream for SOURCE and, potentially ~
+seek to START, then ~(~A~)." name)
+	    (with-input-from-file (stream source
+					  :element-type '(unsigned-byte 8))
+	      (unless (zerop start)
+		(file-position stream start))
+	      (apply #',name mechanism stream
+		     ,@(map 'list #'first extra-args)
+		     :end (- (or end (file-length stream)) start)
+		     (remove-from-plist args :start :end)))))))
+
+  (define-unpack-method unpack   ((destination t)))
+  (define-unpack-method location ((schema t) (part t)))
+  (define-unpack-method extract  ((schema t) (part t))))
+
+
+;;; Utility functions
+;;
+
+(defun %prepare-binary-unpack-from-stream (stream &optional (start 0) end)
+  "Read content from STREAM into a buffer taking into account START
+and END."
+  ;; Advance STREAM to START position, if necessary.
+  (unless (zerop start)
+    (iter (repeat start) (read-byte stream)))
+
+  ;; Read stream content into a buffer.
   (bind (((:flet read-whole-stream ())
 	  (let ((buffer (make-array 0
 				    :element-type '(unsigned-byte 8)
 				    :fill-pointer 0)))
-	    (iter (for c in-stream source :using #'read-byte)
+	    (iter (for c in-stream stream :using #'read-byte)
 		  (vector-push-extend c buffer))
 	    (coerce buffer '(simple-array (unsigned-byte 8) (*)))))
 	 ((:flet read-range ())
 	  (let ((buffer (make-array (- end start)
 				    :element-type '(unsigned-byte 8))))
-	    (read-sequence buffer source)
-	    buffer))
-	 (buffer (if end (read-range) (read-whole-stream))))
-    (apply #'unpack mechanism buffer destination
-	   (remove-from-plist args :start :end))))
-
-(defmethod unpack ((mechanism   binary-mixin)
-		   (source      pathname)
-		   (destination t)
-		   &rest args
-		   &key
-		   (start 0)
-		   end)
-  "Open a stream for SOURCE and, potentially seek to START, then
-unpack the contents into DESTINATION."
-  (with-input-from-file (stream source
-				:element-type '(unsigned-byte 8))
-    (unless (zerop start)
-      (file-position stream start))
-    (apply #'unpack mechanism stream destination
-	   :end (- (or end (file-length stream)) start)
-	   (remove-from-plist args :start :end))))
+	    (read-sequence buffer stream)
+	    buffer)))
+    (if end (read-range) (read-whole-stream))))
