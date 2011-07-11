@@ -75,9 +75,7 @@
   (:export
    :target-packed-size
 
-   :target-serializer
-
-   :target-deserializer)
+   :target-pack :target-unpack)
 
   (:documentation
    "This package contains backend-related protocols and infrastructure

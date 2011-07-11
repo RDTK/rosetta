@@ -35,39 +35,35 @@ code for given serialization mechanisms and classes described by model
 component instances."))
 
 
-;;; Serializer
+;;; Full (De)serialization
 ;;
 
-(defmethod find-target-class ((spec (eql :serializer)))
-  (find-class 'target-serializer))
+(defmethod find-target-class ((spec (eql :pack)))
+  (find-class 'target-pack))
 
-(defclass target-serializer (code-generating-target-mixin)
+(defclass target-pack (code-generating-target-mixin)
   ()
   (:documentation
-   "Target class for \"serializer\" target which, for example, emits
-methods on `rosetta.serialization:pack' or otherwise generates code
-for given serialization mechanisms and classes described by model
-component instances."))
+   "Target class for \"pack\" target which, for example, emits methods
+on `rosetta.serialization:pack' or otherwise generates code for given
+serialization mechanisms and classes described by model component
+instances."))
 
-(defmethod find-target-class ((spec (eql :before-serializer)))
-  (find-class 'target-before-serializer))
+(defmethod find-target-class ((spec (eql :before-pack)))
+  (find-class 'target-before-pack))
 
-(defclass target-before-serializer (code-generating-target-mixin)
+(defclass target-before-pack (code-generating-target-mixin)
   ()
   (:documentation
-   "Helper target class for serializer target."))
+   "Helper target class for pack target."))
 
-
-;;; Deserializer
-;;
+(defmethod find-target-class ((spec (eql :unpack)))
+  (find-class 'target-unpack))
 
-(defmethod find-target-class ((spec (eql :deserializer)))
-  (find-class 'target-deserializer))
-
-(defclass target-deserializer (code-generating-target-mixin)
+(defclass target-unpack (code-generating-target-mixin)
   ()
   (:documentation
-   "Target class for \"deserializer\" target which, for example, emits
+   "Target class for \"unpack\" target which, for example, emits
 methods on `rosetta.serialization:unpack' or otherwise generates code
 for given serialization mechanisms and classes described by model
 component instances."))
