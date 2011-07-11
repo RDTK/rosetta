@@ -108,12 +108,15 @@
 			      (:file       "protocol"
 			       :depends-on ("package" "variables"
 					    "macros"))
+			      (:file       "bind"
+			       :depends-on ("package" "protocol"))
 
 			      (:file       "code-generating-target-mixin"
 			       :depends-on ("package"))
 
 			      (:file       "target-serializer"
-			       :depends-on ("package" "code-generating-target-mixin")))))
+			       :depends-on ("package"
+					    "code-generating-target-mixin")))))
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 
