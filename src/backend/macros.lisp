@@ -121,3 +121,36 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 	      (intern name package)))
        (declare (ignorable #'recur #'cget #'(setf cget) #'intern*))
        ,@body)))
+
+(defmacro define-mechanism-targets
+    (mechanism
+     &key
+     (prefix  "MECHANISM-")
+     (methods '(:packed-size :pack :unpack :location :extract))
+     mixins)
+  "Define target classes for generating methods on \(all or some of)
+`packed-size', `pack', `unpack', `location' and `extract'."
+  (check-type mechanism symbol "a symbol")
+
+  (let* ((mechanism-string (string mechanism))
+	 (base-name (if (starts-with-subseq prefix mechanism-string)
+			(subseq mechanism-string (length prefix))
+			mechanism-string)))
+    `(progn
+       ,@(iter (for target in methods)
+	       (let ((spec       (let ((*package* (find-package :keyword)))
+				   (symbolicate base-name "-" target)))
+		     (name       (symbolicate "TARGET-" base-name "-" target))
+		     (super-name (symbolicate "TARGET-" target)))
+		 (collect
+		     `(defmethod find-target-class ((spec (eql ,spec)))
+			(find-class ',name)))
+		 (collect
+		     `(defclass ,name (,super-name ,@mixins)
+			((mechanism :initform ',mechanism))
+			(:documentation
+			 ,(format nil "~A This target class generates ~
+methods that implement the ~(~A~) mechanism:~%~A"
+				  (documentation super-name 'type)
+				  base-name
+				  (documentation mechanism 'type))))))))))

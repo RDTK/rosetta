@@ -80,6 +80,10 @@
 
    :target-pack :target-unpack)
 
+  ;; Macros
+  (:export
+   :define-mechanism-targets)
+
   (:documentation
    "This package contains backend-related protocols and infrastructure
 of the cl-rosetta compiler."))
