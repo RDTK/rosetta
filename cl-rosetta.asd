@@ -89,6 +89,7 @@
 
 		(:module     "model-data"
 		 :pathname   "src/model/data"
+		 :depends-on ("src")
 		 :components ((:file       "package")
 			      (:file       "protocol"
 			       :depends-on ("package"))
