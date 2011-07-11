@@ -49,7 +49,7 @@
 
   ;; Partial deserialization protocol
   (:export
-   :offset
+   :location
    :extract)
 
   ;; Mechanism class family
