@@ -46,7 +46,8 @@ ted."))
    "Target class for the \"packed-size\" target which, for example,
 emits methods on `rosetta.serialization:packed-size' or otherwise
 generates code for given serialization mechanisms and classes
-described by model component instances."))
+described by model component instances. This target is mainly used
+with binary serialization mechanisms."))
 
 
 ;;; Full (De)serialization
