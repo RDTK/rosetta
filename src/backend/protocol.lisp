@@ -200,7 +200,7 @@ state of a particular emission process. This state consists of:
   (when print
     (format *standard-output* "~@<; ~@;emitting (~A)~@:>~%" (type-of node))))
 
-(defmethod emit :around ((node     standard-object)
+(defmethod emit :around ((node     t)
 			 (target   standard-object)
 			 (language standard-object)
 			 &key)
