@@ -33,7 +33,7 @@ storing the mechanism for which the serialization code is `emit'
 ted."))
 
 
-;;; Packed Size
+;;; Packed size
 ;;
 
 (defmethod find-target-class ((spec (eql :packed-size)))
@@ -50,7 +50,7 @@ described by model component instances. This target is mainly used
 with binary serialization mechanisms."))
 
 
-;;; Full (De)serialization
+;;; Full (de)serialization
 ;;
 
 (defmethod find-target-class ((spec (eql :pack)))
@@ -86,3 +86,33 @@ component instances."))
 methods on `rosetta.serialization:unpack' or otherwise generates code
 for given serialization mechanisms and classes described by model
 component instances."))
+
+
+;;; Partial deserialization
+;;
+
+(defmethod find-target-class ((spec (eql :location)))
+  (find-class 'target-location))
+
+(defclass target-location (code-generating-target-mixin
+			   serialization-mixin)
+  ()
+  (:documentation
+   "Target class for the \"location\" target which, for example, emits
+methods on `rosetta.serialization:location' or otherwise generates
+code for given serialization mechanisms to determine the location of a
+part of a structure within the serialized representation of that
+containing structure."))
+
+(defmethod find-target-class ((spec (eql :extract)))
+  (find-class 'target-extract))
+
+(defclass target-extract (code-generating-target-mixin
+			  serialization-mixin)
+  ()
+  (:documentation
+   "Target class for \"extract\" target which, for example, emits
+methods on `rosetta.serialization:extract' or otherwise generates code
+for given serialization mechanisms to unpack individual parts of
+structures from serialized representations without unpacking the
+entire serialized representation."))

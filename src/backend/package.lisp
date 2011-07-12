@@ -78,7 +78,10 @@
 
    :target-packed-size
 
-   :target-pack :target-unpack)
+   :target-pack :target-unpack
+
+   :target-location
+   :target-extract)
 
   ;; Macros
   (:export
