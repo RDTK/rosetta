@@ -117,7 +117,7 @@
 
 		(:module     "backend"
 		 :pathname   "src/backend"
-		 :depends-on ("serialization")
+		 :depends-on ("serialization" "model-data")
 		 :components ((:file       "package")
 			      (:file       "variables"
 			       :depends-on ("package"))
