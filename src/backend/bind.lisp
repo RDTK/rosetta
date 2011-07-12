@@ -40,7 +40,7 @@ case VALUE will be stored and assigned."
 	      ;; Collect a form to store the value in the `emit'
 	      ;; context.
 	      (collect
-		  `(setf (context-get ,values ',name) ,name)
+		  `(setf (context-get ,values ',(make-keyword name)) ,name)
 		:into body))
 	    (finally (return (values bindings body))))
     `(let* ,bindings
@@ -52,5 +52,5 @@ case VALUE will be stored and assigned."
 from `emit' context and bind to the variables."
 			:accept-multiple-forms-p nil)
   `(let ,(iter (for name in bind::variables)
-	       (collect `(,name (context-get ,values ',name
+	       (collect `(,name (context-get ,values ',(make-keyword name)
 					     :default :error))))))
