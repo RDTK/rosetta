@@ -46,11 +46,9 @@ designated by THING."
 (defgeneric parse (format source
 		   &key)
   (:documentation
-   "Parse content of SOURCE
-Return a `pb::file-set-desc' instance that contains the complete
-description in its child nodes.
-
-"))
+   "Parse content of SOURCE assuming it uses the format or syntax
+described by FORMAT. Return an object that represents the parsed
+content."))
 
 
 ;;; Format class lookup
