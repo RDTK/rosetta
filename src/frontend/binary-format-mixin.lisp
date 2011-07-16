@@ -30,4 +30,4 @@ formats."))
   "Open a binary input stream for the file designated by SOURCE and
 call a method specialized on streams."
   (with-input-from-file (stream source :element-type '(unsigned-byte 8))
-    (parse format source)))
+    (parse format stream)))
