@@ -19,8 +19,7 @@
 
 (in-package :rosetta.model.data)
 
-(defclass structure-mixin (named-mixin
-			   composite-mixin)
+(defclass structure-mixin (composite-mixin)
   ((fields :type     hash-table
 	   :accessor %structure-fields
 	   :documentation
@@ -33,13 +32,16 @@ consist of a collection of named fields."))
                                      (slot-names t)
                                      &key
 				     fields)
+  (check-type fields (or sequence hash-table)
+	      "a plist of names and types, a list of named types or a hash-table.")
+
   (setf (slot-value instance 'fields)
 	(cond
 	  ((or (null fields)
 	       (and (typep fields 'sequence) (emptyp fields)))
 	   (make-hash-table))
 	  ;; plist
-	  ((and (listp fields) (keywordp (first fields)))
+	  ((and (listp fields) (stringp (first fields)))
 	   (plist-hash-table fields))
 	  ;; sequence of named child instances
 	  ((and (typep fields 'sequence)
@@ -50,7 +52,12 @@ consist of a collection of named fields."))
 				  fields)))
 	  ;; hash-table of child instances
 	  ((hash-table-p fields)
-	   fields))))
+	   fields)
+
+	  (t
+	   (error 'type-error
+		  :datum         fields
+		  :expected-type '(or sequence hash-table))))))
 
 (defmethod composite-children ((type structure-mixin))
   "Return the fields of TYPE."
@@ -60,4 +67,4 @@ consist of a collection of named fields."))
 			    (name string))
   "Return the field named NAME in TYPE."
   (or (nth-value 0 (gethash name (%structure-fields type)))
-      (error "No such field: ~S" name)))
+      (error "No such field: ~S" name))) ;;; TODO(jmoringe): condition
