@@ -162,6 +162,18 @@
 			      (:file       "binary-mixin"
 			       :depends-on ("package"))
 			      (:file       "data-holder-mixin"
+			       :depends-on ("package"))))
+
+		(:module     "model"
+		 :pathname   "test/model"
+		 :depends-on ("package")
+		 :components ((:file       "package")))
+
+		(:module     "model-data"
+		 :pathname   "test/model/data"
+		 :depends-on ("package" "model")
+		 :components ((:file       "package")
+			      (:file       "structure-mixin"
 			       :depends-on ("package")))))
 
   :in-order-to ((test-op (load-op :cl-rosetta-test))))
