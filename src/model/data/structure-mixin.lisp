@@ -45,7 +45,7 @@ consist of a collection of named fields."))
 	  ((and (typep fields 'sequence)
 		(not (emptyp fields))
 		(typep (elt fields 0) 'field-mixin))
-	   (alist-hash-table (map 'list #'list
+	   (alist-hash-table (map 'list #'cons
 				  (map 'list #'data-type-name fields)
 				  fields)))
 	  ;; hash-table of child instances
