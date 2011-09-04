@@ -68,14 +68,13 @@ CONTEXT."))
 
 (defclass context ()
   ((target      :initarg  :target
+		:type     standard-object
 		:accessor context-target
-		:initform nil
 		:documentation
 		"The target of the current emission process.")
    (language    :initarg  :language
-		:type     symbol
+		:type     standard-object
 		:accessor context-language
-		:initform nil
 		:documentation
 		"")
    (stack       :initarg  :stack
