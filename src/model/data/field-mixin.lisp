@@ -29,7 +29,9 @@
    :type (missing-required-initarg 'field-mixin :type))
   (:documentation
    "This class is intended to be mixed into data type classes that
-represent fields of structure-like composite data types."))
+represent fields of structure-like composite data types. Note that
+instances of subclasses of this class do not generally represent data
+types."))
 
 (defmethod print-items append ((object field-mixin))
   "Try to enforce a meaningful order of the name and type print
