@@ -26,6 +26,14 @@
 
    :rosetta)
 
+  ;; Conditions
+  (:export
+   :data-type-error
+   :data-type-error-type
+
+   :no-such-child
+   :data-type-error-key)
+
   ;; Data type protocol
   (:export
    :data-type-name

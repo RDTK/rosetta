@@ -66,10 +66,25 @@ tuple/item."))
    "Return a sequence of the child data types of the composite data
 type TYPE. "))
 
-(defgeneric composite-child (type key)
+(defgeneric composite-child (type key
+			     &key
+			     error?)
   (:documentation
    "Retrieve the child identified by KEY of the composite data type
-TYPE."))
+TYPE.
+ERROR? controls whether an error should be signaled if KEY does not
+designate a child within TYPE. If ERROR? is non-nil and the requested
+child does not exist, an error of type `no-such-child' is signaled. If
+ERROR? is nil, nil is returned in that case."))
+
+(defmethod composite-child :around ((type t) (key t)
+				    &key
+				    (error? t))
+  (or (call-next-method)
+      (when error?
+	(error 'no-such-child
+	       :key  key
+	       :type type))))
 
 
 ;;; Field protocol for structure-like data types

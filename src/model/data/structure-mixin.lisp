@@ -39,17 +39,18 @@ consist of a collection of named fields."))
 	(cond
 	  ((or (null fields)
 	       (and (typep fields 'sequence) (emptyp fields)))
-	   (make-hash-table))
+	   (make-hash-table :test #'equal))
 	  ;; plist
 	  ((and (listp fields) (stringp (first fields)))
-	   (plist-hash-table fields))
+	   (plist-hash-table fields  :test #'equal))
 	  ;; sequence of named child instances
 	  ((and (typep fields 'sequence)
 		(not (emptyp fields))
 		(typep (elt fields 0) 'field-mixin))
 	   (alist-hash-table (map 'list #'cons
 				  (map 'list #'data-type-name fields)
-				  fields)))
+				  fields)
+			     :test #'equal))
 	  ;; hash-table of child instances
 	  ((hash-table-p fields)
 	   fields)
@@ -64,7 +65,7 @@ consist of a collection of named fields."))
   (hash-table-values (%structure-fields type)))
 
 (defmethod composite-child ((type structure-mixin)
-			    (name string))
+			    (name string)
+			    &key &allow-other-keys)
   "Return the field named NAME in TYPE."
-  (or (nth-value 0 (gethash name (%structure-fields type)))
-      (error "No such field: ~S" name))) ;;; TODO(jmoringe): condition
+  (nth-value 0 (gethash name (%structure-fields type))))
