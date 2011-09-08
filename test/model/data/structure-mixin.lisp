@@ -20,7 +20,15 @@
 (in-package :rosetta.model.data.test)
 
 (deftestsuite structure-mixin-root (model-data-root)
-  ()
+  ((simple-child (make-instance
+		  'field-mixin
+		  :name "f"
+		  :type 'string))
+   (simple-type))
+  (:setup
+   (setf simple-type (make-instance
+		      'structure-mixin
+		      :fields `("a" ,simple-child))))
   (:documentation
    "Test suite for the `structure-mixin' class."))
 
@@ -52,3 +60,22 @@
 			    (composite-children composite))
 		       expected-children
 		       :test (rcurry #'set-equal :test #'string=))))))
+
+(addtest (structure-mixin-root
+          :documentation
+	  "Test the `composite-child' method specialization
+`structure-mixin'")
+  composite-child
+
+  (ensure-cases (args expected)
+      `((("a")                         ,simple-child)
+	(("a" :error? nil)             ,simple-child)
+	(("no-such-child")             :error)
+	(("no-such-child" :error? nil) nil))
+
+    (if (eq expected :error)
+	(ensure-condition 'no-such-child
+	  (apply #'composite-child simple-type args))
+	(ensure-same (apply #'composite-child simple-type args)
+		     expected
+		     :test #'eq))))
