@@ -23,6 +23,7 @@
    :alexandria
    :lift
 
+   :rosetta
    :rosetta.model.data
 
    :rosetta.test

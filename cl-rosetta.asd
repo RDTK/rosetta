@@ -175,6 +175,8 @@
 		 :pathname   "test/model/data"
 		 :depends-on ("package" "model")
 		 :components ((:file       "package")
+			      (:file       "named-mixin"
+			       :depends-on ("package"))
 			      (:file       "structure-mixin"
 			       :depends-on ("package")))))
 

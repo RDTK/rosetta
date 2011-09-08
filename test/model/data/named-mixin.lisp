@@ -1,4 +1,4 @@
-;;; named-mixin.lisp --- A mixin class for named data type classes.
+;;; named-mixin.lisp --- Unit tests for the named-mixin class.
 ;;
 ;; Copyright (C) 2011 Jan Moringen
 ;;
@@ -17,19 +17,17 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rosetta.model.data)
+(in-package :rosetta.model.data.test)
 
-(defclass named-mixin ()
-  ((name :initarg  :name
-	 :type     string
-	 :reader   data-type-name
-	 :documentation
-	 "Stores the name of the data type."))
-  (:default-initargs
-   :name (missing-required-initarg 'named-mixin :name))
+(deftestsuite named-mixin-root (model-data-root)
+  ()
   (:documentation
-   "This class is intended to be mixed into data type classes
-instances of which represent named data types."))
+   "Test suite for `named-mixin' class."))
 
-(defmethod print-items append ((object named-mixin))
-  (list (list :name (data-type-name object) "~S")))
+(addtest (named-mixin-root
+          :documentation
+	  "Test constructing `named-mixin' instances.")
+  construction
+
+  (ensure-condition 'missing-required-initarg
+    (make-instance 'named-mixin)))
