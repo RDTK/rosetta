@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocol of the compiler backend.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -68,13 +68,15 @@ CONTEXT."))
 
 (defclass context ()
   ((target      :initarg  :target
-		:type     standard-object
+		;; :type     standard-object
 		:accessor context-target
+		:initform nil ;;; TODO(jmoringe): type and default value?
 		:documentation
-		"The target of the current emission process.")
+		"Stores the target of the current emission process.")
    (language    :initarg  :language
-		:type     standard-object
+		;; :type     standard-object
 		:accessor context-language
+		:initform nil ;;; TODO(jmoringe): type and default value?
 		:documentation
 		"")
    (stack       :initarg  :stack
