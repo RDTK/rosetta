@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the serialization module.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rosetta.serialization.test
+(cl:defpackage :rosetta.serialization.test
   (:use
    :cl
    :alexandria
@@ -34,7 +32,7 @@
   (:documentation
    "This package contains unit tests for the serialization module"))
 
-(in-package :rosetta.serialization.test)
+(cl:in-package :rosetta.serialization.test)
 
 (deftestsuite serialization-root (root)
   ()

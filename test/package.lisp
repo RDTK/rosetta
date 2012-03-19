@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the cl-rosetta system.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,9 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :cl-user)
-
-(defpackage :rosetta.test
+(cl:defpackage :rosetta.test
   (:use
    :cl
    :lift)
@@ -30,7 +28,7 @@
   (:documentation
    "This package contains unit tests for the cl-rosetta system"))
 
-(in-package :rosetta.test)
+(cl:in-package :rosetta.test)
 
 (deftestsuite root ()
   ()

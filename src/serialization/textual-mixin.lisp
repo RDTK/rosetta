@@ -1,6 +1,6 @@
 ;;; textual-mixin.lisp --- Mixin class for textual mechanism classes.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rosetta.serialization)
+(cl:in-package :rosetta.serialization)
 
 (defclass textual-mixin ()
   ()
@@ -59,7 +59,6 @@ represent textual serialization mechanisms."))
 		   &rest args
 		   &key)
   "Unpack contents of SOURCE into DESTINATION."
-  
   (let ((string (read-stream-content-into-string source)))
     (apply #'unpack mechanism string destination args)))
 

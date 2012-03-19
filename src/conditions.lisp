@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Basic conditions used in cl-rosetta.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rosetta)
+(cl:in-package :rosetta)
 
 
 ;;; Program error conditions
