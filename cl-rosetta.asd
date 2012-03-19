@@ -1,6 +1,6 @@
-;;; cl-rosetta.asd ---
+;;; cl-rosetta.asd --- System definition for the cl-rosetta system.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,12 +17,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(defpackage :cl-rosetta-system
+(cl:defpackage :cl-rosetta-system
   (:use
    :cl
-   :asdf))
+   :asdf)
 
-(in-package :cl-rosetta-system)
+  (:export
+   :version/list
+   :version/string))
+
+(cl:in-package :cl-rosetta-system)
 
 
 ;;; Version stuff
@@ -37,13 +41,13 @@
 (defconstant +version-revision+ 0
   "Revision component of version number.")
 
-(defun version ()
+(defun version/list ()
   "Return a version of the form (MAJOR MINOR REVISION) "
   (list +version-major+ +version-minor+ +version-revision+))
 
 (defun version/string ()
   "Return a version string of the form \"MAJOR.MINOR.REVISION\"."
-  (format nil "~{~A.~A.~A~}" (version)))
+  (format nil "~{~A.~A.~A~}" (version/list)))
 
 
 ;;; System definitions
@@ -58,6 +62,7 @@
   :depends-on  (:alexandria
 		:split-sequence
 		:flexi-streams
+
 		:cl-protobuf
 		:yacc
 		:cl-dynamic-classes)
@@ -178,9 +183,7 @@
 			      (:file       "named-mixin"
 			       :depends-on ("package"))
 			      (:file       "structure-mixin"
-			       :depends-on ("package")))))
-
-  :in-order-to ((test-op (load-op :cl-rosetta-test))))
+			       :depends-on ("package"))))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :cl-rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
