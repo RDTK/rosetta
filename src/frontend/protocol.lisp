@@ -40,28 +40,43 @@ designated by THING."
   (documentation (find-format-class thing) t))
 
 
+;;; Builder
+;;
+
+(intern "BUILDER")
+
+
+
+
 ;;; Parse protocol
 ;;
 
-(defgeneric parse (format source
-		   &key)
+(defgeneric parse (format source builder
+		   &key
+		   dependency-handler)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
 described by FORMAT. Return an object that represents the parsed
-content."))
+content.
+
+DEPENDENCY-HANDLER has to be a function of single argument that
+accepts a source and loads the content of the resource designated by
+the source. If this fails for some reason, the supplied function
+should signal an error of a subtype of `dependency-error' such as
+`cannot-resolve-dependency'."))
 
 
 ;;; Format class lookup
 ;;
 
-(defmethod parse ((format list) (source t)
-		  &key)
-  (bind (((format-name &rest format-args) format)
+(defmethod parse ((format list) (source t) (builder t)
+		  &rest args &key &allow-other-keys)
+  (let+ (((format-name &rest format-args) format)
 	 (format-class    (find-format-class format-name))
 	 (format-instance (apply #'make-instance
 				 format-class format-args)))
-    (parse format-instance source)))
+    (apply #'parse format-instance source builder args)))
 
-(defmethod parse ((format symbol) (source t)
-		  &key)
-  (parse (list format) source))
+(defmethod parse ((format symbol) (source t) (builder t)
+		  &rest args &key &allow-other-keys)
+  (apply #'parse (list format) source builder args))

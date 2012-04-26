@@ -25,16 +25,20 @@
    "This class is intended to be mixed into format classes that
 operate on textual input data."))
 
-(defmethod parse ((format text-format-mixin) (source pathname)
-		  &key)
+(defmethod parse ((format  text-format-mixin)
+		  (source  pathname)
+		  (builder t)
+		  &rest args &key &allow-other-keys)
   "Open a character input stream for the file designated by SOURCE and
 call a method specialized on streams."
   (with-input-from-file (stream source)
-    (parse format stream)))
+    (apply #'parse format stream builder args)))
 
-(defmethod parse ((format text-format-mixin) (source string)
-		  &key)
+(defmethod parse ((format  text-format-mixin)
+		  (source  string)
+		  (builder t)
+		  &rest args &key &allow-other-keys)
   "Create an input stream for the content of SOURCE and call a method
 specialized on streams."
   (with-input-from-string (stream source)
-    (parse format stream)))
+    (apply #'parse format stream builder args)))
