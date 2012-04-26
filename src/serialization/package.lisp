@@ -24,8 +24,12 @@
   (:use
    :cl
    :alexandria
-   :metabang-bind
-   :iterate)
+   :let-plus
+   :iterate
+
+   :nibbles
+
+   :rosetta.model.serialization)
 
   ;; Conditions
   (:export
@@ -49,12 +53,6 @@
   (:export
    :location
    :extract)
-
-  ;; Mechanism class family
-  (:export
-   :no-such-mechanism-class
-   :find-mechanism-class
-   :mechanism-classes)
 
   ;; `textual-mixin' mixin class
   (:export

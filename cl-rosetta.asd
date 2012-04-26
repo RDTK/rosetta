@@ -61,35 +61,21 @@
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
 		:split-sequence
+		:let-plus
+		:more-conditions
+		:cl-dynamic-classes
+
+		:nibbles
 		:flexi-streams
 
 		:cl-protobuf
-		:yacc
-		:cl-dynamic-classes)
+		:yacc)
   :components  ((:module     "src"
 		 :components ((:file       "package")
 			      (:file       "conditions"
 			       :depends-on ("package"))
 			      (:file       "print-items"
 			       :depends-on ("package"))))
-
-		(:module     "serialization"
-		 :pathname   "src/serialization"
-		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package"))
-
-			      (:file       "textual-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "textual-stream-mixin"
-			       :depends-on ("package" "protocol"
-					    "textual-mixin"))
-			      (:file       "binary-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "data-holder-mixin"
-			       :depends-on ("package" "protocol"))))
 
 		(:module     "model-data"
 		 :pathname   "src/model/data"
@@ -110,6 +96,32 @@
 			      (:file       "structure-mixin"
 			       :depends-on ("package" "protocol"
 					    "composite-mixin" "field-mixin"))))
+
+		(:module     "model-serialization"
+		 :pathname   "src/model/serialization"
+		 :depends-on ("src" "model-data")
+		 :serial     t
+		 :components ((:file       "package")
+			      (:file       "protocol")))
+
+		(:module     "serialization"
+		 :pathname   "src/serialization"
+		 :depends-on ("src" "model-serialization")
+		 :components ((:file       "package")
+			      (:file       "conditions"
+			       :depends-on ("package"))
+			      (:file       "protocol"
+			       :depends-on ("package"))
+
+			      (:file       "textual-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "textual-stream-mixin"
+			       :depends-on ("package" "protocol"
+					    "textual-mixin"))
+			      (:file       "binary-mixin"
+			       :depends-on ("package" "protocol"))
+			      (:file       "data-holder-mixin"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"

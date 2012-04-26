@@ -27,6 +27,8 @@
 
    :rosetta.serialization
 
+   :rosetta.model.serialization
+
    :rosetta.test)
 
   (:documentation

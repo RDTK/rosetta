@@ -39,7 +39,7 @@ represent textual serialization mechanisms."))
 		 &rest args
 		 &key)
   "Write packing result to stream DESTINATION."
-  (bind (((:values size result)
+  (let+ (((&values size result)
 	  (apply #'pack mechanism source 'string args)))
     (write-string result destination)
     (values size destination)))

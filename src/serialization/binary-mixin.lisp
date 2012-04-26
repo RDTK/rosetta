@@ -25,9 +25,12 @@
    "This class is intended to be mixed into mechanism classes that
 represent binary serialization mechanisms."))
 
+(defmethod wire-type ((mechanism binary-mixin))
+  (make-instance 'rs.m.d::type-octet-vector))
+
 (defmethod pack ((mechanism   binary-mixin)
 		 (source      t)
-		 (destination (eql 'binio:octet-vector))
+		 (destination (eql 'octet-vector))
 		 &rest args
 		 &key
 		 (start 0))
@@ -35,7 +38,7 @@ represent binary serialization mechanisms."))
 created as destination. Use `packed-size' to determine the required
 size and create such an octet-vector."
   (let ((size (+ start (packed-size mechanism source))))
-    (apply #'pack mechanism source (binio:make-octet-vector size) args)))
+    (apply #'pack mechanism source (make-octet-vector size) args)))
 
 (defmethod pack ((mechanism   binary-mixin)
 		 (source      t)
@@ -43,7 +46,7 @@ size and create such an octet-vector."
 		 &rest args
 		 &key)
   "Map nil DESTINATION to octet-vector."
-  (apply #'pack mechanism source 'binio:octet-vector args))
+  (apply #'pack mechanism source 'octet-vector args))
 
 (defmethod pack ((mechanism   binary-mixin)
 		 (source      t)
@@ -51,8 +54,8 @@ size and create such an octet-vector."
 		 &rest args
 		 &key)
   "Write packing result to stream DESTINATION."
-  (bind (((:values size result)
-	  (apply #'pack mechanism source 'binio:octet-vector args)))
+  (let+ (((&values size result)
+	  (apply #'pack mechanism source 'octet-vector args)))
     (write-sequence result destination)
     (values size destination)))
 
@@ -119,20 +122,19 @@ seek to START, then ~(~A~)." name)
   "Read content from STREAM into a buffer taking into account START
 and END."
   ;; Advance STREAM to START position, if necessary.
-  (unless (zerop start)
-    (iter (repeat start) (read-byte stream)))
+  (iter (repeat start) (read-byte stream))
 
   ;; Read stream content into a buffer.
-  (bind (((:flet read-whole-stream ())
-	  (let ((buffer (make-array 0
-				    :element-type '(unsigned-byte 8)
-				    :fill-pointer 0)))
-	    (iter (for c in-stream stream :using #'read-byte)
-		  (vector-push-extend c buffer))
-	    (coerce buffer '(simple-array (unsigned-byte 8) (*)))))
-	 ((:flet read-range ())
-	  (let ((buffer (make-array (- end start)
-				    :element-type '(unsigned-byte 8))))
-	    (read-sequence buffer stream)
-	    buffer)))
+  (let+ (((&flet read-whole-stream ()
+	    (let ((buffer (make-array 0
+				      :element-type '(unsigned-byte 8)
+				      :fill-pointer 0)))
+	      (iter (for c in-stream stream :using #'read-byte)
+		    (vector-push-extend c buffer))
+	      (coerce buffer '(simple-array (unsigned-byte 8) (*))))))
+	 ((&flet read-range ()
+	    (let ((buffer (make-array (- end start)
+				      :element-type '(unsigned-byte 8))))
+	      (read-sequence buffer stream)
+	      buffer))))
     (if end (read-range) (read-whole-stream))))

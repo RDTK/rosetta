@@ -20,24 +20,6 @@
 (cl:in-package :rosetta.serialization)
 
 
-;;; Mechanisms
-;;
-
-(intern "MECHANISM") ;; for (documentation :MECHANISM 'rosetta.backend:mechanism)
-
-(dynamic-classes:define-findable-class-family mechanism
-    "This family consists of serialization mechanism classes. Each
-serialization mechanism class represents a serialization mechanism
-with respect to its principal properties. Instances may in addition
-store specific parameters of a serialization mechanism \(like
-indentation of output for an XML-based mechanism).")
-
-(defmethod documentation ((thing symbol) (type (eql 'mechanism)))
-  "Obtain documentation of type TARGET from the target class
-designated by THING."
-  (documentation (find-mechanism-class thing) t))
-
-
 ;;; Serialization and deserialization protocol
 ;;
 
@@ -103,7 +85,7 @@ of the PART of SCHEMA occurs."))
 	 `(progn
 	    (defmethod ,method ((mechanism list) ,@args/typed
 				&rest rest-args &key)
-	      (bind (((mechanism-name &rest mechanism-args) mechanism)
+	      (let+ (((mechanism-name &rest mechanism-args) mechanism)
 		     (mechanism-class    (find-mechanism-class mechanism-name))
 		     (mechanism-instance
 		      (apply #'make-instance mechanism-class mechanism-args)))
