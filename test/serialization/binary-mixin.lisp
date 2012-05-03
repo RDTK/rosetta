@@ -79,7 +79,7 @@
 	;; (5    1   1 ,(octetify "05"))
 	)
 
-    (bind (((:values size destination)
+    (let+ (((&values size destination)
 	    (if start
 		(pack simple-mechanism source nil :start start)
 		(pack simple-mechanism source nil))))
@@ -100,8 +100,8 @@
 	;; (5    1   1 ,(octetify "05"))
 	)
 
-    (bind ((stream (make-in-memory-output-stream))
-	   ((:values size destination)
+    (let+ ((stream (make-in-memory-output-stream))
+	   ((&values size destination)
 	    (if start
 		(pack simple-mechanism source stream :start start)
 		(pack simple-mechanism source stream)))
@@ -123,7 +123,7 @@
 	;; (:foo 1   #P"/tmp/foo.bin" 4 ,(octetify "0:FOO"))
 	)
 
-    (bind (((:values size destination)
+    (let+ (((&values size destination)
 	    (if start
 		(pack simple-mechanism source pathname :start start)
 		(pack simple-mechanism source pathname)))
@@ -146,7 +146,7 @@
 	(,(octetify "_5")    1   5    1))
 
     (with-input-from-sequence (stream source)
-      (bind (((:values output size)
+      (let+ (((&values output size)
 	      (if start
 		  (unpack simple-mechanism stream :unused :start start)
 		  (unpack simple-mechanism stream :unused))))
@@ -167,7 +167,7 @@
 	(,(octetify "_5")    #P"/tmp/foo"     1   5    1))
 
     (write-byte-vector-into-file input pathname :if-exists :supersede)
-    (bind (((:values output size)
+    (let+ (((&values output size)
 	    (if start
 		(unpack simple-mechanism pathname :unused :start start)
 		(unpack simple-mechanism pathname :unused))))

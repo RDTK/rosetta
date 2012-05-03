@@ -1,6 +1,6 @@
-;;; bind.lisp --- Binding forms for things in the emit context.
+;;; let-plus.lisp --- Binding forms for things in the emit context.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -19,38 +19,44 @@
 
 (cl:in-package :rosetta.backend)
 
-(bind::defbinding-form (:env
-			:docstring
-			"Store in context generated unique names and
-other things in the environment of the current `emit'
-context. Bindings can be of the form VARIABLE in which case a `gensym'
-will be stored and assigned, or of the form (VARIABLE VALUE) in which
-case VALUE will be stored and assigned."
-			:accept-multiple-forms-p nil)
-  (multiple-value-bind (bindings body)
-      (iter (for name in bind::variables)
+(define-let+-expansion (&env args
+			:value-var context
+			:body-var  body)
+  (multiple-value-bind (bindings setters cleanup)
+      (iter (for name in args)
 	    ;; Split the variable into the name and optional value
 	    ;; parts.
-	    (bind (((name &optional (value :gensym)) (ensure-list name)))
+	    (let+ (((name &optional (value :gensym)) (ensure-list name))
+		   ((&with-gensyms old)))
 	      ;; Collect a binding.
 	      (collect `(,name ,(case value
 				      (:gensym `(gensym ,(string name)))
 				      (t       value)))
 		:into bindings)
+	      (collect `(,old (context-get ,context ,(make-keyword name)))
+		:into bindings)
 	      ;; Collect a form to store the value in the `emit'
 	      ;; context.
 	      (collect
-		  `(setf (context-get ,values ',(make-keyword name)) ,name)
-		:into body))
-	    (finally (return (values bindings body))))
+		  `(setf (context-get ,context ,(make-keyword name)) ,name)
+		:into setters)
+	      (collect `(setf (context-get ,context ,(make-keyword name)) ,old)
+		:into cleanup))
+	    (finally (return (values bindings setters cleanup))))
     `(let* ,bindings
-       ,@body)))
+       ,@setters
+       (unwind-protect
+	    ,@body
+	 ,@cleanup))))
 
-(bind::defbinding-form (:env-r/o
-			:docstring
-			"For all binding variables, retrieve values
-from `emit' context and bind to the variables."
-			:accept-multiple-forms-p nil)
-  `(let ,(iter (for name in bind::variables)
-	       (collect `(,name (context-get ,values ',(make-keyword name)
-					     :default :error))))))
+(define-let+-expansion (&env-r/o args
+			:value-var context
+			:body-var  body)
+  `(let* ,(iter (for name in args)
+		(let+ (((name &optional (item-name name) (default :error))
+			(ensure-list name))
+		       (key (make-keyword item-name)))
+		  (collect
+		      `(,name (context-get ,context ,key
+					   :default ,default)))))
+     ,@body))

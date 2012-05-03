@@ -27,11 +27,11 @@
   "Establish restarts."
   (with-unique-names (result-var read-value-var)
     (once-only (node target)
-      `(bind ((,result-var)
-	      ((:flet ,read-value-var ())
-	       (format *query-io* "Replacement value: ")
-	       (force-output *query-io*)
-	       (list (read *query-io*))))
+      `(let+ ((,result-var)
+	      ((&flet ,read-value-var ()
+		 (format *query-io* "Replacement value: ")
+		 (force-output *query-io*)
+		 (list (read *query-io*)))))
 	 (tagbody
 	  :retry
 	    (restart-case

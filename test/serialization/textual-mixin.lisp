@@ -64,7 +64,7 @@
 	       '((:foo 4 ":FOO")
 		 (5    1 "5"))
 
-	     (bind (((:values size destination)
+	     (let+ (((&values size destination)
 		     (pack simple-mechanism source nil)))
 	       (when size
 		 (ensure-same size expected-size :test #'=))
@@ -79,8 +79,8 @@
 	       '((:foo 4 ":FOO")
 		 (5    1 "5"))
 
-	     (bind ((stream (make-string-output-stream))
-		    ((:values size destination)
+	     (let+ ((stream (make-string-output-stream))
+		    ((&values size destination)
 		     (pack simple-mechanism source stream))
 		    (output (get-output-stream-string stream)))
 	       (ensure-same destination stream :test #'eq)
@@ -98,7 +98,7 @@
 		 (:foo #P"/tmp/foo.txt" 4 ":FOO") ;; requires superseding the file
 		 (5    #P"/tmp/foo"     1 "5"))   ;; no file type
 
-	     (bind (((:values size destination)
+	     (let+ (((&values size destination)
 		     (pack simple-mechanism source pathname))
 		    (output (read-file-into-string pathname)))
 	       (ensure-same destination pathname :test #'eq)
@@ -116,7 +116,7 @@
 		 ("5"    5    1))
 
 	     (with-input-from-string (stream source)
-	       (bind (((:values output size)
+	       (let+ (((&values output size)
 		       (unpack simple-mechanism stream :unused)))
 		 (ensure-same output expected-output :test #'equalp)
 		 (when size
@@ -132,7 +132,7 @@
 		 ("5"    #P"/tmp/foo"     5    1))
 
 	     (write-string-into-file input pathname :if-exists :supersede)
-	     (bind (((:values output size)
+	     (let+ (((&values output size)
 		     (unpack simple-mechanism pathname :unused)))
 	       (ensure-same output expected-output :test #'equalp)
 	       (when size

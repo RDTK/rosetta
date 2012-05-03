@@ -142,7 +142,7 @@
 			      (:file       "protocol"
 			       :depends-on ("package" "variables"
 					    "macros"))
-			      (:file       "bind"
+			      (:file       "let-plus"
 			       :depends-on ("package" "protocol"))
 
 			      (:file       "code-generating-target-mixin"

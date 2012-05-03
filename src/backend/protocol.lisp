@@ -122,7 +122,7 @@ state of a particular emission process. This state consists of:
   (setf (gethash key (first (%context-environment context))) new-value))
 
 (defmethod print-object ((object context) stream)
-  (bind (((:accessors-r/o (target   context-target)
+  (let+ (((&accessors-r/o (target   context-target)
 			  (language context-language)
 			  (stack    context-stack)
 			  (package  context-package)) object))
@@ -158,7 +158,7 @@ state of a particular emission process. This state consists of:
 
 (defmethod emit ((node t) (target list) (language t)
 		 &key)
-  (bind (((target-name &rest target-args) target)
+  (let+ (((target-name &rest target-args) target)
 	 (target-class    (find-target-class target-name))
 	 (target-instance (apply #'make-instance
 				 target-class target-args)))
@@ -174,7 +174,7 @@ state of a particular emission process. This state consists of:
 
 (defmethod emit ((node t) (target t) (language list)
 		 &key)
-  (bind (((language-name &rest language-args) language)
+  (let+ (((language-name &rest language-args) language)
 	 (language-class    (find-language-class language-name))
 	 (language-instance (apply #'make-instance
 				 language-class language-args)))
