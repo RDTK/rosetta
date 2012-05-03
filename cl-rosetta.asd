@@ -101,6 +101,19 @@
 		 :components ((:file       "package")
 			      (:file       "protocol")))
 
+		(:module     "model-language"
+		 :pathname   "src/model/language"
+		 :depends-on ("src")
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))
+			      (:file       "abstract"
+			       :depends-on ("package" "protocol"))
+			      (:file       "lisp"
+			       :depends-on ("package" "protocol"))
+			      (:file       "c++"
+			       :depends-on ("package" "protocol"))))
+
 		(:module     "serialization"
 		 :pathname   "src/serialization"
 		 :depends-on ("src" "model-serialization")
@@ -133,7 +146,7 @@
 
 		(:module     "backend"
 		 :pathname   "src/backend"
-		 :depends-on ("serialization" "model-data")
+		 :depends-on ("serialization" "model-data" "model-language")
 		 :components ((:file       "package")
 			      (:file       "variables"
 			       :depends-on ("package"))

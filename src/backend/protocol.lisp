@@ -36,22 +36,6 @@ designated by THING."
   (documentation (find-target-class thing) t))
 
 
-;;; Languages
-;;
-
-(intern "LANGUAGE") ;; for (documentation :LANGUAGE 'rosetta.backend:language)
-
-(dynamic-classes:define-findable-class-family language
-    "This family consists of language classes. Each language class is
-used to control the output language when emitting things based on an
-abstract description in form of model component instances.")
-
-(defmethod documentation ((thing symbol) (type (eql 'language)))
-  "Obtain documentation of type LANGUAGE from the language class
-designated by THING."
-  (documentation (find-language-class thing) t))
-
-
 ;;; Backend Context
 ;;
 
@@ -175,7 +159,7 @@ state of a particular emission process. This state consists of:
 (defmethod emit ((node t) (target t) (language list)
 		 &key)
   (let+ (((language-name &rest language-args) language)
-	 (language-class    (find-language-class language-name))
+	 (language-class    (rs.m.l::find-language-class language-name))
 	 (language-instance (apply #'make-instance
 				 language-class language-args)))
     (emit node target language-instance)))
