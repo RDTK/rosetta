@@ -74,9 +74,9 @@ a condition object."))
 	 (rs.m.d:composite-children type)))
 
 (defmethod validate-type ((mechanism t)
-			  (type      rs.m.d:field-mixin)
+			  (type      rs.m.d::typed-mixin)
 			  &key &allow-other-keys)
-  (validate-type mechanism (rs.m.d:field-type type)))
+  (validate-type mechanism (rs.m.d:type1 type)))
 
 
 ;;; Mechanisms

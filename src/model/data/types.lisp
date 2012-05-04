@@ -1,6 +1,6 @@
-;;; composite-mixin.lisp --- Mixin class for composite data type classes.
+;;; types.lisp --- Types used in the model.data module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -19,11 +19,29 @@
 
 (cl:in-package :rosetta.model.data)
 
-(defclass composite-mixin ()
-  ()
-  (:documentation
-   "This class is intended to be mixed into classes that represent
-composite data types."))
+
+;;; Naming-related types
+;;
 
-(defmethod print-items append ((object composite-mixin))
-  (list (list :num-items (length (composite-children object)) "(~D)")))
+(deftype name-component ()
+  'string)
+
+(deftype name-components ()
+  '(and list (satisfies %every-name-component)))
+
+(deftype name/absolute ()
+  '(cons (eql :absolute) (or null name-components)))
+
+(deftype name/relative ()
+  '(cons (eql :relative) name-components))
+
+(deftype name ()
+  '(or name/absolute name/relative))
+
+
+;;; Utility functions
+;;
+
+(defun %every-name-component (list)
+  "TODO(jmoringe): document"
+  (every (of-type 'name-component) list))

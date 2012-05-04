@@ -23,25 +23,20 @@
 ;;; Data type protocol
 ;;
 
-(defgeneric data-type-name (type)
+(defgeneric name (thing)
   (:documentation
-   "Return the name of the data-type TYPE."))
+   "Return the name of THING."))
 
-(defgeneric data-type-documentation (type)
+(defgeneric documentation1 (thing)
   (:documentation
-   "Return the documentation string associated to the data type
-TYPE."))
-
-
-;;; Default behavior
-;;
+   "Return the documentation string associated to THING."))
 
 (intern "DATA-TYPE")
 
 (defmethod documentation ((thing t) (type (eql 'data-type)))
   "Return documentation for data type THING when asked for
 documentation of type 'data-type."
-  (data-type-documentation thing))
+  (documentation1 thing))
 
 
 ;;; Composite data type protocol

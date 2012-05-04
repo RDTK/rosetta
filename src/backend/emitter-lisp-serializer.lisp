@@ -23,7 +23,7 @@
 ;;; Serialization code for fundamental types
 ;;
 
-(defmethod emit ((node     fundamental-type-mixin)
+(defmethod emit ((node     rs.m.d::fundamental-type-mixin)
 		 (target   target-pack)
 		 (language language-lisp)
 		 &key)
@@ -34,7 +34,7 @@
        (setf (,packer ,destination-var ,offset-var) ,source-var)
        ,(emit node :packed-size language))))
 
-(defmethod emit ((node     fundamental-type-mixin)
+(defmethod emit ((node     rs.m.d::fundamental-type-mixin)
 		 (target   target-unpack)
 		 (language language-lisp)
 		 &key)
@@ -47,7 +47,7 @@
 ;;; Serialization-related methods
 ;;
 
-(defmethod emit ((node     toplevel-mixin)
+(defmethod emit ((node     rs.m.d::toplevel-mixin)
 		 (target   target-packed-size/method)
 		 (language language-lisp)
 		 &key)
@@ -58,7 +58,7 @@
 			     &key)
        ,(call-next-method))))
 
-(defmethod emit ((node     toplevel-mixin)
+(defmethod emit ((node     rs.m.d::toplevel-mixin)
 		 (target   target-pack/method)
 		 (language language-lisp)
 		 &key)
@@ -74,7 +74,7 @@
 
        ,(call-next-method))))
 
-(defmethod emit ((node     toplevel-mixin)
+(defmethod emit ((node     rs.m.d::toplevel-mixin)
 		 (target   target-unpack/method)
 		 (language language-lisp)
 		 &key)

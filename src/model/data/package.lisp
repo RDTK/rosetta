@@ -24,6 +24,7 @@
   (:use
    :cl
    :alexandria
+   :iterate
    :let-plus
 
    :rosetta)

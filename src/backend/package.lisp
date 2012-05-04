@@ -26,7 +26,11 @@
    :alexandria
    :split-sequence
    :let-plus
-   :iterate)
+   :iterate
+
+   :rosetta.model.data
+
+   :rosetta.model.language)
 
   ;; Conditions
   (:export)

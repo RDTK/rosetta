@@ -181,7 +181,7 @@
 ;;; Array types
 ;;
 
-(defmethod emit ((node     array-mixin)
+(defmethod emit ((node     rs.m.d::array-mixin)
 		 (target   target-packed-size)
 		 (language t)
 		 &key)
@@ -195,7 +195,7 @@
 	    (* ,(emit element-type target language)
 	       (length ,source-var))))))
 
-(defmethod emit ((node     array-mixin)
+(defmethod emit ((node     rs.m.d::array-mixin)
 		 (target   target-pack)
 		 (language t)
 		 &key)
@@ -217,7 +217,7 @@
 			       (offset-var `(+ ,offset-var (* ,element-size ,i))))))
 		   (emit element-type target language))))))))
 
-(defmethod emit ((node     array-mixin)
+(defmethod emit ((node     rs.m.d::array-mixin)
 		 (target   target-unpack)
 		 (language t)
 		 &key)
@@ -249,7 +249,7 @@
 
 (macrolet
     ((define-toplevel-method (target)
-       `(defmethod emit :around ((node     toplevel-mixin)
+       `(defmethod emit :around ((node     rs.m.d::toplevel-mixin)
 				 (target   ,target)
 				 (language t)
 				 &key)

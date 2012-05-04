@@ -1,6 +1,6 @@
-;;; named-mixin.lisp --- A mixin class for named data type classes.
+;;; type-array.lisp ---
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -19,17 +19,12 @@
 
 (cl:in-package :rosetta.model.data)
 
-(defclass named-mixin ()
-  ((name :initarg  :name
-	 :type     string
-	 :reader   data-type-name
-	 :documentation
-	 "Stores the name of the data type."))
-  (:default-initargs
-   :name (missing-required-initarg 'named-mixin :name))
-  (:documentation
-   "This class is intended to be mixed into data type classes
-instances of which represent named data types."))
+
+;;; Class `base-array'
+;;
 
-(defmethod print-items append ((object named-mixin))
-  (list (list :name (data-type-name object) "~S")))
+(defclass base-array (array-mixin
+		      print-items-mixin)
+  ()
+  (:documentation
+   "TODO(jmoringe): document"))

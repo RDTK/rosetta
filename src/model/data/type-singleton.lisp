@@ -1,4 +1,4 @@
-;;; data-type-singleton.lisp --- Singleton data type.
+;;; type-singleton.lisp --- Singleton data type.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -19,18 +19,14 @@
 
 (cl:in-package :rosetta.model.data)
 
-;;; TODO(jmoringe, 2012-05-03): mixin
-(defclass singleton (print-items-mixin)
-  ((type  :initarg  :type
-	  :reader   type1
-	  :documentation
-	  "Stores type the type of the singleton value.")
-   (value :initarg  :value
+;;; TODO(jmoringe, 2012-05-03): mixin?
+(defclass singleton (typed-mixin
+		     print-items-mixin)
+  ((value :initarg  :value
 	  :reader   value
 	  :documentation
 	  "Stores the singleton value."))
   (:default-initargs
-   :type  (missing-required-initarg 'singleton :type)
    :value (missing-required-initarg 'singleton :value))
   (:documentation
    "Instances of this type class represent types the extension of
@@ -46,5 +42,4 @@ which consist of singleton values."))
 		 :expected-type type))))
 
 (defmethod print-items append ((type singleton))
-  (list (list :value (value type))
-	(list :type  (data-type-name (type1 type)) " : ~A")))
+  (list (list :value (value type))))

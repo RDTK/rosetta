@@ -74,31 +74,32 @@
 			      (:file       "print-items"
 			       :depends-on ("package"))))
 
-		(:module     "model-data"
+		(:module     "model-data-early"
 		 :pathname   "src/model/data"
 		 :depends-on ("src")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package"))
+			      (:file       "types")
+			      (:file       "conditions")
+			      (:file       "protocol")))
 
-			      (:file       "named-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "composite-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "field-mixin"
-			       :depends-on ("package" "protocol"
-					    "named-mixin"))
-			      (:file       "structure-mixin"
-			       :depends-on ("package" "protocol"
-					    "composite-mixin" "field-mixin"))
+		(:module     "model-data"
+		 :pathname   "src/model/data"
+		 :depends-on ("src" "model-data-early")
+		 :serial     t
+		 :components ((:file       "mixins")
 
-			      (:file       "data-type-singleton"
-			       :depends-on ("package" "protocol"))
+			      (:file       "forward-reference")
+			      (:file       "repository")
+			      (:file       "package1")
 
-			      (:file       "mapping"
-			       :depends-on ("package" "protocol"))))
+			      (:file       "type-singleton")
+			      (:file       "type-fundamental")
+			      (:file       "type-enum")
+			      (:file       "type-structure")
+			      (:file       "type-array")
+
+			      (:file       "mapping")))
 
 		(:module     "model-serialization"
 		 :pathname   "src/model/serialization"
@@ -168,7 +169,6 @@
 			      (:file       "targets")
 
 			      (:file       "emitter-serializer")
-			      (:file       "emitter-serializer-methods")
 
 			      (:file       "emitter-lisp")
 			      (:file       "emitter-lisp-serializer"))))
