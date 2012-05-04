@@ -57,9 +57,8 @@ ITEM   ::= (KEY VALUE [FORMAT])
 KEY    ::= any Lisp object
 VALUE  ::= any Lisp object
 FORMAT ::= a format string (Default is \"~A\")"
-  (map 'nil (lambda (item)
-	      (bind (((_ value &optional format) item))
-		(format stream (or format "~A") value)))
-       (remove-duplicates items
-			  :key      #'first
-			  :from-end t)))
+  (mapc (lambda+ ((nil value &optional format))
+	  (format stream (or format "~A") value))
+	(remove-duplicates items
+			   :key      #'first
+			   :from-end t)))

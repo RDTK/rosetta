@@ -20,7 +20,7 @@
 (cl:defpackage :rosetta
   (:use
    :cl
-   :metabang-bind)
+   :let-plus)
 
   ;; Conditions
   (:export
