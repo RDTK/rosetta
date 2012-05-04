@@ -56,11 +56,18 @@ a condition object."))
 	(null
 	 nil)
 	(function
-	 (funcall if-invalid
-		  (make-condition
-		   'simple-error
-		   :format-control   "~@<Type ~A is invalid for mechanism ~A.~@:>"
-		   :format-arguments (list type mechanism)))))))
+	 (restart-case
+	     (funcall if-invalid
+		      (make-condition
+		       'simple-error
+		       :format-control   "~@<Type ~A is invalid for ~
+mechanism ~A.~@:>"
+		       :format-arguments (list type mechanism)))
+	   (continue ()
+	     :report (lambda (stream)
+		       (format stream "~@<Ignore the incompatibility ~
+and try to continue.~@:>"))
+	     t))))))
 
 (defmethod validate-type ((mechanism t)
 			  (type      t)
