@@ -24,6 +24,7 @@
   (:use
    :cl
    :alexandria
+   :let-plus
 
    :rosetta)
 
@@ -53,6 +54,11 @@
    :field-type
    :field-optional?)
 
+  ;; Singleton protocol
+  (:export
+   :type1
+   :value)
+
   ;; `named-mixin' mixin class
   (:export
    :named-mixin)
@@ -68,6 +74,10 @@
   ;; `structure-mixin' mixin class
   (:export
    :structure-mixin)
+
+  ;; `singleton' data type class
+  (:export
+   :singleton)
 
   (:documentation
    "This package contains protocols and classes which can be used to

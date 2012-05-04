@@ -92,7 +92,10 @@
 					    "named-mixin"))
 			      (:file       "structure-mixin"
 			       :depends-on ("package" "protocol"
-					    "composite-mixin" "field-mixin"))))
+					    "composite-mixin" "field-mixin"))
+
+			      (:file       "data-type-singleton"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "model-serialization"
 		 :pathname   "src/model/serialization"
