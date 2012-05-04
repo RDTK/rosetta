@@ -150,26 +150,28 @@
 			      (:file       "binary-format-mixin"
 			       :depends-on ("package" "protocol"))))
 
+		(:module     "backend-early"
+		 :pathname   "src/backend"
+		 :depends-on ("model-data" "model-language" "model-serialization"
+			      "serialization")
+		 :serial     t
+		 :components ((:file       "package")
+			      (:file       "variables")
+			      (:file       "macros")
+			      (:file       "protocol")))
+
 		(:module     "backend"
 		 :pathname   "src/backend"
-		 :depends-on ("serialization" "model-data" "model-language")
-		 :components ((:file       "package")
-			      (:file       "variables"
-			       :depends-on ("package"))
-			      (:file       "macros"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package" "variables"
-					    "macros"))
-			      (:file       "let-plus"
-			       :depends-on ("package" "protocol"))
+		 :depends-on ("backend-early")
+		 :serial     t
+		 :components ((:file       "target-mixins")
+			      (:file       "targets")
 
-			      (:file       "code-generating-target-mixin"
-			       :depends-on ("package"))
+			      (:file       "emitter-serializer")
+			      (:file       "emitter-serializer-methods")
 
-			      (:file       "target-serializer"
-			       :depends-on ("package"
-					    "code-generating-target-mixin")))))
+			      (:file       "emitter-lisp")
+			      (:file       "emitter-lisp-serializer"))))
 
   :in-order-to  ((test-op (test-op :cl-rosetta-test))))
 
