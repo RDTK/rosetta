@@ -133,24 +133,26 @@ TARGET-VAR and push NODE-VAR onto the context stack."
   (check-type mechanism symbol "a symbol")
 
   (let* ((mechanism-string (string mechanism))
-	 (base-name (if (starts-with-subseq prefix mechanism-string)
-			(subseq mechanism-string (length prefix))
-			mechanism-string)))
+	 (base-name        (if (starts-with-subseq prefix mechanism-string)
+			       (subseq mechanism-string (length prefix))
+			       mechanism-string))
+	 (mechanism-spec   (make-keyword base-name)))
     `(progn
        ,@(iter (for target in methods)
-	       (let ((spec       (let ((*package* (find-package :keyword)))
-				   (symbolicate base-name "-" target)))
+	       (let ((spec       (format-symbol :keyword "~A-~A" base-name  target))
 		     (name       (symbolicate "TARGET-" base-name "-" target))
 		     (super-name (symbolicate "TARGET-" target)))
 		 (collect
 		     `(defmethod find-target-class ((spec (eql ,spec)))
 			(find-class ',name)))
 		 (collect
-		     `(defclass ,name (,super-name ,@mixins)
-			((mechanism :initform ',mechanism))
+		     `(defclass ,name (mechanism-target-mixin ,super-name ,@mixins)
+			()
+			(:default-initargs
+			 :mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism-spec)))
 			(:documentation
-			 ,(format nil "~A This target class generates ~
-methods that implement the ~(~A~) mechanism:~%~A"
+			 ,(format nil "~A~2%This target class generates ~
+methods that implement the ~(~A~) mechanism: ~A"
 				  (documentation super-name 'type)
 				  base-name
 				  (documentation mechanism 'type))))))))))

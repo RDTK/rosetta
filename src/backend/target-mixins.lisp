@@ -26,7 +26,7 @@
 (defclass code-generating-target-mixin ()
   ((optimization-settings :initarg  :optimization-settings
 			  :type     list
-			  :accessor optimzation-settings
+			  :accessor optimization-settings
 			  :initform nil
 			  :documentation
 			  "Optimization settings that should be used
