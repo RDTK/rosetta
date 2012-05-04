@@ -160,25 +160,32 @@ methods that implement the ~(~A~) mechanism:~%~A"
 ;;
 
 (define-let+-expansion (&env args
-			     :uses-value? nil
-			     :body-var    body)
+			:uses-value? nil
+			:body-var    body)
   (let+ (((args &optional (context '(*context*)))
 	  (split-sequence '&context args))
 	 ((&values bindings setters cleanup)
 	  (iter (for name in args)
 		;; Split the variable into the name and optional value
 		;; parts.
-		(let+ (((name &optional (value `(gensym ,(string name))))
+		(let+ (((name
+			 &optional
+			 (value `(gensym ,(string (first (ensure-list name))))))
 			(ensure-list name))
-		       (place `(context-get ,@context ,(make-keyword name)))
-		       ((&with-gensyms new old)))
+		       ((name &optional (item-name (make-keyword name)))
+			(ensure-list name))
+		       (place `(context-get ,@context ,item-name))
+		       ((&with-gensyms old)))
+		  (check-type name      symbol)
+		  (check-type item-name keyword)
+		  
 		  ;; Collect a binding.
-		  (collect `(,new ,value) :into bindings)
-		  (collect `(,old ,place) :into bindings)
+		  (collect `(,name ,value) :into bindings)
+		  (collect `(,old  ,place) :into bindings)
 		  ;; Collect a form to store the value in the `emit'
 		  ;; context.
-		  (collect `(setf ,place ,new) :into setters)
-		  (collect `(setf ,place ,old) :into cleanup))
+		  (collect `(setf ,place ,name) :into setters)
+		  (collect `(setf ,place ,old)  :into cleanup))
 		(finally (return (values bindings setters cleanup))))))
     `(let* ,bindings
        ,@setters
@@ -187,18 +194,20 @@ methods that implement the ~(~A~) mechanism:~%~A"
 	 ,@cleanup))))
 
 (define-let+-expansion (&env-r/o args
-				 :uses-value? nil
-				 :body-var    body)
+			:uses-value? nil
+			:body-var    body)
   (let+ (((args &optional (context '(*context*)))
 	  (split-sequence '&context args))
 	 (bindings
 	  (iter (for name in args)
 		(let+ (((name &optional (default :error))
 			(ensure-list name))
-		       ((name &optional (item-name name))
-			(ensure-list name))
-		       (key (make-keyword item-name)))
+		       ((name &optional (item-name (make-keyword name)))
+			(ensure-list name)))
+		  (check-type name      symbol)
+		  (check-type item-name keyword)
+		  
 		  (collect
-		      `(,name (context-get ,@context ,key
+		      `(,name (context-get ,@context ,item-name
 					   :default ,default)))))))
     `(let* ,bindings ,@body)))
