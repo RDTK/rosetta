@@ -26,6 +26,7 @@
    :alexandria
    :iterate
    :let-plus
+   :more-conditions
 
    :rosetta)
 

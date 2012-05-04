@@ -27,6 +27,7 @@
    :split-sequence
    :let-plus
    :iterate
+   :more-conditions
 
    :rosetta.model.data
 

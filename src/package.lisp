@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for util module.
+;;; package.lisp --- Package definition for rosetta module.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -22,14 +22,6 @@
    :cl
    :let-plus)
 
-  ;; Conditions
-  (:export
-   :missing-required-initarg
-   :missing-required-initarg-class
-
-   :missing-required-argument
-   :missing-required-argument-parameter)
-
   ;; print-items mechanism and mixin class
   (:export
    :print-items
@@ -37,5 +29,5 @@
    :print-items-mixin)
 
   (:documentation
-   "This package contains generic facilities like unspecific
-conditions used within cl-rosetta."))
+   "This package contains generic facilities used within the rosetta
+system."))

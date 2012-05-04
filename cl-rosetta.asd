@@ -68,11 +68,9 @@
 
 		:nibbles)
   :components  ((:module     "src"
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "print-items"
-			       :depends-on ("package"))))
+			      (:file       "print-items")))
 
 		(:module     "model-data-early"
 		 :pathname   "src/model/data"
