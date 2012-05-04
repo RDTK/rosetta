@@ -20,29 +20,26 @@
 (cl:in-package :rosetta.backend)
 
 (define-let+-expansion (&env args
-			:value-var context
-			:body-var  body)
-  (multiple-value-bind (bindings setters cleanup)
-      (iter (for name in args)
-	    ;; Split the variable into the name and optional value
-	    ;; parts.
-	    (let+ (((name &optional (value :gensym)) (ensure-list name))
-		   ((&with-gensyms old)))
-	      ;; Collect a binding.
-	      (collect `(,name ,(case value
-				      (:gensym `(gensym ,(string name)))
-				      (t       value)))
-		:into bindings)
-	      (collect `(,old (context-get ,context ,(make-keyword name)))
-		:into bindings)
-	      ;; Collect a form to store the value in the `emit'
-	      ;; context.
-	      (collect
-		  `(setf (context-get ,context ,(make-keyword name)) ,name)
-		:into setters)
-	      (collect `(setf (context-get ,context ,(make-keyword name)) ,old)
-		:into cleanup))
-	    (finally (return (values bindings setters cleanup))))
+			:uses-value? nil
+		        :body-var    body)
+  (let+ (((args &optional (context '(*context*)))
+	  (split-sequence '&context args))
+	 ((&values bindings setters cleanup)
+	  (iter (for name in args)
+		;; Split the variable into the name and optional value
+		;; parts.
+		(let+ (((name &optional (value `(gensym ,(string name))))
+			(ensure-list name))
+		       (place `(context-get ,@context ,(make-keyword name)))
+		       ((&with-gensyms new old)))
+		  ;; Collect a binding.
+		  (collect `(,new ,value) :into bindings)
+		  (collect `(,old ,place) :into bindings)
+		  ;; Collect a form to store the value in the `emit'
+		  ;; context.
+		  (collect `(setf ,place ,new) :into setters)
+		  (collect `(setf ,place ,old) :into cleanup))
+		(finally (return (values bindings setters cleanup))))))
     `(let* ,bindings
        ,@setters
        (unwind-protect
@@ -50,13 +47,18 @@
 	 ,@cleanup))))
 
 (define-let+-expansion (&env-r/o args
-			:value-var context
-			:body-var  body)
-  `(let* ,(iter (for name in args)
-		(let+ (((name &optional (item-name name) (default :error))
+		        :uses-value? nil
+			:body-var    body)
+  (let+ (((args &optional (context '(*context*)))
+	  (split-sequence '&context args))
+	 (bindings
+	  (iter (for name in args)
+		(let+ (((name &optional (default :error))
+			(ensure-list name))
+		       ((name &optional (item-name name))
 			(ensure-list name))
 		       (key (make-keyword item-name)))
 		  (collect
-		      `(,name (context-get ,context ,key
-					   :default ,default)))))
-     ,@body))
+		      `(,name (context-get ,@context ,key
+					   :default ,default)))))))
+    `(let* ,bindings ,@body)))
