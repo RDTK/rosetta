@@ -95,6 +95,9 @@
 					    "composite-mixin" "field-mixin"))
 
 			      (:file       "data-type-singleton"
+			       :depends-on ("package" "protocol"))
+
+			      (:file       "mapping"
 			       :depends-on ("package" "protocol"))))
 
 		(:module     "model-serialization"

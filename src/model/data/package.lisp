@@ -59,6 +59,11 @@
    :type1
    :value)
 
+  ;; Mapping protocol
+  (:export
+   :data-holder
+   :wire-schema)
+
   ;; `named-mixin' mixin class
   (:export
    :named-mixin)
@@ -78,6 +83,10 @@
   ;; `singleton' data type class
   (:export
    :singleton)
+
+  ;; `mapping' class
+  (:export
+   :mapping)
 
   (:documentation
    "This package contains protocols and classes which can be used to
