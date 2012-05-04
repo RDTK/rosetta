@@ -178,11 +178,12 @@ methods that implement the ~(~A~) mechanism: ~A"
 			(ensure-list name))
 		       (place `(context-get ,@context ,item-name))
 		       ((&with-gensyms old)))
-		  (check-type name      symbol)
+		  (check-type name      (or null symbol))
 		  (check-type item-name keyword)
 		  
 		  ;; Collect a binding.
-		  (collect `(,name ,value) :into bindings)
+		  (when name
+		    (collect `(,name ,value) :into bindings))
 		  (collect `(,old  ,place) :into bindings)
 		  ;; Collect a form to store the value in the `emit'
 		  ;; context.
