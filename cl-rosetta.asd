@@ -57,7 +57,7 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "GPL3; see COPYING file for details."
+  :license     "LLGPLv3; see COPYING file for details."
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
 		:split-sequence
@@ -177,7 +177,7 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "GP3L; see COPYING file for details."
+  :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the cl-rosetta system."
   :depends-on  (:cl-rosetta
 		:lift)
