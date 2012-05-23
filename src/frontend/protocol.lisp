@@ -80,3 +80,57 @@ should signal an error of a subtype of `dependency-error' such as
 (defmethod parse ((format symbol) (source t) (builder t)
 		  &rest args &key &allow-other-keys)
   (apply #'parse (list format) source builder args))
+
+
+;;; Source and location protocol
+;;
+
+(defgeneric source (thing)
+  (:documentation
+   "Return the source associated to THING."))
+
+(defgeneric source-content (thing)
+  (:documentation
+   "Return the content as string of the source associated to THING.
+Return nil if the content is not available."))
+
+(defgeneric bounds (thing)
+  (:documentation
+   "Return the bounds of the region of the source string associated to
+THING as a cons cell
+
+  (START . END)
+
+. Return nil if the information is not available."))
+
+(defgeneric line (thing &key of)
+  (:documentation
+   "Return the line within the source string associated to
+THING. Return nil if the information is not available. Line numbers
+start at 0.
+
+OF can be :START or :END and controls whether the line of the
+beginning or end of the region associated to THING is used."))
+
+(defgeneric column (thing &key of)
+  (:documentation
+   "Return the column within the source string associated to
+THING. Return nil if the information is not available. Column numbers
+start at 0.
+
+OF can be :START or :END and controls whether the line of the
+beginning or end of the region associated to THING is used."))
+
+
+;;; Location repository protocol
+;;
+
+(defgeneric location-of (repository for)
+  (:documentation
+   "Return a `location-info' instance for FOR in REPOSITORY or nil if
+there is no such information."))
+
+(defgeneric (setf location-of) (new-value repository for)
+  (:documentation
+   "Set the location information for FOR within REPOSITORY to
+NEW-VALUE."))

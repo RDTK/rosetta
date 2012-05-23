@@ -29,6 +29,41 @@
 
    :rosetta.model.data)
 
+  ;; Conditions
+  (:export
+   :location-condition
+   :location
+
+   :builder-condition
+   :builder
+
+   :parse-error1
+
+   :parse-warning
+
+   :processing-error
+
+   :processing-warning)
+
+  ;; Location protocol
+  (:export
+   :source
+   :source-content
+   :bounds
+   :line
+   :column)
+
+  ;; Location repository protocol
+  (:export
+   :location-of)
+
+  ;; Location Utilities
+  (:export
+   :location-info
+
+   :format-location
+   :format-content)
+
   ;; Parse protocol
   (:export
    :parse)

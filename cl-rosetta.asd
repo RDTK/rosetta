@@ -140,9 +140,16 @@
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"
+		 :depends-on ("src" "model-data")
 		 :components ((:file       "package")
-			      (:file       "protocol"
+			      (:file       "types"
 			       :depends-on ("package"))
+			      (:file       "locations"
+			       :depends-on ("types"))
+			      (:file       "conditions"
+			       :depends-on ("package" "types" "locations"))
+			      (:file       "protocol"
+			       :depends-on ("package" "types"))
 
 			      (:file       "text-format-mixin"
 			       :depends-on ("package" "protocol"))
