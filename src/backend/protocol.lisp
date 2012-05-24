@@ -216,36 +216,3 @@ state of a particular emission process. This state consists of:
 (defmethod emit ((node t) (target t) (language t)
 		 &key)
   (values))
-
-(defmethod emit ((node pb:file-set-desc) (target t) (language t)
-		 &key)
-  "Multi-file container; default behavior is recursion over files."
-  (with-emit-symbols
-    (map 'list #'recur (pb::file-set-desc-file node))))
-
-(defmethod emit ((node pb:file-desc) (target t) (language t)
-		 &key)
-  "File; default behavior is recursion over enums, messages, services,
-extensions and options."
-  (with-emit-symbols
-    (nconc
-     (map 'list #'recur (pb::file-desc-enum-type    node))
-     (map 'list #'recur (pb::file-desc-service      node))
-     (map 'list #'recur (pb::file-desc-extension    node))
-     (map 'list #'recur (pb::file-desc-options      node))
-     (map 'list #'recur (pb::file-desc-message-type node)))))
-
-(defmethod emit ((node pb:message-desc) (target t) (language t)
-		 &key)
-  "Message; default behavior is recursion over contained elements."
-  (with-emit-symbols
-    (map nil #'recur (pb::message-desc-enum-type   node))
-    (map nil #'recur (pb::message-desc-nested-type node))
-    (map nil #'recur (pb::message-desc-field       node))
-    (map nil #'recur (pb::message-desc-extension   node))))
-
-(defmethod emit ((node pb:enum-desc) (target t) (language t)
-		 &key)
-  "Enum; default behavior is recursion over enum values."
-  (with-emit-symbols
-    (map 'list #'recur (pb::enum-desc-value node))))

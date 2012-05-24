@@ -61,7 +61,7 @@
        (string
 	(sb-ext:string-to-octets thing))
        (sequence
-	(coerce thing 'binio:octet-vector)))))
+	(coerce thing 'nibbles:octet-vector)))))
   (:documentation
    "Unit tests for the `binary-mixin' mixin class."))
 

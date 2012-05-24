@@ -64,12 +64,9 @@
 		:let-plus
 		:more-conditions
 		:cl-dynamic-classes
-
-		:nibbles
 		:flexi-streams
 
-		:cl-protobuf
-		:yacc)
+		:nibbles)
   :components  ((:module     "src"
 		 :components ((:file       "package")
 			      (:file       "conditions"
