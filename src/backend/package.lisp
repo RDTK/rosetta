@@ -93,4 +93,4 @@
 
   (:documentation
    "This package contains backend-related protocols and infrastructure
-of the cl-rosetta compiler."))
+of the rosetta compiler."))

@@ -1,4 +1,4 @@
-;;; cl-rosetta.asd --- System definition for the cl-rosetta system.
+;;; rosetta.asd --- System definition for the rosetta system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:defpackage :cl-rosetta-system
+(cl:defpackage :rosetta-system
   (:use
    :cl
    :asdf)
@@ -26,7 +26,7 @@
    :version/list
    :version/string))
 
-(cl:in-package :cl-rosetta-system)
+(cl:in-package :rosetta-system)
 
 
 ;;; Version stuff
@@ -35,7 +35,7 @@
 (defconstant +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 1
+(defconstant +version-minor+ 2
   "Minor component of version number.")
 
 (defconstant +version-revision+ 0
@@ -53,7 +53,7 @@
 ;;; System definitions
 ;;
 
-(defsystem :cl-rosetta
+(defsystem :rosetta
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -178,15 +178,15 @@
 			      (:file       "emitter-lisp")
 			      (:file       "emitter-lisp-serializer"))))
 
-  :in-order-to  ((test-op (test-op :cl-rosetta-test))))
+  :in-order-to  ((test-op (test-op :rosetta-test))))
 
-(defsystem :cl-rosetta-test
+(defsystem :rosetta-test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "LLGPLv3; see COPYING file for details."
-  :description "Unit tests for the cl-rosetta system."
-  :depends-on  (:cl-rosetta
+  :description "Unit tests for the rosetta system."
+  :depends-on  (:rosetta
 		:lift)
   :components  ((:file         "package"
 		 :pathname     "test/package")
@@ -220,5 +220,5 @@
 			      (:file       "structure-mixin"
 			       :depends-on ("package"))))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :cl-rosetta-test))))
+(defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))

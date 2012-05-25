@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for unit tests of the cl-rosetta system.
+;;; package.lisp --- Package definition for unit tests of the rosetta system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -26,11 +26,11 @@
    :root)
 
   (:documentation
-   "This package contains unit tests for the cl-rosetta system"))
+   "This package contains unit tests for the rosetta system"))
 
 (cl:in-package :rosetta.test)
 
 (deftestsuite root ()
   ()
   (:documentation
-   "Root unit test suite for the cl-rosetta system."))
+   "Root unit test suite for the rosetta system."))

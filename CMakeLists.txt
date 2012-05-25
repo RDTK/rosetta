@@ -25,7 +25,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # Project definition (version is grovelled from asd system definition)
-SET(SYSTEM_NAME "cl-rosetta")
+SET(SYSTEM_NAME "rosetta")
 PROJECT(${SYSTEM_NAME})
 MACRO(EXTRACT_COMPONENT NAME OUTPUT)
     FILE(STRINGS "${CMAKE_SOURCE_DIR}/${SYSTEM_NAME}.asd" TEMP

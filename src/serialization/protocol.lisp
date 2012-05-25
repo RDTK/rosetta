@@ -1,4 +1,4 @@
-;;; protocol.lisp --- Serialization protocol of the cl-rosetta system.
+;;; protocol.lisp --- Serialization protocol of the rosetta system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

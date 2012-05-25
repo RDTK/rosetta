@@ -1,4 +1,4 @@
-;;; conditions.lisp --- Conditions used in the serialization module of cl-rosetta.
+;;; conditions.lisp --- Conditions used in the serialization module of rosetta.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

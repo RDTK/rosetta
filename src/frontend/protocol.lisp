@@ -1,4 +1,4 @@
-;;; protocol.lisp --- Protocol definitions of the cl-rosetta compiler frontend.
+;;; protocol.lisp --- Protocol definitions of the rosetta compiler frontend.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

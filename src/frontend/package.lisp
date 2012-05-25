@@ -84,7 +84,7 @@
 
   (:documentation
    "This package contains frontend-related protocols and
-infrastructure of the cl-rosetta compiler.
+infrastructure of the rosetta compiler.
 
 In particular the `parse' generic function and function and some
 default methods are contained in this package."))
