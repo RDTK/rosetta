@@ -21,14 +21,9 @@
 
 (defclass package1 (named-mixin
 		    parented-mixin
-		    forward-reference-upgrader-mixin
-		    composite-mixin
+		    container/relative-mixin
 		    print-items-mixin)
-  ((table :type     hash-table
-	  :reader   %table
-	  :initform (make-hash-table :test #'equal)
-	  :documentation
-	  ""))
+  ()
   (:documentation
    "TODO(jmoringe): document"))
 
@@ -37,21 +32,22 @@
     (append (qname parent) (list (data-type-name package)))
     (list :absolute)))
 
-(defmethod contents ((package package1) (kind (eql :nested)))
-  (hash-table-values (%table package)))
-
 (defmethod contents/plist ((package package1))
-  (hash-table-plist (%table package)))
+  (hash-table-plist (%nested package)))
 
 (defmethod lookup ((package package1)
 		   (kind    symbol)
-		   (name    string)
+		   (name    list)
 		   &key &allow-other-keys)
-  (values (gethash (cons kind name) (%table package))))
+  (check-type name (or name/absolute name/relative))
 
-(defmethod (setf lookup) ((new-value t)
-			  (package   package1)
-			  (kind      symbol)
-			  (name      string)
-			  &key &allow-other-keys)
-  (setf (gethash (cons kind name) (%table package)) new-value))
+  (typecase name
+    ((and (cons (eql :relative) (cons string null)))
+     (lookup package kind (second name)))
+
+    ((and (cons (eql :relative) (cons string cons)))
+     (lookup (lookup package :package (second name))
+	     kind (cons :relative (nthcdr 2 name))))
+
+    (name/absolute
+     (lookup (root package) kind (cons :relative (rest name))))))

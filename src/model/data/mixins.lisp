@@ -112,7 +112,7 @@ associated parent object."))
   (setf (parent child) parent))
 
 
-;;; `composite-mixin' mixin class
+;;;
 ;;
 
 (defclass composite-mixin ()
@@ -121,38 +121,128 @@ associated parent object."))
    "This class is intended to be mixed into classes that represent
 composite data types."))
 
-(defmethod print-items append ((object composite-mixin))
-  (list (list :num-items (length (composite-children object)) "(~D)")))
+(defmacro define-composite-mixin
+    (name
+     &key
+     (class-name       (format-symbol *package* "~A-MIXIN" name))
+     (kind             (make-keyword name))
+     (kind-specializer (typecase kind
+			 (keyword `(eql ,kind))
+			 (t       kind)))
+     (slot-name        (format-symbol *package* "~A" name))
+     (accessor-name    (format-symbol *package* "%~A" slot-name))
+     (key-type         'string)
+     (key-class        key-type)
+     (key-form         (typecase kind
+			 (keyword (lambda (kind-var key-var)
+				    (declare (ignore kind-var))
+				    key-var))
+			 (t       (lambda (kind-var key-var)
+				    `(cons ,kind-var ,key-var))))))
+  "Define a class named NAME which implements to composite
+protocol (i.e `contents' and `lookup')."
+  `(progn
+     (defclass ,class-name (composite-mixin)
+       ((,slot-name :type     hash-table
+		    :accessor ,accessor-name
+		    :initform (make-hash-table :test #'equal)
+		    :documentation
+		    ,(format nil "Stores the contents of kind ~A of ~
+the container."
+			     kind)))
+       (:documentation
+
+	,(format nil "This class is intended to be mixed into classes ~
+which implement the composite protocol for kind ~A."
+		 kind)))
+
+     (defmethod contents ((container ,class-name)
+			  (kind      ,kind-specializer))
+       (hash-table-values (,accessor-name container)))
+
+     (defmethod contents ((container ,class-name)
+			  (kind      (eql t)))
+       ,(typecase kind
+	  (keyword
+	   `(nconc (when (next-method-p)
+		     (call-next-method))
+		   (contents container ,kind)))
+	  (t
+	   `(call-next-method))))
+
+     (defmethod lookup ((container ,class-name)
+			(kind      ,kind-specializer)
+			(key       ,key-class)
+			&key &allow-other-keys)
+       ,@(when (and key-type (not (eq key-type key-class)))
+	   `((check-type key ,key-type)))
+
+       (or (when (next-method-p)
+	     (call-next-method))
+	   (values (gethash ,(funcall key-form 'kind 'key)
+			    (,accessor-name container)))))
+
+     (defmethod (setf lookup) ((new-value t)
+			       (container ,class-name)
+			       (kind      ,kind-specializer)
+			       (key       ,key-class)
+			       &key &allow-other-keys)
+       ,@(when (and key-type (not (eq key-type key-class)))
+	   `((check-type key ,key-type)))
+
+       (setf (gethash ,(funcall key-form 'kind 'key)
+		      (,accessor-name container))
+	     new-value))
+
+     (defmethod print-items append ((object ,class-name))
+       `((,',(make-keyword name)
+	  ,(hash-table-count (,accessor-name object))
+	  ,',(format nil " (~C ~~D)" (aref (string name) 0)))))
+
+     ',class-name))
+
+(define-composite-mixin nested
+    :class-name nesting-mixin)
+
+(define-composite-mixin nested
+    :class-name container/absolute-mixin
+    :kind       symbol
+    :key-type   name/absolute
+    :key-class  list)
+
+(define-composite-mixin nested
+    :class-name container/relative-mixin
+    :kind       symbol)
 
 
 ;;; `ordered-mixin' mixin class
 ;;
 
-(defclass ordered-mixin (composite-mixin)
+(defclass ordered-mixin ()
   ((children :initarg  :children
 	     :type     list
 	     :accessor %children
-	     :reader   composite-children
 	     :initform nil
 	     :documentation
 	     ""))
   (:documentation
    "TODO(jmoringe): document"))
 
-(defmethod composite-child ((type ordered-mixin)
-			    (name integer)
-			    &key &allow-other-keys)
-  "Return the child at index NAME in TYPE."
-  (nth name (%children type)))
+(defmethod contents ((container ordered-mixin)
+		     (kind      (eql :nested)))
+  (%children container))
 
-(defmethod (setf composite-child) :after ((new-value t)
-					  (type      ordered-mixin)
-					  (name      t)
-					  &key &allow-other-keys)
-  (appendf (%children type) (list new-value)))
+(defmethod (setf lookup) :after ((new-value t)
+				 (type      ordered-mixin)
+				 (kind      t)
+				 (name      t)
+				 &key &allow-other-keys)
+  (let+ (((&accessors (children %children)) type))
+    (unless (member new-value children)
+      (appendf children (list new-value)))))
 
 
-;;; `named-component-mixin' mixin class 
+;;; `named-component-mixin' mixin class
 ;;
 
 (defclass named-component-mixin (named-mixin
@@ -178,11 +268,12 @@ types."))
 ;;; `structure-mixin' mixin class
 ;;
 
-(defclass structure-mixin (composite-mixin)
-  ((fields :type     hash-table
-	   :accessor %fields
-	   :documentation
-	   "Stores a mapping of field names to field objects."))
+(define-composite-mixin fields
+    :kind :field)
+
+(defclass structure-mixin (nesting-mixin
+			   fields-mixin)
+  ()
   (:documentation
    "This class is intended to be mixed into composite data types that
 consist of a collection of named fields."))
@@ -220,43 +311,12 @@ consist of a collection of named fields."))
 		  :datum         fields
 		  :expected-type '(or sequence hash-table))))))
 
-(defmethod composite-children ((type structure-mixin))
-  "Return the fields of TYPE."
-  (hash-table-values (%fields type)))
-
-(defmethod lookup ((container structure-mixin)
-		   (kind      (eql :field))
-		   (name      string)
-		   &key &allow-other-keys)
-  "Return the field named NAME in TYPE."
-  (values (gethash name (%fields container))))
-
-(defmethod (setf lookup) ((new-value t)
-			  (container structure-mixin)
-			  (kind      (eql :field))
-			  (name      string)
-			  &key &allow-other-keys)
-  (setf (gethash name (%fields container)) new-value))
-
-;; obsolete
-(defmethod composite-child ((type structure-mixin)
-			    (name string)
-			    &key &allow-other-keys)
-  "Return the field named NAME in TYPE."
-  (values (gethash name (%fields type))))
-
-(defmethod (setf composite-child) ((new-value t)
-				   (type      structure-mixin)
-				   (name      string)
-				   &key &allow-other-keys)
-  (setf (gethash name (%fields type)) new-value))
-
 ;; Hint for generic builders
 
 (defmethod add-child ((builder t)
 		      (parent  structure-mixin)
-		      (child   named-mixin))
-  (setf (composite-child parent (data-type-name child)) child)
+		      (child   field-mixin))
+  (setf (lookup parent :field (name child)) child)
   (if (next-method-p)
       (call-next-method)
       parent))
@@ -265,14 +325,12 @@ consist of a collection of named fields."))
 ;;; `array-mixin' mixin class
 ;;
 
-(defclass array-mixin (composite-mixin)
+(defclass array-mixin ()
   ((element-type :initarg  :element-type
-		 :reader   array-element-type1 ;;; TODO(jmoringe, 2012-04-17):
 		 :reader   element-type
 		 :documentation
 		 "")
    (index-type   :initarg  :index-type
-		 :reader   array-index-type ;;; TODO(jmoringe, 2012-04-17):
 		 :reader   index-type
 		 :documentation
 		 ""))
@@ -283,10 +341,6 @@ consist of a collection of named fields."))
    "This class is intended to be mixed into type classes which
 represent array-like types which consist of an index type and an
 element type."))
-
-(defmethod composite-children ((type array-mixin))
-  (list (array-element-type1 type)
-	(array-index-type    type)))
 
 (defmethod fixed-size? ((type array-mixin))
   (let+ (((&accessors-r/o index-type) type))
@@ -301,8 +355,7 @@ element type."))
 					    (value index)
 					    '*))
 				    (ensure-list (index-type type)))
-	      "[~{~A~^, ~}]") ;;; TODO(jmoringe, 2012-03-28):
-	(list :num-items    "")))
+	      "[~{~A~^, ~}]"))) ;;; TODO(jmoringe, 2012-03-28):
 
 
 ;;; `toplevel-mixin' mixin class

@@ -35,35 +35,26 @@
 ;;; `base-enum' class
 ;;
 
+(define-composite-mixin value
+    :class-name values-mixin)
+
 (defclass enum (named-mixin
 		parented-mixin
-		structure-mixin ;;; TODO(jmoringe, 2012-05-03): associative-container-mixin
-		toplevel-mixin
+		typed-mixin
+		ordered-mixin
+		values-mixin
+		;; toplevel-mixin
 		documentation-mixin
 		print-items-mixin)
   ()
   (:documentation
    "TODO(jmoringe): document"))
 
-(defmethod lookup ((container enum)
-		   (kind      (eql :value))
-		   (name      string)
-		   &key &allow-other-keys)
-  "Return the field named NAME in TYPE."
-  (values (gethash name (%fields container))))  ;;; TODO(jmoringe, 2012-05-03):
-
-(defmethod (setf lookup) ((new-value t)
-			  (container enum)
-			  (kind      (eql :value))
-			  (name      string)
-			  &key &allow-other-keys)
-  (setf (gethash name (%fields container)) new-value)) ;;; TODO(jmoringe, 2012-05-03):
-
 (defmethod (setf lookup) :before ((new-value t)
-				  (parent    enum)
+				  (container enum)
 				  (kind      (eql :value))
-				  (name      string)
+				  (key      string)
 				  &key &allow-other-keys)
   (unless (compute-applicable-methods #'value (list new-value))
-    (error "~@<Supplied child ~A for ~A does not specialize the ~S method.~@:>"
-	   new-value parent 'value)))
+    (error "~@<Supplied value ~A for ~A does not specialize the ~S method.~@:>"
+	   new-value container 'value)))

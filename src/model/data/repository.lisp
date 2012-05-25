@@ -65,69 +65,37 @@
 
 (defmethod (setf lookup) :around ((new-value  t)
 				  (repository forward-reference-upgrader-mixin)
-				  (kind       t)
-				  (name       t)
+				  (kind       symbol)
+				  (name       list)
 				  &key &allow-other-keys)
-  (let ((entry (lookup repository kind name
-		       :if-does-not-exist nil)))
-    (if (typep entry 'forward-reference)
-	(restart-case
-	    (call-next-method)
-	  (upgrade (&optional (value new-value))
-	    :test (lambda (condition)
-		    (typep condition 'duplicate-child-key)
-		    t) ;;; TODO(jmoringe, 2012-04-24):
-	    (removef (forward-references repository) entry
-		     :key #'cdr :test #'eq :count 1)
-	    (setf (lookup repository kind name) (upgrade! entry value))))
-	(call-next-method))))
+  (check-type name name/absolute)
+
+  (if (typep new-value 'forward-reference)
+      (call-next-method)
+      (let ((entry (lookup repository kind name
+			   :if-does-not-exist nil)))
+	(if (typep entry 'forward-reference)
+	    (restart-case
+		(call-next-method)
+	      (upgrade (&optional (value new-value))
+		:test (lambda (condition)
+			(typep condition 'duplicate-child-key)
+			t) ;;; TODO(jmoringe, 2012-04-24):
+		(removef (forward-references repository) entry
+			 :key #'cdr :test #'eq :count 1)
+		(setf (lookup repository kind name) (upgrade! entry value))))
+	    (call-next-method)))))
 
 
 ;;;
 ;;
 
-(defclass base-repository (forward-reference-upgrader-mixin)
-  ((table :type     hash-table
-	  :reader   %table
-	  :initform (make-hash-table :test #'equal)
-	  :documentation
-	  ""))
+(defclass base-repository (container/absolute-mixin
+			   forward-reference-upgrader-mixin
+			   print-items-mixin)
+  ()
   (:documentation
    "TODO(jmoringe): document"))
 
-(defmethod contents ((repository base-repository) (kind (eql :nested)))
-  (hash-table-values (%table repository)))
-
 (defmethod contents/plist ((repository base-repository))
-  (hash-table-plist (%table repository)))
-
-(defmethod lookup ((repository base-repository)
-		   (kind       symbol)
-		   (name       list)
-		   &key &allow-other-keys)
-  (check-type name name/absolute)
-
-  (or (call-next-method)
-      (values (gethash (cons kind name) (%table repository)))))
-
-(defmethod (setf lookup) ((new-value  t)
-			  (repository base-repository)
-			  (kind       symbol)
-			  (name       list)
-			  &key &allow-other-keys)
-  (check-type name name/absolute)
-
-  (setf (gethash (cons kind name) (%table repository)) new-value))
-
-(defmethod print-object ((object base-repository) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "(~D)" (hash-table-count (%table object)))))
-
-#+test
-(let ((r (make-instance 'base-repository)))
-  (setf (lookup r :foo '(:absolute "a" "b")) (make-instance 'forward-reference))
-  (setf (lookup r :foo '(:absolute "a" "b")) (make-instance 'type-uint32))
-  (values
-   (lookup r :foo '(:absolute "a" "b"))
-   #+no(lookup r :foo '(:absolute "a" "c"))
-   (contents/plist r)))
+  (hash-table-plist (%nested repository)))
