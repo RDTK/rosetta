@@ -51,13 +51,7 @@
    :context-package
    :context-get
 
-   :with-emit-symbols
-   :package
-   :parent
-   :grandparent
-   :ancestors
-   :recur
-   :intern*)
+   :context-get)
 
   ;; Targets
   (:export
@@ -79,16 +73,23 @@
    :serializtion-mixin
    :target-mechanism
 
-   :target-packed-size
-
-   :target-pack :target-unpack
+   :target-packed-size :target-pack :target-unpack
 
    :target-location
    :target-extract)
 
   ;; Macros
   (:export
-   :define-mechanism-targets)
+   :define-mechanism-targets
+
+   :with-emit-symbols
+   :parent
+   :grandparent
+   :ancestors
+   :recur
+
+   ;; let-plus
+   :&env :&env-r/o)
 
   (:documentation
    "This package contains backend-related protocols and infrastructure
