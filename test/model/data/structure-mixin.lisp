@@ -20,15 +20,13 @@
 (cl:in-package :rosetta.model.data.test)
 
 (deftestsuite structure-mixin-root (model-data-root)
-  ((simple-child (make-instance
-		  'field-mixin
-		  :name "f"
-		  :type 'string))
+  ((simple-child (make-instance 'field-mixin
+				:name "a"
+				:type 'string))
    (simple-type))
   (:setup
-   (setf simple-type (make-instance
-		      'structure-mixin
-		      :fields `("a" ,simple-child))))
+   (setf simple-type (make-instance 'structure-mixin
+				    :fields `("a" ,simple-child))))
   (:documentation
    "Test suite for the `structure-mixin' class."))
 
@@ -42,10 +40,8 @@
 	 :error)
 	((:fields #("bla"))
 	 :error)
-	((:fields ("a" ,(make-instance 'field-mixin
-				       :name "f"
-				       :type 'string)))
-	 ("f"))
+	((:fields ("a" ,simple-child))
+	 ("a"))
 	((:fields (,(make-instance 'field-mixin
 				   :name "g"
 				   :type 'string)))
@@ -56,8 +52,7 @@
 	  (apply #'make-instance 'structure-mixin args))
 
 	(let ((composite (apply #'make-instance 'structure-mixin args)))
-	  (ensure-same (map 'list #'data-type-name
-			    (composite-children composite))
+	  (ensure-same (map 'list #'name (contents composite :field))
 		       expected-children
 		       :test (rcurry #'set-equal :test #'string=))))))
 
@@ -65,17 +60,17 @@
           :documentation
 	  "Test the `composite-child' method specialization
 `structure-mixin'")
-  composite-child
+  lookup
 
   (ensure-cases (args expected)
-      `((("a")                         ,simple-child)
-	(("a" :error? nil)             ,simple-child)
-	(("no-such-child")             :error)
-	(("no-such-child" :error? nil) nil))
+      `((("a")                                    ,simple-child)
+	(("a" :if-does-not-exist nil)             ,simple-child)
+	(("no-such-child")                        :error)
+	(("no-such-child" :if-does-not-exist nil) nil))
 
     (if (eq expected :error)
 	(ensure-condition 'no-such-child
-	  (apply #'composite-child simple-type args))
-	(ensure-same (apply #'composite-child simple-type args)
+	  (apply #'lookup simple-type :field args))
+	(ensure-same (apply #'lookup simple-type :field args)
 		     expected
 		     :test #'eq))))

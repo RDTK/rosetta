@@ -48,11 +48,14 @@ as a structure type as well) by means of a set of rules.
 Rules associates the values fields of the data-holder and wire-schema
 via simple expressions."))
 
-(defmethod data-type-name ((type mapping))
-  (data-type-name (data-holder type)))
+(defmethod name ((type mapping))
+  (name (data-holder type)))
+
+(defmethod qname ((type mapping))
+  (qname (data-holder type)))
 
 (defmethod print-items append ((object mapping))
   (let+ (((&accessors-r/o data-holder wire-schema rules) object))
-    (list (list :data-holder (data-type-name data-holder))
-	  (list :wire-schema (data-type-name wire-schema)  " -> ~A")
-	  (list :num-items   (length rules)                " (~D)"))))
+    (list (list :data-holder (name data-holder))
+	  (list :wire-schema (name wire-schema)  " -> ~A")
+	  (list :num-items   (length rules)      " (~D)"))))

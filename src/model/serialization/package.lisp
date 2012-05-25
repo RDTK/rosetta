@@ -24,7 +24,12 @@
   (:use
    :cl
    :alexandria
-   :more-conditions)
+   :more-conditions
+
+   :rosetta.model.data)
+
+  (:shadow
+   :name)
 
   ;; Mechanism protocol
   (:export

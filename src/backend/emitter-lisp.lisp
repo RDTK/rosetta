@@ -53,7 +53,7 @@
 	   (call-next-method))
       (setf (context-package *context*) nil))))
 
-(defmethod emit :around ((node     rs.m.d::toplevel-mixin)
+(defmethod emit :around ((node     toplevel-mixin)
 			 (target   code-generating-target-mixin)
 			 (language language-lisp)
 			 &key)
@@ -77,7 +77,7 @@
 			 (target   t)
 			 (language language-lisp)
 			 &key)
-  (let+ (((&env (name (intern (data-type-name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
+  (let+ (((&env (name (intern (name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
     (call-next-method)))
 
 (defmethod emit :after ((node     rs.m.d::documentation-mixin)
@@ -85,7 +85,7 @@
 			(language language-lisp)
 			&key)
   (when-let ((name          (context-get *context* :name :default nil))
-	     (documentation (rs.m.d::documentation1 node)))
+	     (documentation (documentation1 node)))
     (setf (documentation name 'type) documentation)))
 
 (defmethod emit :after ((node     rs.m.d::documentation-mixin)
@@ -93,7 +93,7 @@
 			(language language-lisp)
 			&key)
   (when-let ((name          (context-get *context* :name :default nil))
-	     (documentation (rs.m.d::documentation1 node)))
+	     (documentation (documentation1 node)))
     (setf (documentation name 'function) documentation)))
 
 (defmethod emit :after ((node     t)
@@ -126,9 +126,8 @@
 		 &key)
   "Emit an enum definition for NODE."
   (with-emit-symbols
-    (let+ (((&accessors-r/o (values composite-children)) node)
-	   ((&env-r/o name name-name code-name))
-	   (pairs (mapcar #'recur values))) ;;; TODO(jmoringe, 2012-05-04): call-next-method?
+    (let+ (((&env-r/o name name-name code-name))
+	   (pairs (map 'list #'recur (contents node :values)))) ;;; TODO(jmoringe, 2012-05-04): call-next-method?
       `(progn
 	 (deftype ,name ()
 	   '(member ,@(mapcar #'first pairs)))
@@ -163,7 +162,7 @@
 		 &key)
   "Emit a slot specification for NODE."
   (with-emit-symbols
-    (let+ (((&accessors-r/o (type field-type)) node)
+    (let+ (((&accessors-r/o (type type1)) node)
 	   ((&env-r/o name))
 	   (initarg     (make-keyword name))
 	   (type        (recur type))
@@ -183,8 +182,7 @@
 		 &key)
   "Define a Lisp class for NODE. "
   (with-emit-symbols
-    (let+ (((&accessors-r/o (fields composite-children)) node)
-	   #+no((&accessors-r/o
+    (let+ (#+no((&accessors-r/o
 		 (metaclass    target-metaclass)
 		 (superclasses target-superclasses)) target)
 	   ((&env-r/o name)))
@@ -192,7 +190,7 @@
       `(progn
 	 (defclass ,name () ()) ;; TODO do we want to this here?
 	 (defclass ,name (#+no ,@superclasses)
-	   ,(mapcar #'recur fields) ;;; TODO(jmoringe, 2012-05-04): next method should do this
+	   ,(map 'list #'recur (contents node :fields)) ;;; TODO(jmoringe, 2012-05-04): next method should do this
 	   #+no ,@(when metaclass
 			`((:metaclass ,metaclass))))))))
 

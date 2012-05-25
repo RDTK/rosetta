@@ -24,14 +24,19 @@
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod name ((type fundamental-type-mixin))
+  (subseq (string (class-name (class-of type))) 5))
+
+(defmethod qname ((type fundamental-type-mixin))
+  (list :absolute (name type)))
+
 (defmethod data-type-fundamental? ((type fundamental-type-mixin))
   t)
 
-(defmethod data-type-composite? ((type fundamental-type-mixin))
-  nil)
+
+;;;
+;;
 
-(defmethod data-type-name ((type fundamental-type-mixin))
-  (subseq (string (class-name (class-of type))) 5))
 
 (defmacro define-fundamental-type (name (&rest supertypes) category width)
   (let ((name (symbolicate "TYPE-" name)))

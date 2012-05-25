@@ -20,12 +20,20 @@
 (cl:in-package :rosetta.model.data)
 
 
-;;; Data type protocol
+;;; Name protocol
 ;;
 
 (defgeneric name (thing)
   (:documentation
    "Return the name of THING."))
+
+(defgeneric qname (thing)
+  (:documentation
+   "Return the fully qualified name of THING."))
+
+
+;;; Documentation protocol
+;;
 
 (defgeneric documentation1 (thing)
   (:documentation
@@ -42,59 +50,193 @@ documentation of type 'data-type."
 ;;; Composite data type protocol
 ;;
 
-(defgeneric data-type-composite? (type)
+(defgeneric lookup (container kind key
+		    &key
+		    if-does-not-exist
+		    if-exists)
   (:documentation
-   "Return non-nil when the data type TYPE is in some way composed of
-other types."))
+   "Retrieve the element of kind KIND identified by KEY,
+i.e. associated to the (KIND KEY) pair, within CONTAINER.
 
-(defgeneric data-type-parent (type)
+IF-DOES-NOT-EXIST controls whether an error should be signaled
+if (KIND KEY) does not designate a element within CONTAINER. The
+following values are allowed:
+
+  a function
+    Make a `no-such-child' error and call the supplied function with
+    it as the sole argument.
+
+  nil
+    nil is returned.
+
+IF-EXISTS is accepted for parity with the `setf' method and
+ignored."))
+
+(defgeneric (setf lookup) (new-value container kind key
+			   &key
+			   if-does-not-exist
+			   if-exists)
   (:documentation
-   "Assuming the data type TYPE is contained in a composite data type,
+   "Associate NEW-VALUE with the (KIND KEY) pair in CONTAINER.
+
+IF-DOES-NOT-EXIST is accepted for parity with the `lookup' method and
+ignored.
+
+IF-EXISTS controls the behavior in case something is already
+associated with (KIND KEY) in CONTAINER. The following values are
+allowed:
+
+  :KEEP
+    Do not modify CONTAINER and return the existing value.
+
+  :SUPERSEDE
+    Replace the existing value with NEW-VALUE.
+
+  a function
+    Make a `duplicate-child-key' error and call the supplied function
+    with it as the sole argument."))
+
+(defmethod lookup ((container t)
+		   (kind      t)
+		   (key       t)
+		   &key &allow-other-keys)
+  nil)
+
+(defmethod lookup :around ((container t)
+			   (kind      t)
+			   (key       t)
+			   &key
+			   (if-does-not-exist #'error)
+			   &allow-other-keys)
+  (or (call-next-method)
+      (etypecase if-does-not-exist
+	(null
+	 nil)
+	(function
+	 (restart-case
+	     (funcall if-does-not-exist
+		      (make-condition 'no-such-child
+				      :type container
+				      :key  (list kind key)))
+	   (use-value (value)
+	     value)
+	   (store-value (value)
+	     :interactive (lambda ()
+			    (format *query-io* "Replacement value (evaluated): ")
+			    (finish-output *query-io*)
+			    (list (eval (read *query-io*))))
+	     (setf (lookup container kind key) value)))))))
+
+(defmethod (setf lookup) :around ((new-value  t)
+				  (container  t)
+				  (kind       t)
+				  (key        t)
+				  &key
+				  (if-exists #'error)
+				  &allow-other-keys)
+  (when-let ((existing (lookup container kind key
+			       :if-does-not-exist nil)))
+    (etypecase if-exists
+      ((eql :keep)
+       (return-from lookup existing))
+      ((eql :supersede))
+      (function
+       (restart-case
+	   (funcall if-exists
+		    (make-condition 'duplicate-child-key
+				    :type container
+				    :key  (list kind key)))
+	 (continue ())
+	 (keep ()
+	   (return-from lookup existing))))))
+
+  (call-next-method))
+
+(defgeneric query (container kind key)
+  (:documentation
+   "Retrieve the element of kind KIND identified by KEY,
+i.e. associated to the (KIND KEY) pair, within CONTAINER.
+
+KIND can be a symbol or a list of the form
+
+  (OR ALTERNATIVE1 ALTERNATIVE2 ...)
+
+KEY can be usually be a `cl:string', a `name/relative' or a
+`name/absolute'. In addition, KEY can be a list of the form
+
+  (OR ALTERNATIVE1 ALTERNATIVE2 ...)"))
+
+(defmethod query ((container t)
+		  (kind      t)
+		  (key       t))
+  (lookup container kind key :if-does-not-exist nil))
+
+(defmethod query ((container t)
+		  (kind      t)
+		  (key       list))
+  (if (eq (first key) 'or)
+      (some (curry #'query container kind) (rest key))
+      (call-next-method)))
+
+(defmethod query ((container t)
+		  (kind      list)
+		  (key       t))
+  (some #'(lambda (kind) (query container kind key))
+	kind))
+
+(defgeneric parent (thing)
+  (:documentation
+   "Assuming the data type THING is contained in a composite data type,
 return that data type. Otherwise return nil.
 
 Note: this method does not reflect super/subtype relations like
 integer/uint32, but composition relations like structure/field or
-tuple/item."))
+tuple/item.
 
-(defgeneric composite-children (type)
+See: `ancestors', `root'."))
+
+(defgeneric ancestors (thing
+		       &key
+		       include-self?)
   (:documentation
-   "Return a sequence of the child data types of the composite data
-type TYPE. "))
+   "Return the list of transitive `parent's of THING.
 
-(defgeneric composite-child (type key
-			     &key
-			     error?)
+INCLUDE-SELF? controls whether THING is included at the beginning of
+the returned list.
+
+See: `parent', `root'."))
+
+(defgeneric root (thing)
   (:documentation
-   "Retrieve the child identified by KEY of the composite data type
-TYPE.
-ERROR? controls whether an error should be signaled if KEY does not
-designate a child within TYPE. If ERROR? is non-nil and the requested
-child does not exist, an error of type `no-such-child' is signaled. If
-ERROR? is nil, nil is returned in that case."))
+   "Return the ancestor of THING which does not have a parent (the
+\"root\").
 
-(defmethod composite-child :around ((type t) (key t)
-				    &key
-				    (error? t))
-  (or (call-next-method)
-      (when error?
-	(error 'no-such-child
-	       :key  key
-	       :type type))))
+See: `parent', `ancestors'."))
+
+(defgeneric composite? (type)
+  (:documentation
+   "Return non-nil when the data type TYPE is in some way composed of
+other types."))
+
+(defmethod composite? ((type t))
+  nil)
+
+
+;;; Typed protocol
+;;
+
+(defgeneric type1 (thing)
+  (:documentation
+   "Return a type instance representing the type of THING."))
 
 
 ;;; Field protocol for structure-like data types
 ;;
 
-(defgeneric field-name (field)
-  (:documentation
-   "Return the name of FIELD. The returned name uniquely identifies
-the field within its containing type."))
-
-(defgeneric field-type (field)
-  (:documentation
-   "Return the data type of FIELD."))
-
-(defgeneric field-optional? (field)
+(defgeneric optional? (field)
   (:documentation
    "Return non-nil if FIELD does not have to be present in
 realizations of its containing data type."))
+
+(defmethod optional? ((field t))
+  nil)

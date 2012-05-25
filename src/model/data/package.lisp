@@ -35,30 +35,54 @@
    :data-type-error
    :data-type-error-type
 
+   :child-error
+   :data-type-error-key
+
    :no-such-child
-   :data-type-error-key)
 
-  ;; Data type protocol
-  (:export
-   :data-type-name
-   :data-type-documentation)
+   :duplicate-child-key)
 
-  ;; Composite data type protocol
+  ;; Name protocol
   (:export
-   :data-type-composite?
-   :data-type-parent
-   :composite-children
-   :composite-child)
+   :name
+   :qname)
+
+  ;; Documentation protocol
+  (:export
+   :documentation1)
+
+  ;; Fundamental protocol
+  (:export
+   :category
+   :width)
+
+  ;; Composition protocol
+  (:export
+   :contents
+   :lookup
+   :query
+
+   :parent
+   :ancestors
+   :root
+
+   :composite?)
+
+  ;; Typed protocol
+  (:export
+   :type1)
 
   ;; Field protocol
   (:export
-   :field-name
-   :field-type
-   :field-optional?)
+   :optional?)
+
+  ;; Array protocol
+  (:export
+   :element-type
+   :index-type)
 
   ;; Singleton protocol
   (:export
-   :type1
    :value)
 
   ;; Mapping protocol
@@ -70,9 +94,20 @@
   (:export
    :named-mixin)
 
+  ;; `fundamental-type-mixin' and `*-with-mixin' classes
+  (:export
+   :fundamental-type-mixin
+
+   :fixed-width-mixin
+   :variable-width-mixin)
+
   ;; `composite-mixin' mixin class
   (:export
    :composite-mixin)
+
+  ;; `typed-mixin' mixin class
+  (:export
+   :typed-mixin)
 
   ;; `field-mixin' mixin class
   (:export
@@ -82,15 +117,38 @@
   (:export
    :structure-mixin)
 
-  ;; `singleton' data type class
+  ;; `array-mixin' mixin class
   (:export
-   :singleton)
+   :array-mixin)
+
+  ;; `toplevel-mixin'
+  (:export
+   :toplevel-mixin)
 
   ;; `mapping' class
   (:export
    :mapping)
 
+  ;; Data type class
+  (:export
+   :type-bool
+
+   :type-uint8 :type-uint16 :type-uint32  :type-uint64
+   :type-int8  :type-int16  :type-int32   :type-int64
+
+   :type-float32 :type-float64
+
+   :type-ascii-string
+   :type-utf-8-string
+
+   :base-field
+   :base-structure
+
+   :base-array
+
+   :singleton)
+
   (:documentation
    "This package contains protocols and classes which can be used to
-define data-type classes for use with the cl-rosetta backend. In
+define data-type classes for use with the rosetta backend. In
 Addition, some classes for common data-types are included."))

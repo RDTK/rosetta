@@ -75,15 +75,15 @@ and try to continue.~@:>"))
   nil)
 
 (defmethod validate-type ((mechanism t)
-			  (type      rs.m.d:composite-mixin)
+			  (type      composite-mixin)
 			  &key &allow-other-keys)
   (every (curry #'validate-type mechanism)
-	 (rs.m.d:composite-children type)))
+	 (contents type t)))
 
 (defmethod validate-type ((mechanism t)
-			  (type      rs.m.d::typed-mixin)
+			  (type      typed-mixin)
 			  &key &allow-other-keys)
-  (validate-type mechanism (rs.m.d:type1 type)))
+  (validate-type mechanism (type1 type)))
 
 
 ;;; Mechanisms

@@ -52,7 +52,7 @@ documentation can be associated."))
 instances of which represent named data types."))
 
 (defmethod print-items append ((object named-mixin))
-  (list (list :name (data-type-name object) "~S ")))
+  (list (list :name (name object) "~S ")))
 
 
 ;;; `typed-mixin' mixin class
@@ -101,7 +101,7 @@ associated parent object."))
 
 (defmethod qname ((type parented-mixin))
   (if-let ((parent (parent type)))
-    (append (qname parent) (list (data-type-name type)))    
+    (append (qname parent) (list (name type)))
     (list :absolute (name type))))
 
 ;; Hint for generic builders

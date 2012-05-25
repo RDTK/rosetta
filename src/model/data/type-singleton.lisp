@@ -41,5 +41,8 @@ which consist of singleton values."))
 		 :datum         value
 		 :expected-type type))))
 
+(defmethod name ((type singleton))
+  (format nil "=~A" (value type)))
+
 (defmethod print-items append ((type singleton))
   (list (list :value (value type))))

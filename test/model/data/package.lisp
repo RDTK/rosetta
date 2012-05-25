@@ -30,6 +30,9 @@
    :rosetta.test
    :rosetta.model.test)
 
+  (:shadow
+   :root)
+
   (:documentation
    "This package contains unit tests for the model.data module."))
 

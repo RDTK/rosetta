@@ -97,8 +97,7 @@
 		 (target   target-packed-size)
 		 (language t)
 		 &key)
-  (let+ (((&accessors-r/o (name field-name)
-			  (type field-type)) node)
+  (let+ (((&accessors-r/o name (type type1)) node)
 	 ((&env-r/o instance-var))
 	 ((&env (source-var `(slot-value ,instance-var ,(make-keyword name))))))
     (emit type target language)))
@@ -107,8 +106,7 @@
 		 (target   target-pack)
 		 (language t)
 		 &key)
-  (let+ (((&accessors-r/o (name field-name)
-			  (type field-type)) node)
+  (let+ (((&accessors-r/o name (type type1)) node)
 	 ((&env-r/o offset-var ((instance :source-var))))
 	 ((&env (source-var `(slot-value ,instance ,(make-keyword name))))))
     `(incf ,offset-var ,(emit type target language))))
@@ -117,8 +115,7 @@
 		 (target   target-unpack)
 		 (language t)
 		 &key)
-  (let+ (((&accessors-r/o (name field-name)
-			  (type field-type)) node)
+  (let+ (((&accessors-r/o name (type type1)) node)
 	 ((&env-r/o offset-var (destination-var nil) (instance-var nil)))
 	 ((&env (destination-var (progn
 				   (cond
@@ -140,7 +137,7 @@
 			 (target   target-packed-size)
 			 (language t)
 			 &key)
-  (if (composite-children node)
+  (if (contents node :fields)
       (call-next-method)
       0))
 
@@ -171,7 +168,7 @@
 			 (t
 			  (let+ (((&env (destination-var destination))))
 			    (recur child))))))))
-	      `(,',op ,@(mapcar #'do-child (composite-children node))))))))
+	      `(,',op ,@(map 'list #'do-child (contents node :fields))))))))
 
   (define-structure-method target-packed-size +)
   (define-structure-method target-pack        progn)
@@ -181,7 +178,7 @@
 ;;; Array types
 ;;
 
-(defmethod emit ((node     rs.m.d::array-mixin)
+(defmethod emit ((node     array-mixin)
 		 (target   target-packed-size)
 		 (language t)
 		 &key)
@@ -195,7 +192,7 @@
 	    (* ,(emit element-type target language)
 	       (length ,source-var))))))
 
-(defmethod emit ((node     rs.m.d::array-mixin)
+(defmethod emit ((node     array-mixin)
 		 (target   target-pack)
 		 (language t)
 		 &key)
@@ -217,7 +214,7 @@
 			       (offset-var `(+ ,offset-var (* ,element-size ,i))))))
 		   (emit element-type target language))))))))
 
-(defmethod emit ((node     rs.m.d::array-mixin)
+(defmethod emit ((node     array-mixin)
 		 (target   target-unpack)
 		 (language t)
 		 &key)
@@ -249,7 +246,7 @@
 
 (macrolet
     ((define-toplevel-method (target)
-       `(defmethod emit :around ((node     rs.m.d::toplevel-mixin)
+       `(defmethod emit :around ((node     toplevel-mixin)
 				 (target   ,target)
 				 (language t)
 				 &key)

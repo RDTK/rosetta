@@ -28,11 +28,22 @@
    "This error condition class is intended to used as a superclass for
 type-related error condition classes."))
 
-(define-condition no-such-child (data-type-error)
+(define-condition child-error (data-type-error)
   ((key :initarg  :key
 	:reader   data-type-error-key
 	:documentation
 	""))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Child key ~S caused an error within type ~S.~@:>"
+	     (data-type-error-key  condition)
+	     (data-type-error-type condition))))
+  (:documentation
+   "This class serves as a superclass for errors related to composite
+types and their children."))
+
+(define-condition no-such-child (child-error)
+  ()
   (:report
    (lambda (condition stream)
      (format stream "~@<The requested child type ~S could not be found ~
@@ -42,3 +53,15 @@ within the type ~S.~@:>"
   (:documentation
    "This error is signaled when a requested child type cannot be found
 within the specified container type."))
+
+(define-condition duplicate-child-key (child-error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The child key ~S is already in use within type
+~S.~@:>"
+	     (data-type-error-key  condition)
+	     (data-type-error-type condition))))
+  (:documentation
+   "This error is signaled when a attempt is made to add child to a
+composite structure using a key that which is already in use."))
