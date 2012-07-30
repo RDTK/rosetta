@@ -186,8 +186,9 @@
   :version     #.(version/string)
   :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the rosetta system."
-  :depends-on  (:rosetta
-		:lift)
+  :depends-on  ((:version :rosetta #.(version/string))
+
+		(:version :lift    "1.7.1"))
   :components  ((:file         "package"
 		 :pathname     "test/package")
 
