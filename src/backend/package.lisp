@@ -80,6 +80,9 @@
 
   ;; Macros
   (:export
+   :define-target
+   :define-mechanism-target
+   :define-mechanism-target/method
    :define-mechanism-targets
 
    :with-emit-symbols

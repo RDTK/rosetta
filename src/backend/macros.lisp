@@ -122,15 +122,83 @@ TARGET-VAR and push NODE-VAR onto the context stack."
        (declare (ignorable #'recur #'cget #'(setf cget) #'intern*))
        ,@body)))
 
+(defmacro define-target (name superclasses slots &body options)
+  "Define a mechanism named by the keyword NAME. SUPERCLASSES, SLOTS
+and OPTIONS have the same meaning as in `cl:defclass'."
+  (check-type name symbol)
+
+  (let ((spec       (make-keyword name))
+	(class-name (format-symbol *package* "TARGET-~A" name)))
+    `(progn
+       (defmethod find-target-class ((spec (eql ,spec)))
+	 (find-class ',class-name))
+
+       (defclass ,class-name (,@superclasses)
+	 (,@slots)
+	 ,@options))))
+
+(defmacro define-mechanism-target ((mechanism method)
+				   (&rest mixins))
+  "Define a target for the combination of MECHANISM and METHOD which
+have to be symbols."
+  (check-type mechanism symbol)
+  (check-type method    symbol)
+  (check-type mixins    list)
+
+  (let ((name       (symbolicate mechanism "-" method))
+	(superclass (symbolicate "TARGET-" method)))
+    `(define-target ,name (,superclass ,@mixins)
+	 ()
+       (:default-initargs
+	:mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
+       (:documentation
+	,(format nil "~A~2%This target class generates ~
+code that implements the ~(~A~) mechanism~:[.~;~:*:~2%~A~]"
+		 (documentation superclass 'type)
+		 mechanism
+		 (documentation mechanism 'type))))))
+
+(defmacro define-mechanism-target/method ((mechanism method)
+					  (&rest mixins))
+  "Define a method target for the combination of MECHANISM and METHOD
+which have to be symbols."
+  (check-type mechanism symbol)
+  (check-type method    symbol)
+  (check-type mixins    list)
+
+  (let ((name       (format-symbol *package* "~A-~A/METHOD" mechanism method))
+	(superclass (format-symbol *package* "TARGET-~A/METHOD" method))
+	(body-class (format-symbol *package* "TARGET-~A-~A" mechanism method)))
+    `(define-target ,name (,superclass ,@mixins)
+	 ()
+       (:default-initargs
+	:body-target (make-instance ',body-class))
+       (:documentation
+
+	,(format nil "The ~S target is a specialization of the ~S
+target which generates methods that implement the ~(~A~) function for
+the ~(~A~) mechanism.~@[~2%~A~]~@[~2%~A~]"
+		 name superclass method mechanism
+		 (documentation superclass 'type)
+		 (when-let ((mechanism (find-mechanism-class mechanism)))
+		   (documentation mechanism 'type)))))))
+
 (defmacro define-mechanism-targets
     (mechanism
      &key
      (prefix  "MECHANISM-")
-     (methods '(:packed-size :pack :unpack :location :extract))
+     (targets        '(:packed-size :pack :unpack :location :extract))
+     (method-targets targets)
      mixins)
-  "Define target classes for generating methods on \(all or some of)
-`packed-size', `pack', `unpack', `location' and `extract'."
-  (check-type mechanism symbol "a symbol")
+  "Define target classes for MECHANISM for TARGETS.
+TARGETS could, for example, be `packed-size', `pack', `unpack',
+`location' and `extract'."
+  (check-type mechanism symbol)
+  (check-type mixins    list)
+  (unless (subsetp method-targets targets)
+    (error "~@<~S ~S is not a subset of ~S ~S.~@:>"
+	   'method-targets method-targets
+	   'targets        targets))
 
   (let* ((mechanism-string (string mechanism))
 	 (base-name        (if (starts-with-subseq prefix mechanism-string)
@@ -138,24 +206,12 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 			       mechanism-string))
 	 (mechanism-spec   (make-keyword base-name)))
     `(progn
-       ,@(iter (for target in methods)
-	       (let ((spec       (format-symbol :keyword "~A-~A" base-name  target))
-		     (name       (symbolicate "TARGET-" base-name "-" target))
-		     (super-name (symbolicate "TARGET-" target)))
-		 (collect
-		     `(defmethod find-target-class ((spec (eql ,spec)))
-			(find-class ',name)))
-		 (collect
-		     `(defclass ,name (mechanism-target-mixin ,super-name ,@mixins)
-			()
-			(:default-initargs
-			 :mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism-spec)))
-			(:documentation
-			 ,(format nil "~A~2%This target class generates ~
-methods that implement the ~(~A~) mechanism: ~A"
-				  (documentation super-name 'type)
-				  base-name
-				  (documentation mechanism 'type))))))))))
+       ,@(iter (for target in targets)
+	       (collect `(define-mechanism-target
+			     (,mechanism-spec ,target) ,mixins))
+	       (when (member target method-targets)
+		 (collect `(define-mechanism-target/method
+			       (,mechanism-spec ,target) ,mixins)))))))
 
 
 ;;; let-plus extensions
@@ -180,7 +236,7 @@ methods that implement the ~(~A~) mechanism: ~A"
 		       ((&with-gensyms old)))
 		  (check-type name      (or null symbol))
 		  (check-type item-name keyword)
-		  
+
 		  ;; Collect a binding.
 		  (when name
 		    (collect `(,name ,value) :into bindings))
@@ -209,7 +265,7 @@ methods that implement the ~(~A~) mechanism: ~A"
 			(ensure-list name)))
 		  (check-type name      symbol)
 		  (check-type item-name keyword)
-		  
+
 		  (collect
 		      `(,name (context-get ,@context ,item-name
 					   :default ,default)))))))
