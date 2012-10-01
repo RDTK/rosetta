@@ -81,6 +81,7 @@
   ;; Macros
   (:export
    :define-target
+   :define-target/method
    :define-mechanism-target
    :define-mechanism-target/method
    :define-mechanism-targets
