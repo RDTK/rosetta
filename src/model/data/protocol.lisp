@@ -230,6 +230,38 @@ other types."))
    "Return a type instance representing the type of THING."))
 
 
+;;; Fundamental type protocol
+;;
+
+(defgeneric fundamental? (type)
+  (:documentation
+   "Return non-nil when TYPE is a fundamental data type."))
+
+(defgeneric category (type)
+  (:documentation
+   "Return a symbol indicating the category of the fundamental data
+type TYPE. Categories include :bool, :integer, :float, :string,
+etc."))
+
+(defgeneric width (type)
+  (:documentation
+   "Return the width in bits required to store values of data type
+TYPE, if it is a fixed-width data type."))
+
+(defgeneric signed? (type)
+  (:documentation
+   "Return non-nil if the integer data type TYPE is signed, that is
+allows negative values."))
+
+(defgeneric encoding (type)
+  (:documentation
+   "Return of string data type TYPE."))
+
+(defmethod fundamental? ((type t))
+  "Arbitrary types are non-fundamental be default."
+  nil)
+
+
 ;;; Field protocol for structure-like data types
 ;;
 

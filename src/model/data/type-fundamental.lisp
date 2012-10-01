@@ -1,4 +1,4 @@
-;;; type-fundamental.lisp ---
+;;; type-fundamental.lisp --- Fundamental data types.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -19,10 +19,23 @@
 
 (cl:in-package :rosetta.model.data)
 
+
+;;; `fundamental-type-mixin' mixin class
+;;
+
 (defclass fundamental-type-mixin ()
-  ()
+  ((category :initarg  :category
+	     :type     keyword
+	     :reader   category
+	     :documentation
+	     "Stores the category to which the type belongs. Examples
+are :integer, :string"))
+  (:default-initargs
+   :category (missing-required-initarg
+	      'fundamental-type-mixin :category))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This mixin class adds a category slot to data type classes
+representing fundamental data types."))
 
 (defmethod name ((type fundamental-type-mixin))
   (subseq (string (class-name (class-of type))) 5))
@@ -30,36 +43,77 @@
 (defmethod qname ((type fundamental-type-mixin))
   (list :absolute (name type)))
 
-(defmethod data-type-fundamental? ((type fundamental-type-mixin))
+(defmethod fundamental? ((type fundamental-type-mixin))
   t)
 
 
-;;;
+;;; `fixed-width-mixin' mixin class
 ;;
 
+(defclass fixed-width-mixin ()
+  ((width :initarg  :width
+	  :type     t ;; positive-integer
+	  :reader   width
+	  :documentation
+	  "Stores the amount of storage in bits required to store
+values of the data type."))
+  (:default-initargs
+   :width (missing-required-initarg 'fixed-width-mixin :width))
+  (:documentation
+   "This mixin class adds a width slot to data type classes
+representing (fundamental) data types which require a fixed amount of
+storage."))
 
-(defmacro define-fundamental-type (name (&rest supertypes) category width)
-  (let ((name (symbolicate "TYPE-" name)))
-   `(progn
-      (defclass ,name (,@supertypes fundamental-type-mixin)
-	())
+
+;;; `variable-width-mixin' mixin class
+;;
 
-      (defmethod category ((type ,name))
-	,category)
+(defclass variable-width-mixin ()
+  ()
+  (:documentation
+   "This mixin class is intended to used as a superclass for data type
+classes representing data types which require a variable amount of
+storage."))
 
-      (defmethod width ((type ,name)) ;;; TODO(jmoringe, 2012-04-12): temp
-	,width))))
+
+;;; Concrete fundamental types
+;;
 
-;; :lisp-type boolean
-(define-fundamental-type bool () :bool 1)
+(eval-when (:compile-toplevel :load-toplevel)
+  (defmacro define-fundamental-type ((name (&rest supertypes) category)
+				     &rest properties &key &allow-other-keys)
+    (let ((name (symbolicate "TYPE-" name)))
+      `(progn
+	 (defclass ,name (,@supertypes fundamental-type-mixin)
+	   ()
+	   (:default-initargs
+	    :category ,category
+	    ,@properties))))))
+
+(define-fundamental-type (bool (fixed-width-mixin) :bool)
+  :width 1)
+
+(defclass integer-mixin ()
+  ((signed? :initarg  :signed?
+	    :type     boolean
+	    :reader   signed?
+	    :documentation
+	    "Stores either nil or t to indicate whether the integer
+data type represents signed or unsigned integers."))
+  (:default-initargs
+   :signed? (missing-required-initarg 'integer-mixin :signed?))
+  (:documentation
+   "This mixin class adds a signed? slot to integer data type
+classes."))
 
 (macrolet
     ((define-fundamental-integer-type (signed? width)
-       (let ((name      (format-symbol *package* "~:[U~;~]INT~D"
-				       signed? width))
-	     (byte-type (if signed? 'signed-byte 'unsigned-byte)))
-	 ;; :lisp-type (,byte-type ,width)
-	 `(define-fundamental-type ,name () :integer ,width))))
+       (let ((name (format-symbol *package* "~:[U~;~]INT~D"
+				  signed? width)))
+	 `(define-fundamental-type
+	      (,name (fixed-width-mixin integer-mixin) :integer)
+	      :signed? ,signed?
+	      :width   ,width))))
 
   (define-fundamental-integer-type t    8)
   (define-fundamental-integer-type nil  8)
@@ -70,22 +124,30 @@
   (define-fundamental-integer-type t   64)
   (define-fundamental-integer-type nil 64))
 
-(define-fundamental-type float* () :float 32)
+(define-fundamental-type (float* (fixed-width-mixin) :float))
 
-;; :lisp-type single-float
-(define-fundamental-type float32 (type-float*) :float 32)
+(define-fundamental-type (float32 (type-float*) :float)
+  :width 32)
 
-;; :lisp-type double-float
-(define-fundamental-type float64 (type-float*) :float 64)
+(define-fundamental-type (float64 (type-float*) :float)
+  :width 64)
 
-;; :lisp-type string
-(define-fundamental-type string* () :string :variable)
+(defclass string-mixin ()
+  ((encoding :initarg  :encoding
+	     :type     (or (eql t) keyword)
+	     :reader   encoding
+	     :documentation
+	     "Stores the encoding implied by the data type."))
+  (:documentation
+   "This mixin class adds an encoding slot to string type classes."))
 
-;; :lisp-type string
-(define-fundamental-type ascii-string (type-string*) :string :variable)
+(define-fundamental-type
+    (string* (variable-width-mixin string-mixin) :string))
 
-;; :lisp-type string
-(define-fundamental-type utf-8-string (type-string*) :string :variable)
+(define-fundamental-type (ascii-string (type-string*) :string)
+  :encoding :ascii)
 
-;; :lisp-type binio:octet-vector
-(define-fundamental-type octet-vector () :bytes :variable)
+(define-fundamental-type (utf-8-string (type-string*) :string)
+  :encoding :utf-8)
+
+(define-fundamental-type (octet-vector (variable-width-mixin) :bytes))

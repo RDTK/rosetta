@@ -51,11 +51,6 @@
   (:export
    :documentation1)
 
-  ;; Fundamental protocol
-  (:export
-   :category
-   :width)
-
   ;; Composition protocol
   (:export
    :contents
@@ -71,6 +66,14 @@
   ;; Typed protocol
   (:export
    :type1)
+
+  ;; Fundamental type protocol
+  (:export
+   :fundamental?
+   :category
+   :width
+   :signed?
+   :encoding)
 
   ;; Field protocol
   (:export
@@ -136,10 +139,14 @@
    :type-uint8 :type-uint16 :type-uint32  :type-uint64
    :type-int8  :type-int16  :type-int32   :type-int64
 
+   :type-float*
    :type-float32 :type-float64
 
+   :type-string*
    :type-ascii-string
    :type-utf-8-string
+
+   :type-octet-vector
 
    :base-field
    :base-structure
