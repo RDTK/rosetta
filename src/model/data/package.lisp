@@ -148,6 +148,9 @@
 
    :type-octet-vector
 
+   :enum-value
+   :enum
+
    :base-field
    :base-structure
 

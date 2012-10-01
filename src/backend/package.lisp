@@ -30,8 +30,11 @@
    :more-conditions
 
    :rosetta.model.data
+   :rosetta.model.language
+   :rosetta.model.serialization)
 
-   :rosetta.model.language)
+  (:shadowing-import-from :rosetta.model.data
+   :name)
 
   ;; Conditions
   (:export)
