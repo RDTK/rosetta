@@ -31,8 +31,17 @@ operate on textual input data."))
 		  &rest args &key &allow-other-keys)
   "Open a character input stream for the file designated by SOURCE and
 call a method specialized on streams."
-  (with-input-from-file (stream source)
-    (apply #'parse format stream builder args)))
+  (handler-bind ((location-condition
+		  #'(lambda (condition)
+		      (let+ (((&accessors-r/o location) condition)
+			     ((&accessors (source1 source) source-content) location))
+			(unless (pathnamep source1)
+			  (setf source1 source))
+			(unless source-content
+			  (setf source-content
+				(read-file-into-string source)))))))
+    (with-input-from-file (stream source)
+      (apply #'parse format stream builder args))))
 
 (defmethod parse ((format  text-format-mixin)
 		  (source  string)
@@ -40,5 +49,11 @@ call a method specialized on streams."
 		  &rest args &key &allow-other-keys)
   "Create an input stream for the content of SOURCE and call a method
 specialized on streams."
-  (with-input-from-string (stream source)
-    (apply #'parse format stream builder args)))
+  (handler-bind ((location-condition
+		  #'(lambda (condition)
+		      (let+ (((&accessors-r/o location) condition)
+			     ((&accessors source-content) location))
+			(unless source-content
+			  (setf source-content source))))))
+    (with-input-from-string (stream source)
+      (apply #'parse format stream builder args))))

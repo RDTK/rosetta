@@ -130,3 +130,45 @@ during parsing."
 
   (define-frontend-conditions warning)
   (define-frontend-conditions error :parse-name parse-error1))
+
+
+;;; Dependency errors
+;;
+
+(define-condition dependency-error (error)
+  ((dependency :initarg  :dependency
+	       :reader   dependency-error-dependency
+	       :documentation
+	       ""))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Dependency ~S caused an error.~@:>"
+	     (dependency-error-dependency condition))))
+  (:documentation
+   "This error and subclasses are signaled when a dependency causes an
+error."))
+
+(define-condition cannot-resolve-dependency (dependency-error)
+  ((locations :initarg  :locations
+	      :type     list
+	      :reader   dependency-error-locations
+	      :initform nil
+	      :documentation
+	      "Locations that have been consulted when trying to
+resolve the dependency."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The dependency ~S could not be resolved. ~:[No ~
+locations have been tried. Check dependency handler~;~:*These ~
+locations have been tried: ~{~S~^, ~}~].~@:>"
+	     (dependency-error-dependency condition)
+	     (dependency-error-locations  condition))))
+  (:documentation
+   "This error is signaled dependency cannot be found or loaded."))
+
+(defun cannot-resolve-dependency (dependency &optional locations)
+  "Convenience function for signaling `cannot-resolve-dependency'
+errors."
+  (error 'cannot-resolve-dependency
+	 :dependency dependency
+	 :locations  locations))

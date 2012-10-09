@@ -24,6 +24,7 @@
   (:use
    :cl
    :alexandria
+   :iterate
    :let-plus
    :more-conditions
 
@@ -43,7 +44,13 @@
 
    :processing-error
 
-   :processing-warning)
+   :processing-warning
+
+   :dependency-error
+   :dependency-error-dependency
+
+   :cannot-resolve-dependency
+   :dependency-error-locations)
 
   ;; Location protocol
   (:export
@@ -81,6 +88,16 @@
   ;; `text-format-mixin' mixin class
   (:export
    :text-format-mixin)
+
+  ;; Comment attaching protocol
+  (:export
+   :most-recent-comment
+   :comment
+   :comment?)
+
+  ;; Dependency resolution protocol
+  (:export
+   :resolve)
 
   (:documentation
    "This package contains frontend-related protocols and

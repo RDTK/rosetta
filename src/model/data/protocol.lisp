@@ -315,3 +315,63 @@ number of elements."))
    "Upgrade the forward reference INSTANCE to OTHER by changing its
 class to the class of OTHER and copying all slot values from OTHER to
 INSTANCE."))
+
+
+;;; Builder protocol
+;;
+
+(defgeneric find-node (builder kind
+		       &rest args
+		       &key
+		       if-does-not-exist
+		       &allow-other-keys)
+  (:documentation
+   "Use BUILDER to find and return the node described by KIND and
+ARGS.
+
+IF-DOES-NOT-EXIST determines the behavior in case the requested node
+does not exist.
+
+When a requested node cannot be found and IF-DOES-NOT-EXIST is a
+function, the function is called with a `use-value' restart
+established."))
+
+(defgeneric make-node (builder kind
+		       &rest args
+		       &key &allow-other-keys)
+  (:documentation
+   "Use BUILDER to create and return a node described by KIND and
+ARGS."))
+
+(defgeneric add-child (builder parent child)
+  (:documentation
+   "Use BUILDER to add CHILD to PARENT. Return the modified PARENT."))
+
+(defmethod find-node :around ((builder t) (kind t)
+			      &key
+			      qname
+			      (if-does-not-exist #'error)
+			      &allow-other-keys)
+  "Default behavior in case a requested node cannot be found."
+  (or (call-next-method)
+      (etypecase if-does-not-exist
+	(null
+	 nil)
+	(function
+	 (restart-case
+	     (funcall if-does-not-exist
+		      (make-condition 'no-such-child
+				      :type builder
+				      :key  (list kind qname))) ;; TODO condition
+	   (use-value (value)
+	     value))))))
+
+
+;;; Builder class family
+;;
+
+(intern "BUILDER") ;; (documentation 'builder 'dynamic-classes:class-family)
+
+(dynamic-classes:define-findable-class-family builder
+  "This class family consists of classes whose instances implement the
+builder protocol.")

@@ -31,5 +31,11 @@ formats."))
 		  &rest args &key &allow-other-keys)
   "Open a binary input stream for the file designated by SOURCE and
 call a method specialized on streams."
-  (with-input-from-file (stream source :element-type '(unsigned-byte 8))
-    (apply #'parse format stream builder args)))
+  (handler-bind ((location-condition
+		  #'(lambda (condition)
+		      (let+ (((&accessors-r/o location) condition)
+			     ((&accessors (source1 source)) location))
+			(unless (pathnamep source1)
+			  (setf source1 source))))))
+    (with-input-from-file (stream source :element-type '(unsigned-byte 8))
+      (apply #'parse format stream builder args))))

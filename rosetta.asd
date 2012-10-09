@@ -174,17 +174,27 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "package")
 			      (:file       "types"
 			       :depends-on ("package"))
-			      (:file       "locations"
-			       :depends-on ("types"))
-			      (:file       "conditions"
-			       :depends-on ("package" "types" "locations"))
 			      (:file       "protocol"
 			       :depends-on ("package" "types"))
+			      (:file       "locations"
+			       :depends-on ("package" "types"
+					    "protocol"))
+			      (:file       "conditions"
+			       :depends-on ("package" "types"
+					    "locations"))
+			      (:file       "util"
+			       :depends-on ("package"))
 
+			      (:file       "builder-mixins"
+			       :depends-on ("package" "protocol"))
 			      (:file       "text-format-mixin"
 			       :depends-on ("package" "protocol"))
 			      (:file       "binary-format-mixin"
-			       :depends-on ("package" "protocol"))))
+			       :depends-on ("package" "protocol"))
+
+			      (:file       "builder"
+			       :depends-on ("package" "protocol"
+					    "util" "builder-mixins"))))
 
 		(:module     "backend-early"
 		 :pathname   "src/backend"

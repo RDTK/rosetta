@@ -30,6 +30,12 @@
 
    :rosetta)
 
+  ;; Types
+  (:export
+   :name-component
+   :name/absolute
+   :name/relative)
+
   ;; Conditions
   (:export
    :data-type-error
@@ -164,11 +170,26 @@
 
    :singleton)
 
+  (:export
+   :package1)
+
   ; Forward reference protocol and class
   (:export
    :upgrade!
 
    :forward-reference)
+
+  ;; Builder protocol
+  (:export
+   :find-node
+   :make-node
+   :add-child)
+
+  ;; Builder class family
+  (:export
+   :no-such-builder-class
+   :find-builder-class
+   :builder-classes)
 
   (:documentation
    "This package contains protocols and classes which can be used to

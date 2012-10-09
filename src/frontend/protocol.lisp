@@ -20,68 +20,6 @@
 (cl:in-package :rosetta.frontend)
 
 
-;;; Formats
-;;
-
-(intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:format)
-
-(dynamic-classes:define-findable-class-family format
-    "This family consists of input format classes. Each input format
-class is associated with input sources, encodings and syntax. Input
-formats may be file-based, stream-based, buffer-based, may use textual
-or binary encodings and may be expressed using different kind of
-grammars. Furthermore, input formats may describe semantically
-different aspects like data types and software system components."
-  (:package *package*))
-
-(defmethod documentation ((thing symbol) (type (eql 'format)))
-  "Obtain documentation of type FORMAT from the target class
-designated by THING."
-  (documentation (find-format-class thing) t))
-
-
-;;; Builder
-;;
-
-(intern "BUILDER")
-
-
-
-
-;;; Parse protocol
-;;
-
-(defgeneric parse (format source builder
-		   &key
-		   dependency-handler)
-  (:documentation
-   "Parse content of SOURCE assuming it uses the format or syntax
-described by FORMAT. Return an object that represents the parsed
-content.
-
-DEPENDENCY-HANDLER has to be a function of single argument that
-accepts a source and loads the content of the resource designated by
-the source. If this fails for some reason, the supplied function
-should signal an error of a subtype of `dependency-error' such as
-`cannot-resolve-dependency'."))
-
-
-;;; Format class lookup
-;;
-
-(defmethod parse ((format list) (source t) (builder t)
-		  &rest args &key &allow-other-keys)
-  (let+ (((format-name &rest format-args) format)
-	 (format-class    (find-format-class format-name))
-	 (format-instance (apply #'make-instance
-				 format-class format-args)))
-    (apply #'parse format-instance source builder args)))
-
-(defmethod parse ((format symbol) (source t) (builder t)
-		  &rest args &key &allow-other-keys)
-  (apply #'parse (list format) source builder args))
-
-
 ;;; Source and location protocol
 ;;
 
@@ -134,3 +72,101 @@ there is no such information."))
   (:documentation
    "Set the location information for FOR within REPOSITORY to
 NEW-VALUE."))
+
+
+;;; Parse protocol
+;;
+
+(defgeneric parse (format source builder
+		   &key &allow-other-keys)
+  (:documentation
+   "Parse content of SOURCE assuming it uses the format or syntax
+described by FORMAT. Return an object that represents the parsed
+content."))
+
+;; error handling
+
+(define-condition-translating-method
+    parse ((format standard-object) (source t) (builder t)
+				    &key &allow-other-keys)
+  (((and error (not processing-error)) parse-error1)
+   :location (make-instance 'location-info
+			    :source source)
+   :builder  builder)
+  (((and warning (not processing-warning)) parse-warning
+					   :signal-via warn)
+   :location (make-instance 'location-info
+			    :source source)
+   :builder  builder))
+
+;; Format class lookup
+
+(defmethod parse ((format list) (source t) (builder t)
+		  &rest args &key &allow-other-keys)
+  (let+ (((format-name &rest format-args) format)
+	 (format-class    (find-format-class format-name))
+	 (format-instance (apply #'make-instance
+				 format-class format-args)))
+	(apply #'parse format-instance source builder args)))
+
+(defmethod parse ((format symbol) (source t) (builder t)
+		  &rest args &key &allow-other-keys)
+  (apply #'parse (list format) source builder args))
+
+
+;;; Formats
+;;
+
+(intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:format)
+
+(dynamic-classes:define-findable-class-family format
+  "This family consists of input format classes. Each input format
+class is associated with input sources, encodings and syntax. Input
+formats may be file-based, stream-based, buffer-based, may use textual
+or binary encodings and may be expressed using different kind of
+grammars. Furthermore, input formats may describe semantically
+different aspects like data types and software system components."
+  (:package *package*))
+
+(defmethod documentation ((thing symbol) (type (eql 'format)))
+  "Obtain documentation of type FORMAT from the target class
+designated by THING."
+  (documentation (find-format-class thing) t))
+
+
+;;; Comment attaching protocol
+;;
+
+(defgeneric most-recent-comment (builder for)
+  (:documentation
+   "Return the most recent comment (usually a string) encountered by
+BUILDER for object FOR or nil if there is no such comment."))
+
+(defgeneric (setf most-recent-comment) (new-value builder for)
+  (:documentation
+   "Set NEW-VALUE (usually a string) as the most recent comment
+encountered by BUILDER for object FOR."))
+
+(defgeneric comment (builder for)
+  (:documentation
+   "Return the complete comment object (usually a string, concatenated
+from individual comment strings) BUILDER created for object FOR."))
+
+(defgeneric (setf comment) (new-value builder for)
+  (:documentation
+   "Install NEW-VALUE as the complete comment object BUILDER should
+associate to object FOR."))
+
+(defgeneric comment? (builder thing)
+  (:documentation
+   "Return non-nil when BUILDER should treat THING as a comment."))
+
+
+;;; Dependency resolution protocol
+;;
+
+;;; TODO(jmoringe, 2012-10-27): think about interface
+(defgeneric resolve (resolver format kind pathname)
+  (:documentation
+   "Use RESOLVER to resolve the dependency described by FOMAT, KIND
+and PATHNAME."))
