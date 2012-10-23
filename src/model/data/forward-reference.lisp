@@ -1,4 +1,4 @@
-;;; forward-reference.lisp ---
+;;; forward-reference.lisp --- Representation of not-yet-defined things.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -19,23 +19,38 @@
 
 (cl:in-package :rosetta.model.data)
 
-(defclass forward-reference ()
+(defclass forward-reference (print-items-mixin)
   ((kind :initarg  :kind
-	 ;; :type     symbol
 	 :accessor kind
 	 :documentation
-	 "")
+	 "Stores a description of the kind of the object represented
+by this forward reference.")
    (args :initarg  :args
 	 :type     list
 	 :accessor args
 	 :documentation
-	 ""))
+	 "Stores the arguments that would have been passed to the
+object represented by this forward reference."))
+  (:default-initargs
+   :kind (missing-required-initarg 'forward-reference :kind)
+   :args (missing-required-initarg 'forward-reference :args))
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent unresolved references to model
+objects.
+
+They store all information that was available when the resolution of
+the reference failed. This information can later be used to resolve
+the reference and eventually replace (via `change-class') the forward
+reference object with the desired object."))
+
+(defmethod name ((thing forward-reference))
+  (format nil "F<~A~[ ~A~]>" (kind thing) (getf (args thing) :name)))
+
+(defmethod qname ((thing forward-reference))
+  (list :absolute (name thing)))
 
 (defmethod upgrade! ((instance forward-reference)
 		     (other    t))
-  "TODO(jmoringe): document"
   (let ((new-class (class-of other)))
     (apply #'change-class instance new-class nil)
     (iter (for slot in (closer-mop:class-slots new-class))
@@ -44,9 +59,6 @@
 		  (slot-value other name))))
     instance))
 
-(defmethod print-object ((object forward-reference) stream)
-  (print-unreadable-object (object stream :type t :identity t)
-    (format stream "~A ~A"
-	    (kind object)
-	    (when (>= (length (args object)) 2)
-	      (second (args object))))))
+(defmethod print-items append ((object forward-reference))
+  (list (list :kind (kind object))
+	(list :name (getf (args object) :name) "~@[ ~A~]")))

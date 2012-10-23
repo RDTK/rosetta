@@ -158,6 +158,12 @@
 
    :singleton)
 
+  ; Forward reference protocol and class
+  (:export
+   :upgrade!
+
+   :forward-reference)
+
   (:documentation
    "This package contains protocols and classes which can be used to
 define data-type classes for use with the rosetta backend. In

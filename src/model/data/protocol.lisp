@@ -272,3 +272,13 @@ realizations of its containing data type."))
 
 (defmethod optional? ((field t))
   nil)
+
+
+;;; Forward reference protocol
+;;
+
+(defgeneric upgrade! (instance other)
+  (:documentation
+   "Upgrade the forward reference INSTANCE to OTHER by changing its
+class to the class of OTHER and copying all slot values from OTHER to
+INSTANCE."))
