@@ -50,6 +50,9 @@
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod kind ((type enum))
+  :enum)
+
 (defmethod (setf lookup) :before ((new-value t)
 				  (container enum)
 				  (kind      (eql :value))

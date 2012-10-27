@@ -27,6 +27,9 @@
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod kind ((type package1))
+  :package)
+
 (defmethod qname ((package package1))
   (if-let ((parent (parent package)))
     (append (qname parent) (list (data-type-name package)))

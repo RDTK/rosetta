@@ -44,6 +44,8 @@
 
   ;; Name protocol
   (:export
+   :kind
+
    :name
    :qname)
 

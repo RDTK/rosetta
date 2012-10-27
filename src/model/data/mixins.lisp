@@ -264,6 +264,9 @@ types."))
   (:documentation
    "TODO(jmoringe): document"))
 
+(defmethod kind ((type field-mixin))
+  :field)
+
 
 ;;; `structure-mixin' mixin class
 ;;
@@ -311,6 +314,9 @@ consist of a collection of named fields."))
 		  :datum         fields
 		  :expected-type '(or sequence hash-table))))))
 
+(defmethod kind ((type structure-mixin))
+  :structure)
+
 ;; Hint for generic builders
 
 (defmethod add-child ((builder t)
@@ -341,6 +347,9 @@ consist of a collection of named fields."))
    "This class is intended to be mixed into type classes which
 represent array-like types which consist of an index type and an
 element type."))
+
+(defmethod kind ((type array-mixin))
+  :array)
 
 (defmethod fixed-size? ((type array-mixin))
   (let+ (((&accessors-r/o index-type) type))

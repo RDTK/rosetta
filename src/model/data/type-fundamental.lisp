@@ -37,6 +37,9 @@ are :integer, :string"))
    "This mixin class adds a category slot to data type classes
 representing fundamental data types."))
 
+(defmethod kind ((type fundamental-type-mixin))
+  :fundamental)
+
 (defmethod name ((type fundamental-type-mixin))
   (subseq (string (class-name (class-of type))) 5))
 
