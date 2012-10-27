@@ -274,6 +274,35 @@ realizations of its containing data type."))
   nil)
 
 
+;;; Array protocol
+;;
+
+(defgeneric element-type (array)
+  (:documentation
+   "Return the type object corresponding to the element type of
+ARRAY."))
+
+(defgeneric index-type (array)
+  (:documentation
+   "Return the type object corresponding to the index type of
+ARRAY."))
+
+(defgeneric fixed-size? (type)
+  (:documentation
+   "Return non-nil if the array type described by TYPE has a fixed
+number of elements."))
+
+
+;;; Singleton value protocol
+;;
+;; This protocol is provided by types whose extension is a single
+;; object.
+
+(defgeneric value (singleton)
+  (:documentation
+   "Return the value of SINGLETON."))
+
+
 ;;; Forward reference protocol
 ;;
 

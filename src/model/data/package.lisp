@@ -63,6 +63,10 @@
 
    :composite?)
 
+  ;; Storage protocol
+  (:export
+   :fixed-size?)
+
   ;; Typed protocol
   (:export
    :type1)
