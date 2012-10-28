@@ -394,3 +394,53 @@ cache parsing results."))
     (if key
 	(values (ensure-gethash key (%cache builder) (call-next-method)))
 	(call-next-method))))
+
+
+;;; `name-normalizing-mixin' mixin class
+;;
+
+(defclass name-normalizing-mixin ()
+  ((normalizer :initarg  :normalizer
+	       :type     function
+	       :reader   normalizer
+	       :documentation
+	       "Stores a function which is called to normalize
+names. The function has to accept the unnormalized names as its sole
+argument and return the normalized name."))
+  (:default-initargs
+   :normalizer (missing-required-initarg 'name-normalizing-mixin :normalizer))
+  (:documentation
+   "This mixin class adds to builder classes on-the-fly normalization
+of names in created/searched nodes.
+
+The actual normalization is performed by a function supplied when
+constructing the builder instance."))
+
+(macrolet
+    ((define-name-normalizing-method (name)
+       `(defmethod ,name :around ((builder name-normalizing-mixin)
+				  (kind    t)
+				  &rest args
+				  &key
+				  (name  nil name-supplied?)
+				  (qname nil qname-supplied?))
+	  (let+ (((&accessors-r/o normalizer) builder)
+		 ((&labels normalize-qname (name)
+		    (etypecase name
+		      (name
+		       (cons (first name) (mapcar normalizer (rest name))))
+		      (name-expression
+		       (cons (first name)
+			     (mapcar #'normalize-qname (rest name))))))))
+	    (apply #'call-next-method builder kind
+		   (append
+		    (when name-supplied?
+		      (check-type name string)
+		      (list :name (funcall normalizer name)))
+		    (when qname-supplied?
+		      (check-type qname name-expression)
+		      (list :qname (normalize-qname qname)))
+		    (remove-from-plist args :name :qname)))))))
+
+  (define-name-normalizing-method find-node)
+  (define-name-normalizing-method make-node))

@@ -163,6 +163,10 @@
   (:export
    :source-level-caching-mixin)
 
+  ;; `name-normalizing-mixin' mixin class
+  (:export
+   :name-normalizing-mixin)
+
   (:documentation
    "This package contains frontend-related protocols and
 infrastructure of the rosetta compiler.

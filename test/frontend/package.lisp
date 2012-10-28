@@ -31,8 +31,8 @@
    :more-conditions
    :lift
 
+   :rosetta
    :rosetta.model.data
-
    :rosetta.frontend)
 
   (:import-from :rosetta.frontend
@@ -45,14 +45,14 @@
    :frontend-root)
 
   (:documentation
-   "This package contains unit tests for the rosetta.frontend system"))
+   "This package contains unit tests for the frontend module"))
 
 (cl:in-package :rosetta.frontend.test)
 
 (deftestsuite frontend-root (root)
   ()
   (:documentation
-   "Root unit test suite for the rosetta.frontend system."))
+   "Root unit test suite for the frontend module."))
 
 
 ;;; `format-mock' mock class
@@ -79,6 +79,7 @@
 
   (let* ((package    (make-node builder :package
 				:qname  '(:absolute "foo")
+				:name   "foo"
 				:bounds '(1 . 2)))
 	 (import     (make-node builder :dependency/file
 				:format   :mock

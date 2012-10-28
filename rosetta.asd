@@ -105,6 +105,7 @@ See `version/list' for details on keyword parameters."
   :components  ((:module     "src"
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "util")
 			      (:file       "print-items")))
 
 		(:module     "model"
@@ -244,12 +245,14 @@ See `version/list' for details on keyword parameters."
   :depends-on  ((:version :rosetta #.(version/string))
 
 		(:version :lift    "1.7.1"))
-  :components  ((:file         "package"
-		 :pathname     "test/package")
+  :components  ((:module     "test"
+		 :serial     t
+		 :components ((:file       "package")
+			      (:file       "util")))
 
 		(:module     "serialization"
 		 :pathname   "test/serialization"
-		 :depends-on ("package")
+		 :depends-on ("test")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")
@@ -260,14 +263,14 @@ See `version/list' for details on keyword parameters."
 
 		(:module     "model"
 		 :pathname   "test/model"
-		 :depends-on ("package")
+		 :depends-on ("test")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")))
 
 		(:module     "model-data"
 		 :pathname   "test/model/data"
-		 :depends-on ("package" "model")
+		 :depends-on ("test" "model")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")
@@ -279,14 +282,14 @@ See `version/list' for details on keyword parameters."
 
 		(:module     "model-serialization"
 		 :pathname   "test/model/serialization"
-		 :depends-on ("package" "model")
+		 :depends-on ("test" "model")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")))
 
 		(:module     "frontend"
 		 :pathname   "test/frontend"
-		 :depends-on ("package" "model")
+		 :depends-on ("test" "model")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")
@@ -299,7 +302,7 @@ See `version/list' for details on keyword parameters."
 
 		(:module     "backend"
 		 :pathname   "test/backend"
-		 :depends-on ("package" "model-data")
+		 :depends-on ("test" "model-data")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")

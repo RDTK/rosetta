@@ -25,6 +25,8 @@
 (cl:defpackage :rosetta
   (:use
    :cl
+   :alexandria
+   :iterate
    :let-plus)
 
   ;; print-items mechanism and mixin class
@@ -32,6 +34,12 @@
    :print-items
 
    :print-items-mixin)
+
+  ;; Utilities
+  (:export
+   :camel-case-boundary?
+   :underscore-boundary?
+   :normalize-name)
 
   (:documentation
    "This package contains generic facilities used within the rosetta

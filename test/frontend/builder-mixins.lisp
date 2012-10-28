@@ -67,18 +67,21 @@ classes."
   "Execute BODY with an instance of CLASS (constructed with INITARGS)
 for CASES entries of which have to be of the form
 
-  (((FORMAT1 SOURCE1) (FORMAT2 SOURCE2) ...) EXPECTED)
+  (INITARGS ((FORMAT1 SOURCE1) (FORMAT2 SOURCE2) ...) EXPECTED)
 
-where FORMATN and SOURCEN have to be suitable arguments for `parse'
-and EXPECTED can be `parse-error1', `processing-error' or some other
+where INITARGS is a case-specific plist of initargs that should be
+passed to the constructed builder instance in addition to INITARGS and
+FORMATN and SOURCEN have to be suitable arguments for `parse' and
+EXPECTED can be `parse-error1', `processing-error' or some other
 object which is then used in BODY."
   (let ((result-var 'result))
-    `(ensure-cases (formats-and-sources expected)
+    `(ensure-cases (initargs formats-and-sources expected)
 	 (list ,@cases)
 
-       (let+ ((builder (make-instance ',class ,@initargs))
-	      (formats (mapcar #'first formats-and-sources))
-	      (sources (mapcar #'second formats-and-sources))
+       (let+ ((builder  (apply #'make-instance ',class
+			       (append initargs (list ,@initargs))))
+	      (formats  (mapcar #'first formats-and-sources))
+	      (sources  (mapcar #'second formats-and-sources))
 	      ((&flet do-it ()
 		 (lastcar (mapcar (rcurry #'process builder) formats sources)))))
 	 (case expected
@@ -113,10 +116,9 @@ object which is then used in BODY."
     (ensure-builder-cases (location-attaching-mixin-mock-builder
 			   :locations (make-instance 'location-repository)
 			   :resolver  (make-instance 'mock-resolver))
-	(`(((:mock #P"does-not-matter")) (()                                  ; all
-					  ,@bounds))
-	 `(((:mock "does-not-matter"))   ((:source-content "does-not-matter") ; all
-					  ,@bounds)))
+	(`(nil ((:mock #P"does-not-matter")) (() ,@bounds))                       ; all
+	 `(nil ((:mock "does-not-matter"))   ((:source-content "does-not-matter") ; all
+					      ,@bounds)))
 
       (let+ (((expected/all
 	       expected/package expected/import
@@ -159,7 +161,7 @@ object which is then used in BODY."
   parse/smoke
 
   (ensure-builder-cases (comment-attaching-mixin-mock-builder)
-      ('(((:mock "does-not-matter")) (nil "comment1
+      ('(nil ((:mock "does-not-matter")) (nil "comment1
 comment2")))
 
     (let+ (((expected/structure expected/field) expected)
@@ -222,8 +224,8 @@ comment2")))
 
   (ensure-builder-cases (lazy-resolver-mixin-mock-builder
 			 :repository (make-instance 'rs.m.d::base-repository))
-      ('(((:mock "does-not-matter"))   nil)
-       '(((:mock "really-unresolved")) processing-error))))
+      ('(nil ((:mock "does-not-matter"))   nil)
+       '(nil ((:mock "really-unresolved")) processing-error))))
 
 
 ;;; `dependency-delegating-mixin' mixin class
@@ -239,7 +241,7 @@ comment2")))
 
   (ensure-builder-cases (dependency-delegating-mixin-mock-builder
 			 :resolver (make-instance 'mock-resolver))
-      ('(((:mock "does-not-matter")) ((:mock #P"some-file.mock"))))
+      ('(nil ((:mock "does-not-matter")) ((:mock #P"some-file.mock"))))
 
     (ensure-same (calls (resolver builder)) expected)))
 
@@ -260,20 +262,48 @@ comment2")))
 	(source4 #.(or *compile-file-truename* *load-truename*))
 	(source5 (merge-pathnames "../frontend/"
 				  #.(or *compile-file-truename* *load-truename*))))
-   (ensure-builder-cases (source-level-caching-mixin-mock-builder)
-       (;; All sources equal => should produce exactly one `parse'
-	;; call.
-	`(((:mock ,source1))                  (,source1))
-	`(((:mock ,source1) (:mock ,source1)) (,source1)) ; `eq' sources
-	`(((:mock ,source1) (:mock ,source2)) (,source1)) ; `equal' sources
-	`(((:mock ,source4) (:mock ,source4)) (,source4))
-	`(((:mock ,source4) (:mock ,source5)) (,source4)) ; `equal' under `truename'
-	`(((:mock ,source5) (:mock ,source4)) (,source5)) ; likewise
+    (ensure-builder-cases (source-level-caching-mixin-mock-builder)
+	(;; All sources equal => should produce exactly one `parse'
+	 ;; call.
+	 `(nil ((:mock ,source1))                  (,source1))
+	 `(nil ((:mock ,source1) (:mock ,source1)) (,source1)) ; `eq' sources
+	 `(nil ((:mock ,source1) (:mock ,source2)) (,source1)) ; `equal' sources
+	 `(nil ((:mock ,source4) (:mock ,source4)) (,source4))
+	 `(nil ((:mock ,source4) (:mock ,source5)) (,source4)) ; `equal' under `truename'
+	 `(nil ((:mock ,source5) (:mock ,source4)) (,source5)) ; likewise
 
-	;; Some sources not equal => should produce multiple `parse'
-	;; calls.
-	`(((:mock ,source1) (:mock ,source2)
-	   (:mock ,source3))                  (,source1 ,source3)))
+	 ;; Some sources not equal => should produce multiple `parse'
+	 ;; calls.
+	 `(nil ((:mock ,source1) (:mock ,source2)
+		(:mock ,source3))                  (,source1 ,source3)))
 
      (ensure-same (mapcar #'second (calls builder)) expected
 		  :test #'equal))))
+
+
+;;; `name-normalizing-mixin' mixin class
+;;
+
+(define-builder-mixin-suite name-normalizing-mixin ()
+  (:initargs (:normalizer #'normalize-name)))
+
+(addtest (name-normalizing-mixin-root
+          :documentation
+	  "Test transparent name normalization performed.")
+  parse/smoke
+
+  (ensure-builder-cases (name-normalizing-mixin-mock-builder)
+      (`((:normalizer ,#'string-capitalize) ((:mock #P"does-not-matter"))
+	 ((:relative "Foo" "Test")
+	  (:relative "Foo" "Test")
+	  (:relative "Foo" "Test" "Field")))
+       `((:normalizer ,#'string-upcase)     ((:mock #P"does-not-matter"))
+	 ((:relative "FOO" "TEST")
+	  (:relative "FOO" "TEST")
+	  (:relative "FOO" "TEST" "FIELD")))
+       `((:normalizer ,#'normalize-name)    ((:mock #P"does-not-matter"))
+	 ((:relative "foo" "test")
+	  (:relative "foo" "test")
+	  (:relative "foo" "test" "field"))))
+    (let ((root `(:package (,result) :name "")))
+      (iter (for spec in expected) (ensure (lookup root t spec))))))

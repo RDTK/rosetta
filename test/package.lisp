@@ -26,7 +26,9 @@
   (:use
    :cl
    :alexandria
-   :lift)
+   :lift
+
+   :rosetta)
 
   (:export
    :root)
