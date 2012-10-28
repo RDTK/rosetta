@@ -32,6 +32,17 @@
    "Return the wire-type of the serialization mechanism MECHANISM. The
 returned object models a type."))
 
+(defgeneric offset-type (mechanism)
+  (:documentation
+   "Return the type used by the serialization mechanism MECHANISM to
+represent offsets in binary buffers. The returned object models a
+type."))
+
+(defgeneric length-type (mechanism)
+  (:documentation
+   "Return the type used by the serialization mechanism MECHANISM to
+represent lengths of arrays. The returned object models a type."))
+
 (defgeneric validate-type (mechanism type
 			   &key
 			   if-invalid)

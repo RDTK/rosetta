@@ -134,7 +134,8 @@ See `version/list' for details on keyword parameters."
 		 :depends-on ("src" "model-data")
 		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "protocol")))
+			      (:file       "protocol")
+			      (:file       "mixins")))
 
 		(:module     "model-language"
 		 :pathname   "src/model/language"

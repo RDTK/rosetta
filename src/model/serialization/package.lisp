@@ -34,7 +34,11 @@
   ;; Mechanism protocol
   (:export
    :name
+
    :wire-type
+   :offset-type
+   :length-type
+
    :validate-type)
 
   ;; Mechanism class family
@@ -47,22 +51,33 @@
   (:export
    :mechanism)
 
+  ;; Mixins
+  (:export
+   :wire-type-mixin
+   :offset-type-mixin
+   :length-type-mixin)
+
   (:documentation
    "This package contains model elements which represent
 serializations.
 
-Each modeled serialization mechanism specializes the generic functions:
+Each modeled serialization mechanism specializes the generic
+functions:
 
 * `name'                            [generic function]
+
 * `wire-type'                       [generic function]
+* `offset-type'                     [generic function]
+* `length-type'                     [generic function]
+
 * `validate-type'                   [generic function]
 
 There is a family of serialization mechanisms which can be manipulated
 using:
 
 * `no-such-mechanism-class'         [condition]
-* `find-mechanism-class'            [method]
-* `mechanisms-classes'              [function]
+* `find-mechanism-class'            [generic function]
+* `mechanism-classes'               [function]
 
 See
 
