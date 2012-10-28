@@ -265,6 +265,13 @@ See `version/list' for details on keyword parameters."
 			      (:file       "named-mixin"
 			       :depends-on ("package"))
 			      (:file       "structure-mixin"
+			       :depends-on ("package"))))
+
+		(:module     "frontend"
+		 :pathname   "test/frontend"
+		 :depends-on ("package" "model")
+		 :components ((:file       "package")
+			      (:file       "util"
 			       :depends-on ("package"))))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))

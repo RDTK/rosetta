@@ -1,4 +1,4 @@
-;;; util.lisp --- Utilities used in the frontend package.
+;;; package.lisp --- Package definition for unit tests of the frontend module.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -22,22 +22,27 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :rosetta.frontend)
+(cl:defpackage :rosetta.frontend.test
+  (:use
+   :cl
+   :alexandria
+   :let-plus
+   :lift
 
-
-;;; File-format utilities
-;;
+   :rosetta.frontend)
 
-(defun guess-format (pathname)
-  "Try to guess the format of the data definition in the file
-designated by PATHNAME. Return two values: the name of the format and
-a boolean indicating whether a format class exists. When PATHNAME does
-not have a type, return nil."
-  (when-let* ((type (pathname-type pathname))
-	      (key  (string-upcase type)))
-    (unless (emptyp key)
-      (if-let ((spec (car (find key (rs.f:format-classes)
-				:test #'search
-				:key  (compose #'symbol-name #'car)))))
-	(values spec               t)
-	(values (make-keyword key) nil)))))
+  (:import-from :rosetta.frontend
+   :guess-format)
+
+  (:export
+   :frontend-root)
+
+  (:documentation
+   "This package contains unit tests for the rosetta.frontend system"))
+
+(cl:in-package :rosetta.frontend.test)
+
+(deftestsuite frontend-root (root)
+  ()
+  (:documentation
+   "Root unit test suite for the rosetta.frontend system."))

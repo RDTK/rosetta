@@ -1,4 +1,4 @@
-;;; util.lisp --- Utilities used in the frontend package.
+;;; util.lisp --- Unit tests for utility functions of the frontend module.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -22,22 +22,27 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :rosetta.frontend)
+(cl:in-package :rosetta.frontend.test)
 
-
-;;; File-format utilities
-;;
+(deftestsuite frontend-util-root (frontend-root)
+  ()
+  (:documentation
+   "Tests for utilities in the frontend module."))
 
-(defun guess-format (pathname)
-  "Try to guess the format of the data definition in the file
-designated by PATHNAME. Return two values: the name of the format and
-a boolean indicating whether a format class exists. When PATHNAME does
-not have a type, return nil."
-  (when-let* ((type (pathname-type pathname))
-	      (key  (string-upcase type)))
-    (unless (emptyp key)
-      (if-let ((spec (car (find key (rs.f:format-classes)
-				:test #'search
-				:key  (compose #'symbol-name #'car)))))
-	(values spec               t)
-	(values (make-keyword key) nil)))))
+(deftestsuite guess-format-root (frontend-util-root)
+  ()
+  (:documentation
+   "Unit tests for the `guess-format' function."))
+
+(addtest (guess-format-root
+          :documentation
+	  "Smoke test for the `guess-format' function.")
+  smoke
+
+  (ensure-cases (input format/expected found?/expected)
+      `((,#P"bla/"        nil             nil)  ; no type
+	(,#P"bla."        nil             nil)  ; empty type
+	(,#P"bla.bla"     :bla            nil)) ; unknown format class
+
+    (ensure-same (guess-format input)
+		 (values format/expected found?/expected))))
