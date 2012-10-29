@@ -117,6 +117,33 @@ TARGET-VAR and push NODE-VAR onto the context stack."
        (declare (ignorable #'recur #'cget #'(setf cget)))
        ,@body)))
 
+(defmacro optimization-case ((target) &body clauses)
+  "Similar to `cl:case' but dispatching on optimization settings in
+TARGET. CLAUSES consists of clauses of the form
+
+  (PREDICATE BODY)
+
+where PREDICATE is an expressions containing the symbols `cl:speed',
+`cl:debug', `cl:safety' and arbitrary expressions forms. PREDICATEs
+and BODY can rely on these symbols being bound to the respective
+optimization setting which is one of the integers 0, 1, 2 or 3."
+  (once-only (target)
+    (let+ ((qualities '(speed debug safety))
+	   ((&with-gensyms settings))
+	   ((&flet+ do-clause ((&whole clause condition &body body))
+	      (if (member condition qualities :test #'eq)
+		  (let ((remaining (remove condition qualities :test #'eq)))
+		   `((and (> ,condition ,(first remaining))
+			  (> ,condition ,(second remaining)))
+		     ,@body))
+		  clause))))
+      `(let* ((,settings (optimization-settings ,target))
+	      (speed     (or (second (find 'speed  ,settings :key #'first)) 1))
+	      (debug     (or (second (find 'debug  ,settings :key #'first)) 1))
+	      (safety    (or (second (find 'saftey ,settings :key #'first)) 1)))
+	 (declare (ignorable ,@qualities))
+	 (cond ,@(mapcar #'do-clause clauses))))))
+
 
 ;;;
 ;;

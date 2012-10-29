@@ -152,6 +152,8 @@
    :ancestors
    :recur
 
+   :optmization-case
+
    ;; let-plus
    :&env :&env-r/o
    :&context)
