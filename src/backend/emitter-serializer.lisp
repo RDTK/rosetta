@@ -4,57 +4,130 @@
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
-;; This Program is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; This file may be licensed under the terms of the GNU Lesser General
+;; Public License Version 3 (the ``LGPL''), or (at your option) any
+;; later version.
 ;;
-;; This Program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-;; GNU General Public License for more details.
+;; Software distributed under the License is distributed on an ``AS
+;; IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
+;; implied. See the LGPL for the specific language governing rights
+;; and limitations.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program. If not, see <http://www.gnu.org/licenses>.
+;; You should have received a copy of the LGPL along with this
+;; program. If not, go to http://www.gnu.org/licenses/lgpl.html or
+;; write to the Free Software Foundation, Inc., 51 Franklin Street,
+;; Fifth Floor, Boston, MA 02110-1301, USA.
+;;
+;; The development of this software was supported by:
+;;   CoR-Lab, Research Institute for Cognition and Robotics
+;;     Bielefeld University
 
 (cl:in-package :rosetta.backend)
 
 
-;;; Checks
+;;; Generic behavior
 ;;
 
-(defmethod emit :before ((node     t)
-			 (target   mechanism-target-mixin)
-			 (language t)
-			 &key
-			 (validate? t))
-  (when validate?
+;;; TODO(jmoringe, 2012-06-06): called too often: LANGUAGE may still be a symbol or list
+(defmethod generate :before ((node     t)
+			     (target   mechanism-target-mixin)
+			     (language t)
+			     &key)
+  (when (mechanism target) ;;; TODO(jmoringe, 2012-05-08): ok?
     (rs.m.s:validate-type (mechanism target) node)))
+
+#+difficult
+(macrolet
+    ((define-skip-method (type)
+       `(defmethod emit ((node     ,type)
+			 (target   target-pack)
+			 (language t)
+			 &key)
+	  (let+ (((&env-r/o source-var)))
+	    (if source-var
+		(call-next-method)
+		(generate node :packed-size language))))))
+
+  (define-skip-method fundamental-type-mixin)
+  (define-skip-method enum)
+  (define-skip-method structure-mixin))
 
 
 ;;; Fundamental types
 ;;
 
-(defmethod emit ((node     rs.m.d::fundamental-type-mixin)
-		 (target   target-packed-size)
-		 (language t)
-		 &key)
-  (ash (width node) -3))
+(defmethod emit/leaf ((node     fixed-width-mixin)
+		      (target   target-packed-size)
+		      (language t))
+  (max (ash (width node) -3) 1))
 
-(defmethod emit ((node     rs.m.d::type-octet-vector)
-		 (target   target-packed-size)
+(defmethod emit ((node     fixed-width-mixin)
+		 (target   target-unpack)
 		 (language t)
 		 &key)
-  (let+ (((&env-r/o source-var)))
-    `(length ,source-var)))
+  (let+ (((&env-r/o destination-var)))
+    (if destination-var
+	(call-next-method)
+	(generate node (list target :packed-size) language))))
 
-;;; TODO(jmoringe, 2012-04-24): variable-size-mixin
-(defmethod emit ((node     rs.m.d::type-string*)
+(macrolet
+    ((define-variable-width-method ((target &optional qualifier) &body body)
+       `(defmethod emit/leaf ,@(when qualifier `(,qualifier))
+	  ((node     variable-width-mixin)
+	   (target   ,target)
+	   (language t))
+	  (let+ ((mechanism (or (mechanism target)
+				(mechanism (second (second (stack *context*)))))) ;; TODO hack
+		 ((&accessors-r/o length-type) mechanism)
+		 (length-size (generate length-type :packed-size language)))
+	    ,@body))))
+
+  (define-variable-width-method (target-packed-size)
+    (let+ (((&env-r/o source-var)))
+      `(+ ,length-size ,(if source-var
+			    `(length ,source-var)
+			    0))))
+
+  (define-variable-width-method (target-pack :around)
+    (let+ (((&env-r/o source-var offset-var)))
+      `(+ ,(let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
+	     (generate length-type :pack language))
+	  ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size)))))
+	     (call-next-method)))))
+
+  (define-variable-width-method (target-unpack :around)
+    (let+ (((&env-r/o offset-var))
+	   ((&with-gensyms temp-var)))
+      `(let ((,temp-var))
+	 (declare (type ,(generate length-type :reference language) ,temp-var))
+	 (+ ,(let+ (((&env (destination-var temp-var))))
+	       (generate length-type :unpack language))
+	    ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size))
+			   (end-var    `(+ ,offset-var ,temp-var)))))
+		   (call-next-method)))))))
+
+
+;;; `typed-mixin'
+;;
+
+;;; TODO(jmoringe, 2012-05-10): simplify
+(defmethod emit ((node     typed-mixin)
 		 (target   target-packed-size)
 		 (language t)
 		 &key)
-  (let+ (((&env-r/o source-var)))
-    `(length ,source-var)))
+  (emit (type1 node) target language))
+
+(defmethod emit ((node     typed-mixin)
+		 (target   target-pack)
+		 (language t)
+		 &key)
+  (emit (type1 node) target language))
+
+(defmethod emit ((node     typed-mixin)
+		 (target   target-unpack)
+		 (language t)
+		 &key)
+  (emit (type1 node) target language))
 
 
 ;;; Singleton types
