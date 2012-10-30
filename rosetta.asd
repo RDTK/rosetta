@@ -268,6 +268,13 @@ See `version/list' for details on keyword parameters."
 			      (:file       "structure-mixin"
 			       :depends-on ("package"))))
 
+		(:module     "model-serialization"
+		 :pathname   "test/model/serialization"
+		 :depends-on ("package" "model")
+		 :components ((:file       "package")
+			      (:file       "protocol"
+			       :depends-on ("package"))))
+
 		(:module     "frontend"
 		 :pathname   "test/frontend"
 		 :depends-on ("package" "model")
