@@ -34,7 +34,15 @@
    :rosetta.model.data)
 
   (:shadow
-   :name)
+   :name
+   :type1)
+
+  ;; Conditions
+  (:export
+   :type-invalid-for-mechanism
+
+   :type1
+   :mechanism)
 
   ;; Mechanism protocol
   (:export

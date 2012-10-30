@@ -74,11 +74,9 @@ a condition object."))
 	(function
 	 (restart-case
 	     (funcall if-invalid
-		      (make-condition
-		       'simple-error
-		       :format-control   "~@<Type ~A is invalid for ~
-mechanism ~A.~@:>"
-		       :format-arguments (list type mechanism)))
+		      (make-condition 'type-invalid-for-mechanism
+				      :mechanism mechanism
+				      :type      type))
 	   (continue ()
 	     :report (lambda (stream)
 		       (format stream "~@<Ignore the incompatibility ~
@@ -99,13 +97,13 @@ and try to continue.~@:>"))
 (defmethod validate-type ((mechanism t)
 			  (type      typed-mixin)
 			  &key &allow-other-keys)
-  (validate-type mechanism (type1 type)))
+  (validate-type mechanism (rs.m.d:type1 type)))
 
 
 ;;; Mechanisms
 ;;
 
-(intern "MECHANISM") ;; for (documentation :MECHANISM 'rosetta.serialization:mechanism)
+(intern "MECHANISM") ; for (documentation MECHANISM 'rosetta.model.serialization:mechanism)
 
 (dynamic-classes:define-findable-class-family mechanism
     "This family consists of serialization mechanism classes. Each

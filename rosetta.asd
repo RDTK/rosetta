@@ -139,6 +139,7 @@ See `version/list' for details on keyword parameters."
 		 :depends-on ("src" "model-data")
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "conditions")
 			      (:file       "protocol")
 			      (:file       "mixins")))
 

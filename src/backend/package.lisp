@@ -39,7 +39,8 @@
    :rosetta.model.serialization)
 
   (:shadowing-import-from :rosetta.model.data
-   :name)
+   :name
+   :type1)
 
   ;; Conditions
   (:export)
