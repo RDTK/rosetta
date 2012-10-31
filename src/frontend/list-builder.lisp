@@ -1,6 +1,6 @@
-;;; binary-format-mixin.lisp --- Mixin class for format classes for binary formats.
+;;; list-builder.lisp --- Builder producing lists.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -24,23 +24,22 @@
 
 (cl:in-package :rosetta.frontend)
 
-(defclass binary-format-mixin ()
-  ()
-  (:documentation
-   "This class is intended to be mixed into format classes for binary
-formats."))
+(defmethod qname ((thing list))
+  (getf (nthcdr 2 thing) :qname))
 
-(defmethod parse ((format  binary-format-mixin)
-		  (source  pathname)
-		  (builder t)
-		  &rest args &key &allow-other-keys)
-  "Open a binary input stream for the file designated by SOURCE and
-call a method specialized on streams."
-  (handler-bind ((location-condition
-		  #'(lambda (condition)
-		      (let+ (((&accessors-r/o location) condition)
-			     ((&accessors (source1 source)) location))
-			(unless (pathnamep source1)
-			  (setf source1 source))))))
-    (with-input-from-file (stream source :element-type '(unsigned-byte 8))
-      (apply #'parse format stream builder args))))
+(defmethod find-node ((builder (eql 'list))
+		      (kind    t)
+		      &rest args &key &allow-other-keys)
+  (let+ (((kind nil &rest args) (apply #'make-node builder kind args)))
+    (list* (list :find kind) nil args)))
+
+(defmethod make-node ((builder (eql 'list))
+		      (kind    t)
+		      &rest args &key)
+  (list* kind nil args))
+
+(defmethod add-child ((builder (eql 'list))
+		      (parent  list)
+		      (child   t))
+  (appendf (second parent) (list child))
+  parent)

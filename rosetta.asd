@@ -194,14 +194,14 @@ See `version/list' for details on keyword parameters."
 
 			      (:file       "builder-mixins"
 			       :depends-on ("package" "protocol"))
-			      (:file       "text-format-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "binary-format-mixin"
+			      (:file       "format-mixins"
 			       :depends-on ("package" "protocol"))
 
-			      (:file       "builder"
+			      (:file       "model-builder"
 			       :depends-on ("package" "protocol"
-					    "util" "builder-mixins"))))
+					    "util" "builder-mixins"))
+			      (:file       "list-builder"
+			       :depends-on ("package" "protocol"))))
 
 		(:module     "backend-early"
 		 :pathname   "src/backend"

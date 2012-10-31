@@ -1,4 +1,4 @@
-;;; builder.lisp --- Builder for rosetta.model.data objects.
+;;; model-builder.lisp --- Builder for rosetta.model.data objects.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -23,10 +23,6 @@
 ;;     Bielefeld University
 
 (cl:in-package :rosetta.frontend)
-
-
-;;; model builder
-;;
 
 (defmethod find-builder-class ((spec (eql :model)))
   (find-class 'model-builder))
@@ -176,23 +172,3 @@ type with width ~D.~@>" signed? width)))
 (define-make-node :rule (lhs rhs)
   (cons lhs rhs))
 
-
-;;; list builder
-;;
-
-(defmethod find-node ((builder (eql 'list))
-		      (kind    t)
-		      &rest args &key &allow-other-keys)
-  (let+ (((kind nil &rest args) (apply #'make-node builder kind args)))
-    (list* (list :find kind) nil args)))
-
-(defmethod make-node ((builder (eql 'list))
-		      (kind    t)
-		      &rest args &key)
-  (list* kind nil args))
-
-(defmethod add-child ((builder (eql 'list))
-		      (parent  list)
-		      (child   t))
-  (appendf (second parent) (list child))
-  parent)
