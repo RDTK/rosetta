@@ -27,7 +27,8 @@
 (defmethod find-builder-class ((spec (eql :model)))
   (find-class 'model-builder))
 
-(defclass model-builder (location-attaching-mixin
+(defclass model-builder (dependency-delegating-mixin
+			 location-attaching-mixin
 			 comment-attaching-mixin
 			 lazy-resolver-mixin
 			 root-package-creating-mixin)
@@ -95,33 +96,6 @@ type with width ~D.~@>" signed? width)))
 (define-make-node :comment ((content string))
   content)
 
-;;; TODO(jmoringe, 2012-10-24): move into separate class
-(define-make-node :dependency/file ((pathname pathname))
-  (let+ ((search-path '("~/code/cor-lab/rst/trunk/rst/proto/stable/"))
-	 (locations (ecase (first (pathname-directory pathname))
-		      (:absolute
-		       (list pathname))
-		      (:relative
-		       (mapcar (curry #'merge-pathnames pathname)
-			       search-path))))
-	 (pathname/resolved
-	  ;; Restrict locations to existing files and process
-	  ;; candidate set.
-	  (let ((candidates (remove-if-not #'probe-file locations)))
-	    (cond
-	      ((emptyp candidates)
-	       (cannot-resolve-dependency pathname locations))
-	      ((length= 1 candidates)
-	       (first candidates))
-	      (t
-	       (ecase :first #+no if-ambiguous
-		      (:first (first candidates))
-		      (:error (error "ambiguous import ~A ~A" pathname candidates)))))))
-
-	 (format (guess-format pathname)))
-
-    (parse format pathname/resolved builder)))
-
 (define-make-node :constant ((name string) value)
   (warn "~@<Ignoring constant ~S = ~S~@:>" name value))
 
@@ -171,4 +145,3 @@ type with width ~D.~@>" signed? width)))
 
 (define-make-node :rule (lhs rhs)
   (cons lhs rhs))
-

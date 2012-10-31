@@ -145,6 +145,8 @@ during parsing."
 	       :reader   dependency-error-dependency
 	       :documentation
 	       ""))
+  (:default-initargs
+   :dependency (missing-required-initarg 'dependency-error :dependency))
   (:report
    (lambda (condition stream)
      (format stream "~@<Dependency ~S caused an error.~@:>"
@@ -177,3 +179,26 @@ errors."
   (error 'cannot-resolve-dependency
 	 :dependency dependency
 	 :locations  locations))
+
+(define-condition ambiguous-dependency (dependency-error)
+  ((candidates :initarg  :candidates
+	       :type     list
+	       :reader   dependency-error-candidates
+	       :initform nil
+	       :documentation
+	       "The set of candidates causing the ambiguity."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Ambiguous dependency ~S. Candidates are ~
+~{~S~^, ~}.~@:>"
+	     (dependency-error-dependency condition)
+	     (dependency-error-candidates condition))))
+  (:documentation
+   "This error is signaled if there are multiple candidates for a
+dependency and no resolution strategy has been specified."))
+
+(defun ambiguous-dependency (dependency &optional candidates)
+  "Convenience function for signaling `ambiguous-dependency' errors."
+  (error 'ambiguous-dependency
+	 :dependency dependency
+	 :candidates candidates))

@@ -192,9 +192,12 @@ See `version/list' for details on keyword parameters."
 			      (:file       "util"
 			       :depends-on ("package"))
 
+			      (:file       "format-mixins"
+			       :depends-on ("package" "protocol"))
+
 			      (:file       "builder-mixins"
 			       :depends-on ("package" "protocol"))
-			      (:file       "format-mixins"
+			      (:file       "resolvers"
 			       :depends-on ("package" "protocol"))
 
 			      (:file       "model-builder"

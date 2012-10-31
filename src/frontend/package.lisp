@@ -33,6 +33,7 @@
    :let-plus
    :more-conditions
 
+   :rosetta
    :rosetta.model.data)
 
   ;; Conditions
@@ -55,7 +56,10 @@
    :dependency-error-dependency
 
    :cannot-resolve-dependency
-   :dependency-error-locations)
+   :dependency-error-locations
+
+   :ambiguous-dependency
+   :dependency-error-candidates)
 
   ;; Location protocol
   (:export
@@ -103,6 +107,11 @@
   ;; Dependency resolution protocol
   (:export
    :resolve)
+
+  ;; Search path-based resolution protocol
+  (:export
+   :search-path
+   :if-ambiguous)
 
   (:documentation
    "This package contains frontend-related protocols and

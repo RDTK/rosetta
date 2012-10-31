@@ -308,8 +308,8 @@ reference and continue.~@:>")))))))
 	     "Stores an object implementing the resolver protocol
 which is consulted when dependencies have to be resolved."))
   (:default-initargs
-   :resolve (missing-required-initarg
-	     'dependency-delegating-mixin :resolver))
+   :resolver (missing-required-initarg
+	      'dependency-delegating-mixin :resolver))
   (:documentation
    "This class is intended to be mixed into builder classes which have
 to resolve dependencies."))
@@ -318,5 +318,9 @@ to resolve dependencies."))
 		      (kind    (eql :dependency/file))
 		      &key
 		      (pathname (required-argument :pathname))
-		      (format   ))
-  (resolve (resolver builder) format kind pathname))
+		      format)
+  (check-type pathname pathname)
+
+  (let+ (((&values format location)
+          (resolve (resolver builder) format pathname)))
+    (parse format location builder)))

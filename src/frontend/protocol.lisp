@@ -170,8 +170,38 @@ associate to object FOR."))
 ;;; Dependency resolution protocol
 ;;
 
-;;; TODO(jmoringe, 2012-10-27): think about interface
-(defgeneric resolve (resolver format kind pathname)
+(defgeneric resolve (resolver format location)
   (:documentation
-   "Use RESOLVER to resolve the dependency described by FOMAT, KIND
-and PATHNAME."))
+   "Use RESOLVER to resolve the dependency described by FORMAT,
+and LOCATION.
+
+FORMAT can be nil to indicate that the format is not known and should
+be derived from LOCATION, if possible."))
+
+(defmethod no-applicable-method  ((generic-function (eql #'resolve)) &rest args)
+  (let+ (((nil nil location) args))
+    (cannot-resolve-dependency location)))
+
+
+;;; Search path-based resolution protocol
+;;
+
+(defgeneric search-path (resolver)
+  (:documentation
+   "Return the list of paths consulted by RESOLVER to resolve pathname
+dependencies."))
+
+(defgeneric (setf search-path) (new-value resolver)
+  (:documentation
+   "Set the list of paths consulted by RESOLVER to resolve pathname
+dependencies to NEW-VALUE."))
+
+(defgeneric if-ambiguous (resolver)
+  (:documentation
+   "Return the policy RESOLVER applies when encountering ambiguous
+dependencies."))
+
+(defgeneric (setf if-ambiguous) (new-value resolver)
+  (:documentation
+   "Set the policy RESOLVER applies when encountering ambiguous
+dependencies to NEW-VALUE."))
