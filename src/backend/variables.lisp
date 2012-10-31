@@ -39,3 +39,12 @@ calls which describe what is being emitted.")
 (defvar *emit-print* nil
   "When non-nil, print concise messages to `*standard-output*' during
 `emit' calls. Analogue to `*load-print*'.")
+
+
+;;; Emission context
+;;
+
+(declaim (special *context*))
+
+(defvar *context* nil
+  "This variable holds the emission context of the current thread.")

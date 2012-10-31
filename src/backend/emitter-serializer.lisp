@@ -77,7 +77,7 @@
 	   (target   ,target)
 	   (language t))
 	  (let+ ((mechanism (or (mechanism target)
-				(mechanism (second (second (stack *context*)))))) ;; TODO hack
+				(mechanism (second (second (context-stack *context*)))))) ;; TODO hack
 		 ((&accessors-r/o length-type) mechanism)
 		 (length-size (generate length-type :packed-size language)))
 	    ,@body))))

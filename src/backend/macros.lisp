@@ -73,24 +73,18 @@ emit method for node ~S and target ~S.~@:>"
 		(setf ,result-var (list value)))))
 	 (values-list ,result-var)))))
 
-(defmacro with-updated-context ((node-var target-var &optional (language-var :keep))
+(defmacro with-updated-context ((node target
+				 &optional
+				 language
+				 (context '(or *context* (make-instance 'context))))
 				&body body)
   "During the execution of BODY, set the current target type to
 TARGET-VAR and push NODE-VAR onto the context stack."
-  (with-unique-names (old-target-var old-language-var)
-    `(let ((,old-target-var   (context-target *context*))
-	   (,old-language-var (context-language *context*)))
-       (setf (context-target   *context*) ,target-var
-	     ,@(unless (eq language-var :keep)
-		       `((context-language *context*) ,language-var)))
-       (push ,node-var (context-stack *context*))
-       (push (make-hash-table) (%context-environment *context*))
-       (unwind-protect
-	    (progn ,@body)
-	 (pop (%context-environment *context*))
-	 (pop (context-stack *context*))
-	 (setf (context-target   *context*) ,old-target-var
-	       (context-language *context*) ,old-language-var)))))
+  `(let ((*context* ,context))
+     (push-context ,node ,target ,language *context*)
+     (unwind-protect
+	  (progn ,@body)
+       (pop-context *context*))))
 
 
 ;;; Convenience macros for clients
@@ -109,8 +103,7 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 + cget, (setf cget) :: Retrieve and store values in the current
                        environment of context.
 + intern*           :: Similar to `intern' but use the context package."
-  `(symbol-macrolet ((package     (context-package *context*))
-		     (stack       (context-stack *context*))
+  `(symbol-macrolet ((stack       (context-stack *context*))
 		     (parent      (second (context-stack *context*)))
 		     (grandparent (third (context-stack *context*)))
 		     (ancestors   (rest (context-stack *context*))))
@@ -121,11 +114,13 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 	    (cget (key)
 	      (context-get *context* key))
 	    ((setf cget) (new-value key)
-	      (setf (context-get *context* key) new-value))
-	    (intern* (name) ;; TODO rename
-	      (intern name package)))
-       (declare (ignorable #'recur #'cget #'(setf cget) #'intern*))
+	      (setf (context-get *context* key) new-value)))
+       (declare (ignorable #'recur #'cget #'(setf cget)))
        ,@body)))
+
+
+;;;
+;;
 
 (defmacro define-target (name superclasses slots &body options)
   "Define a target named by the symbol NAME. SUPERCLASSES, SLOTS and

@@ -25,15 +25,15 @@
 (cl:in-package :rosetta.backend)
 
 
-;;; Targets
+;;; Target protocol and class family
 ;;
 
-(intern "TARGET") ;; for (documentation :TARGET 'rosetta.backend:target)
-
 (dynamic-classes:define-findable-class-family target
-    "This family consists of target classes. Each target class is used
+  "This family consists of target classes. Each target class is used
 to control the emission of one kind of thing based on an abstract
 description in form of model component instances.")
+
+(intern "TARGET") ; for (documentation :TARGET 'rosetta.backend:target)
 
 (defmethod documentation ((thing symbol) (type (eql 'target)))
   "Obtain documentation of type TARGET from the target class
@@ -55,20 +55,24 @@ designated by THING."
    "Store NEW-VALUE as the value of the item designated by KEY in
 CONTEXT."))
 
+(defgeneric context-node (context)
+  (:documentation
+   "Return node currently being processed in CONTEXT."))
+
+(defgeneric context-target (context)
+  (:documentation
+   "Return the target currently being processed in CONTEXT."))
+
+(defgeneric context-language (context)
+  (:documentation
+   "Return the language currently being processed in CONTEXT."))
+
+(defgeneric context-environment/alist (context)
+  (:documentation
+   "Return the environment stored in CONTEXT as an alist."))
+
 (defclass context ()
-  ((target      :initarg  :target
-		;; :type     standard-object
-		:accessor context-target
-		:initform nil ;;; TODO(jmoringe): type and default value?
-		:documentation
-		"Stores the target of the current emission process.")
-   (language    :initarg  :language
-		;; :type     standard-object
-		:accessor context-language
-		:initform nil ;;; TODO(jmoringe): type and default value?
-		:documentation
-		"")
-   (stack       :initarg  :stack
+  ((stack       :initarg  :stack
 		:type     list
 		:accessor context-stack
 		:initform nil
@@ -81,52 +85,80 @@ emission process.")
 		:initform (list (make-hash-table))
 		:documentation
 		"A stack of hash-tables that stores additional
-context-dependent information.")
-   (package     :initarg  :package
-		:type     (or null package)
-		:accessor context-package
-		:initform nil
-		:documentation
-		"The target package of the current emission process."))
+context-dependent information."))
   (:documentation
    "Instances of this class are used to keep track of the current
-state of a particular emission process. This state consists of:
-+ the emission target
-+ the stack of nodes currently being processed
-+ the package to which symbols are currently emitted"))
+state of a particular emission process.
+
+This state consists of:
+* A stack of triples consisting of the current
+  * node
+  * target
+  * language
+* A stack of variable bindings (called \"environment\")"))
 
 (defmethod context-get ((context context) (key symbol)
 			&key
 			default)
-  (or (some #'(lambda (env) (gethash key env))
-	    (%context-environment context))
-      (if (eq default :error)
-	  (error "~@<Required environment entry ~S is missing.~@:>"
-		 key)
-	  default)))
+  ;; The `first'/`list' trickery and use of multiple return values
+  ;; from `gethash' is necessary for correct handling of nil values.
+  (first
+   (or (some #'(lambda (env)
+		 (let+ (((&values value found?) (gethash key env)))
+		   (when found? (list value))))
+	     (%context-environment context))
+       (if (eq default :error)
+	   (error "~@<Required environment entry ~S is missing.~@:>"
+		  key)
+	   (list default)))))
 
 (defmethod (setf context-get) ((new-value t)
 			       (context   context)
 			       (key       symbol))
   (setf (gethash key (first (%context-environment context))) new-value))
 
+(defmethod context-node ((context context))
+  (first (first (context-stack context))))
+
+(defmethod context-target ((context context))
+  (second (first (context-stack context))))
+
+(defmethod context-language ((context context))
+  (third (first (context-stack context))))
+
+(defmethod context-environment/alist ((context context))
+  (remove-duplicates (mappend #'hash-table-alist
+			      (%context-environment context))
+		     :key      #'car
+		     :from-end t))
+
+(defun push-context (node target
+		     &optional language (context *context*))
+  "Push the tripe (NODE TARGET LANGUAGE) onto CONTEXT."
+  (push (list node target (or language (context-language context)))
+	(context-stack context))
+  (push (make-hash-table) (%context-environment context))
+  context)
+
+(defun pop-context (&optional (context *context*))
+  "Pop the current (node target language) triple from CONTEXT."
+  (let+ (((&accessors (environment %context-environment)
+		      (stack       context-stack)) context))
+    (unless (and environment stack)
+      (error "~@<Cannot pop from top-level context ~A.~@:>"
+	     context))
+
+    (pop environment)
+    (pop stack))
+  context)
+
 (defmethod print-object ((object context) stream)
-  (let+ (((&accessors-r/o (target   context-target)
-			  (language context-language)
-			  (stack    context-stack)
-			  (package  context-package)) object))
+  (let+ (((&accessors-r/o (target      context-target)
+			  (stack       context-stack)
+			  (environment context-environment/alist)) object))
    (print-unreadable-object (object stream :type t :identity t)
-     (format stream "~A [~:[no package~;~:*~A~]] ~A ~A (S ~D) (E ~D)"
-	     (first stack)
-	     (when package
-	       (package-name package))
-	     target language (length stack)
-	     (hash-table-count (first (%context-environment object)))))))
-
-(declaim (special *context*))
-
-(defvar *context* (make-instance 'context)
-  "This variable holds the emission context of the current thread.")
+     (format stream "~A (S ~D) (E ~D)"
+	     target (length stack) (length environment)))))
 
 
 ;;; Emit protocol

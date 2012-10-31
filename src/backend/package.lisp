@@ -45,21 +45,23 @@
   ;; Conditions
   (:export)
 
+  ;; Variables
+  (:export
+   :*context*)
+
   ;; Generic emitter
   (:export
    :emit)
 
-  ;; Context
+  ;; Context protocol
   (:export
-   :*context*
-
-   :context
-   :context-target
-   :context-language
    :context-stack
-   :context-package
-   :context-get
 
+   :context-node
+   :context-taget
+   :context-language
+
+   :context-environment/alist
    :context-get)
 
   ;; Targets
