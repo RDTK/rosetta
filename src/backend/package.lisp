@@ -79,6 +79,14 @@
   (:export
    :code-generating-target-mixin)
 
+  ;; General-purpose target classes
+  (:export
+   :target-class
+   :target-reference
+   :target-instantiate
+   :target-value->code
+   :target-code->value)
+
   ;; Serialization-related target classes
   (:export
    :serialization-mixin

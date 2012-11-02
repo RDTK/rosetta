@@ -46,6 +46,29 @@
 classes will not automatically have associated `pack' and `unpack'
 methods. These have to be generated separately."))
 
+(define-target reference (code-generating-target-mixin)
+  ()
+  (:documentation
+   "Emit a reference to a data type. In most cases, this corresponds
+to the name of the data type."))
+
+(define-target instantiate (code-generating-target-mixin)
+  ()
+  (:documentation
+   "Emit code for creating an instance of a data type."))
+
+(define-target value->code (code-generating-target-mixin)
+    ()
+  (:documentation
+   "Emit code for translating an numeric value to its corresponding
+symbolic value within an enumeration."))
+
+(define-target code->value (code-generating-target-mixin)
+    ()
+  (:documentation
+   "Emit code for translating a symbol value to its corresponding
+numeric value within an enumeration."))
+
 
 ;;; Serialization-related target classes
 ;;
