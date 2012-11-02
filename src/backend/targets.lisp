@@ -28,11 +28,7 @@
 ;;; Target class
 ;;
 
-(defmethod find-target-class ((spec (eql :class)))
-  (find-class 'target-class))
-
-;; stream-target-mixin
-(defclass target-class (code-generating-target-mixin)
+(define-target class (code-generating-target-mixin)
   ((metaclass    :initarg  :metaclass
 		 :type     (or null symbol)
 		 :reader   target-metaclass
@@ -55,28 +51,25 @@ methods. These have to be generated separately."))
 ;;
 
 (macrolet
-    ((define-serialization-target (spec)
-       (let ((class-name (format-symbol *package* "TARGET-~A" spec)))
-	 `(progn
-	    (defmethod find-target-class ((spec (eql ,spec)))
-	      (find-class ',class-name))
+    ((define-serialization-target (name)
+       `(define-target ,name (code-generating-target-mixin
+			      mechanism-target-mixin)
+	    ()
+	  (:default-initargs
+	   :mechanism nil) ;;; TODO(jmoringe, 2012-05-08): ok?
+	  (:documentation
+	   ,(format nil "The ~A target, for example, emits methods on ~
+`rosetta.serialization:~(~:*~A~)' or otherwise generates code for ~
+given serialization mechanisms and classes described by model ~
+component instances."
+		    name)))))
 
-	    (defclass ,class-name (code-generating-target-mixin
-				   mechanism-target-mixin)
-	      ()
-	      (:documentation
-	       ,(format nil "Target class for the \"~(~A~)\" target
-which, for example, emits methods on `rosetta.serialization:~(~:*~A~)'
-or otherwise generates code for given serialization mechanisms and
-classes described by model component instances."
-			spec)))))))
-
-  (define-serialization-target :packed-size)
-  (define-serialization-target :pack)
-  (define-serialization-target :unpack)
-  (define-serialization-target :location)
+  (define-serialization-target packed-size)
+  (define-serialization-target pack)
+  (define-serialization-target unpack)
+  (define-serialization-target location)
   ;; determine the location of a part of a structure within the serialized representation of that containing structure.
-  (define-serialization-target :extract)
+  (define-serialization-target extract)
   ;; to unpack individual parts of structures from serialized representations without unpacking the entire serialized representation.
   )
 
@@ -84,27 +77,9 @@ classes described by model component instances."
 ;;; Method target classes
 ;;
 
-(macrolet
-    ((define-method-target (name)
-       (let ((spec       (format-symbol :keyword "~A/METHOD" name))
-	     (class-name (format-symbol *package* "TARGET-~A/METHOD" name))
-	     (body-class (format-symbol *package* "TARGET-~A" name)))
-	`(progn
-	   (defmethod find-target-class ((spec (eql ,spec)))
-	     (find-class ',class-name))
-
-	   (defclass ,class-name (method-target-mixin)
-	     ()
-	     (:default-initargs
-	      :body-target (make-instance ',body-class))
-	     (:documentation
-	      ,(format nil "Target class for a method that delegates ~
-to the \"~(~A~)\" target which, for example, emits methods on ~
-`rosetta.serialization:~:*~(~A~)' or otherwise generates code for ~
-given serialization mechanisms and classes described by model ~
-component instances."
-		       name)))))))
-
-  (define-method-target packed-size)
-  (define-method-target pack)
-  (define-method-target unpack))
+(define-target/method packed-size ()
+    ())
+(define-target/method pack ()
+    ())
+(define-target/method unpack ()
+    ())

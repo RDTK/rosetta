@@ -81,13 +81,15 @@
 
   ;; Serialization-related target classes
   (:export
-   :serializtion-mixin
+   :serialization-mixin
    :target-mechanism
 
-   :target-packed-size :target-pack :target-unpack
+   :target-packed-size :target-packed-size/method
+   :target-pack        :target-pack/method
+   :target-unpack      :target-unpack/method
 
-   :target-location
-   :target-extract)
+   :target-location    :target-location/method
+   :target-extract     :target-extract/method)
 
   ;; Macros
   (:export
