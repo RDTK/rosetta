@@ -43,7 +43,16 @@
    :type1)
 
   ;; Conditions
-  (:export)
+  (:export
+   :emit-condition
+   :emit-condition-context
+   :emit-condition-node
+   :emit-condition-target
+   :emit-condition-language
+
+   :emit-error
+
+   :emit-warning)
 
   ;; Variables
   (:export

@@ -212,6 +212,7 @@ See `version/list' for details on keyword parameters."
 			      "serialization")
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "conditions")
 			      (:file       "variables")
 			      (:file       "macros")
 			      (:file       "protocol")))

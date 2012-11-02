@@ -152,6 +152,14 @@ This state consists of:
     (pop stack))
   context)
 
+(defun copy-context (context)
+  "Return a copy of CONTEXT."
+  (make-instance
+   'context
+   :stack       (copy-list (slot-value context 'stack))
+   :environment (mapcar #'copy-hash-table
+			(slot-value context 'environment))))
+
 (defmethod print-object ((object context) stream)
   (let+ (((&accessors-r/o (target      context-target)
 			  (stack       context-stack)
@@ -228,7 +236,13 @@ This state consists of:
 			 &key)
   (with-emit-restarts (node target)
     (with-updated-context (node target language)
-      (call-next-method))))
+      (with-condition-translation
+	  (((error emit-error)
+	    :context (copy-context *context*))
+	   ((warning emit-warning
+	     :signal-via warn)
+	    :context (copy-context *context*)))
+	(call-next-method)))))
 
 
 ;;; Default recursion behavior
