@@ -38,6 +38,9 @@
    :rosetta.model.language
    :rosetta.model.serialization)
 
+  (:shadow
+   :generate)
+
   (:shadowing-import-from :rosetta.model.data
    :name
    :type1)
@@ -58,8 +61,9 @@
   (:export
    :*context*)
 
-  ;; Generic emitter
+  ;; generate/emit protocol
   (:export
+   :generate
    :emit)
 
   ;; Context protocol
@@ -127,4 +131,25 @@
 
   (:documentation
    "This package contains backend-related protocols and infrastructure
-of the rosetta compiler."))
+of the rosetta compiler.
+
+* `generate'                        [generic function]
+
+There is a family of targets which can be manipulated using:
+
+* `no-such-target-class'            [condition]
+* `find-target-class'               [generic function]
+* `target-classes'                  [function]
+
+The names of some important targets are:
+
+* :class
+* :reference
+
+* :packed-size :packed-size/method
+* :pack        :pack/method
+* :unpack      :unpack/method
+
+See
+
+  (documentation SYMBOL 'rs.b:target)"))

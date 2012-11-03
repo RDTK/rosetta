@@ -64,7 +64,7 @@ methods."))
 		 (target   method-target-mixin)
 		 (language t)
 		 &key)
-  (emit node (body-target target) language))
+  (generate node (body-target target) language))
 
 
 ;;; `mechanism-target-mixin' mixin class

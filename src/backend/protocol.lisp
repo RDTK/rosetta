@@ -169,8 +169,17 @@ This state consists of:
 	     target (length stack) (length environment)))))
 
 
-;;; Emit protocol
+;;; Generate/emit protocol
 ;;
+
+(defgeneric generate (node target language
+		      &key
+		      verbose
+		      print
+		      &allow-other-keys)
+  (:argument-precedence-order language target node)
+  (:documentation
+   "Emit the appropriate object for NODE with respect to TARGET."))
 
 (defgeneric emit (node target language
 		  &key
@@ -181,37 +190,39 @@ This state consists of:
   (:documentation
    "Emit the appropriate object for NODE with respect to TARGET."))
 
+(defmethod generate ((node t) (target t) (language t)
+		     &key)
+  (emit node target language))
+
 
 ;;; Target class lookup
 ;;
 
-(defmethod emit ((node t) (target list) (language t)
-		 &key)
-  (let+ (((target-name &rest target-args) target)
-	 (target-class    (find-target-class target-name))
-	 (target-instance (apply #'make-instance
-				 target-class target-args)))
-    (emit node target-instance language)))
+(defmethod generate ((node t) (target list) (language t)
+		     &key)
+  (let+ (((name &rest args) target)
+	 (class (find-target-class name))
+	 (instance (apply #'make-instance class args)))
+    (generate node instance language)))
 
-(defmethod emit ((node t) (target symbol) (language t)
+(defmethod generate ((node t) (target symbol) (language t)
 		 &key)
-  (emit node (list target) language))
+  (generate node (list target) language))
 
 
 ;;; Language class lookup
 ;;
 
-(defmethod emit ((node t) (target t) (language list)
-		 &key)
-  (let+ (((language-name &rest language-args) language)
-	 (language-class    (rs.m.l::find-language-class language-name))
-	 (language-instance (apply #'make-instance
-				 language-class language-args)))
-    (emit node target language-instance)))
+(defmethod generate ((node t) (target t) (language list)
+		     &key)
+  (let+ (((name &rest args) language)
+	 (class    (rs.m.l:find-language-class name))
+	 (instance (apply #'make-instance class args)))
+    (generate node target instance)))
 
-(defmethod emit ((node t) (target t) (language symbol)
+(defmethod generate ((node t) (target t) (language symbol)
 		 &key)
-  (emit node target (list language)))
+  (generate node target (list language)))
 
 
 ;;; Housekeeping and such
@@ -231,8 +242,8 @@ This state consists of:
     (format *standard-output* "~@<; ~@;emitting (~A)~@:>~%" (type-of node))))
 
 (defmethod emit :around ((node     t)
-			 (target   standard-object)
-			 (language standard-object)
+			 (target   t)
+			 (language t)
 			 &key)
   (with-emit-restarts (node target)
     (with-updated-context (node target language)
@@ -243,11 +254,3 @@ This state consists of:
 	     :signal-via warn)
 	    :context (copy-context *context*)))
 	(call-next-method)))))
-
-
-;;; Default recursion behavior
-;;
-
-(defmethod emit ((node t) (target t) (language t)
-		 &key)
-  (values))
