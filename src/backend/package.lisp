@@ -71,15 +71,15 @@
    :context-stack
 
    :context-node
-   :context-taget
+   :context-target
    :context-language
 
    :context-environment/alist
    :context-get)
 
-  ;; Targets
+  ;; Target class family
   (:export
-   :no-such-target
+   :no-such-target-class
    :find-target-class
    :target-classes)
 
@@ -120,6 +120,7 @@
    :define-mechanism-target/method
    :define-mechanism-targets
 
+   :with-updated-context
    :with-emit-symbols
    :parent
    :grandparent
