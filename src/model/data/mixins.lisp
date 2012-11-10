@@ -46,7 +46,6 @@ documentation can be associated."))
 (defclass named-mixin ()
   ((name :initarg  :name
 	 :type     string
-	 :reader   data-type-name
 	 :reader   name
 	 :documentation
 	 "Stores the name of the data type."))
@@ -295,22 +294,26 @@ consist of a collection of named fields."))
 
   (setf (%fields instance)
 	(cond
+	  ;; No fields.
 	  ((or (null fields)
 	       (and (typep fields 'sequence) (emptyp fields)))
 	   (make-hash-table :test #'equal))
-	  ;; plist
+
+	  ;; plist.
 	  ((and (listp fields) (stringp (first fields)))
 	   (plist-hash-table fields :test #'equal))
-	  ;; sequence of named child instances
+
+	  ;; sequence of named child instances.
 	  ((and (typep fields 'sequence)
 		(not (emptyp fields))
 		(compute-applicable-methods
-		 #'data-type-name (list (elt fields 0))))
+		 #'name (list (elt fields 0))))
 	   (alist-hash-table (map 'list #'cons
-				  (map 'list #'data-type-name fields)
+				  (map 'list #'name fields)
 				  fields)
 			     :test #'equal))
-	  ;; hash-table of child instances
+
+	  ;; hash-table of child instances.
 	  ((hash-table-p fields)
 	   fields)
 
@@ -363,7 +366,7 @@ element type."))
 	     (every (of-type 'singleton) index-type)))))
 
 (defmethod print-items append ((type array-mixin))
-  (list (list :element-type (data-type-name (element-type type)))
+  (list (list :element-type (name (element-type type)))
 	(list :index-type   (mapcar #'(lambda (index)
 					(if (typep index 'singleton)
 					    (value index)

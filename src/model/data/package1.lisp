@@ -37,7 +37,7 @@
 
 (defmethod qname ((package package1))
   (if-let ((parent (parent package)))
-    (append (qname parent) (list (data-type-name package)))
+    (append (qname parent) (list (name package)))
     (list :absolute)))
 
 (defmethod contents/plist ((package package1))
