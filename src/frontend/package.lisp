@@ -61,6 +61,10 @@
    :ambiguous-dependency
    :dependency-error-candidates)
 
+
+;;; Location-related stuff
+;;
+
   ;; Location protocol
   (:export
    :source
@@ -71,9 +75,11 @@
 
    :location=)
 
-  ;; Location repository protocol
+  ;; Location repository protocol and class
   (:export
-   :location-of)
+   :location-of
+
+   :location-repository)
 
   ;; Location Utilities
   (:export
@@ -81,6 +87,10 @@
 
    :format-location
    :format-content)
+
+
+;;; Parsing- and format-related stuff
+;;
 
   ;; Parse protocol
   (:export
@@ -100,6 +110,10 @@
   (:export
    :text-format-mixin)
 
+
+;;; Builder-related stuff
+;;
+
   ;; Comment attaching protocol
   (:export
    :most-recent-comment
@@ -110,10 +124,32 @@
   (:export
    :resolve)
 
-  ;; Search path-based resolution protocol
+  ;; Search path-based resolution protocol and class
   (:export
    :search-path
-   :if-ambiguous)
+   :if-ambiguous
+
+   :search-path-resolver)
+
+  ;; `location-attach-mixin' mixin class
+  (:export
+   :location-attaching-mixin)
+
+  ;; `comment-attaching-mixin' mixin class
+  (:export
+   :comment-attaching-mixin)
+
+  ;; `root-package-creating-mixin' mixin class
+  (:export
+   :root-package-creating-mixin)
+
+  ;; `lazy-resolver-mixin' mixin class
+  (:export
+   :lazy-resolver-mixin)
+
+  ;; `dependency-delegating-mixin' mixin class
+  (:export
+   :dependency-delegating-mixin)
 
   ;; `source-level-caching-mixin' mixin class
   (:export
