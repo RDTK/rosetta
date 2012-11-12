@@ -56,8 +56,8 @@ string."))
 (defmethod shared-initialize :after ((instance   location-info)
                                      (slot-names t)
                                      &key
-				       bounds
-				       position)
+				     bounds
+				     position)
   (cond
     ((and bounds position)
      (error 'incompatible-initargs
@@ -90,6 +90,19 @@ string."))
 					    :from-end t))) ;;; TODO(jmoringe, 2012-05-21): function, use in format-content
 			(1+ position))
 		      0))))
+
+(defmethod location= ((left  location-info)
+		      (right location-info)
+		      &key
+		      (compare-source?         t)
+		      (compare-source-content? t)
+		      (compare-bounds?         t))
+  (and (or (not compare-source?)
+	   (equal (source left) (source right)))
+       (or (not compare-source-content?)
+	   (equal (source-content left) (source-content right)))
+       (or (not compare-bounds?)
+	   (equal (bounds left) (bounds right)))))
 
 (defmethod print-object ((object location-info) stream)
   (print-unreadable-object (object stream :type t :identity t)
@@ -136,8 +149,10 @@ produce a parser-friendly representation."
 	 (line/human-readable   (when line (1+ line)))
 	 (column/human-readable (when column (1+ column))))
     (if colon?
+	;; Textual format.
 	(format stream "~@[column ~D of ~]~@[line ~D of ~]~:[<unknown source>~;~:*~A~]"
 		column/human-readable line/human-readable source)
+	;; Grep-like format.
 	(format stream "~:[<unknown source>~;~:*~A~]~@[:~D~]~@[:~D~]"
 		source line/human-readable column/human-readable))))
 

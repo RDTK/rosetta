@@ -67,7 +67,9 @@
    :source-content
    :bounds
    :line
-   :column)
+   :column
+
+   :location=)
 
   ;; Location repository protocol
   (:export

@@ -64,6 +64,22 @@ start at 0.
 OF can be :START or :END and controls whether the line of the
 beginning or end of the region associated to THING is used."))
 
+(defgeneric location= (left right
+		       &key
+		       compare-source?
+		       compare-source-content?
+		       compare-bounds?)
+  (:documentation
+   "Compare locations LEFT and RIGHT for equality and return non-nil
+if they can be considered equal under the requested comparison.
+
+COMPARE-SOURCE? controls whether sources should be compared.
+
+COMPARE-SOURCE-CONTENT? controls whether the contents of sources
+should be compared.
+
+COMPARE-BOUNDS? controls whether bounds should be compared."))
+
 
 ;;; Location repository protocol
 ;;
