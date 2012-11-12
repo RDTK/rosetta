@@ -39,6 +39,7 @@
   (:export
    :name-component
    :name/absolute
+   :name-expression/absolute
    :name/relative)
 
   ;; Conditions

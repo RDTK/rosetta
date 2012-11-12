@@ -227,7 +227,7 @@ unresolved references as forward references and resolve them later."))
 				(qname                    (missing-required-argument :qname))
 				(if-does-not-exist        #'error)
 				(allow-forward-reference? t))
-	    (check-type qname (or name/absolute (cons (eql or)))) ;;; TODO(jmoringe, 2012-05-03):  proper type
+	    (check-type qname name-expression/absolute)
 
 	    (let+ (((&accessors-r/o repository) builder))
 	      (or (query repository kind qname)

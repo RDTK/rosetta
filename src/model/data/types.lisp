@@ -37,6 +37,12 @@
 (deftype name/absolute ()
   '(cons (eql :absolute) (or null name-components)))
 
+(deftype name-expression/absolute ()
+  "A `name/absolute' or a disjunction (with `cl:or') of multiple
+  `name/obsolute's."
+  '(or name/absolute
+       (cons (eql or) (cons name/absolute))))
+
 (deftype name/relative ()
   '(cons (eql :relative) name-components))
 
@@ -48,5 +54,4 @@
 ;;
 
 (defun %every-name-component (list)
-  "TODO(jmoringe): document"
   (every (of-type 'name-component) list))
