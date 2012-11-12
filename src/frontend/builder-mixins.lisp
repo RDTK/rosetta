@@ -324,3 +324,28 @@ to resolve dependencies."))
   (let+ (((&values format location)
           (resolve (resolver builder) format pathname)))
     (parse format location builder)))
+
+
+;;; `source-level-caching-mixin' mixin class
+;;
+
+(defclass source-level-caching-mixin ()
+  ((cache :type     hash-table
+	  :initform (make-hash-table :test #'equal)
+	  :reader   %cache
+	  :documentation
+	  "Stores a mapping from previously processed sources two the
+respectively produced results."))
+  (:documentation
+   "This class is intended to be mixed into builder classes which
+cache parsing results."))
+
+(defmethod parse :around ((format  t)
+			  (source  t)
+			  (builder source-level-caching-mixin)
+			  &key &allow-other-keys)
+  ;; Construct a key based on FORMAT and SOURCE and retrieve the
+  ;; parsing result from the cache or delegate to the next method to
+  ;; perform a parse.
+  (let ((key (cons format source)))
+    (ensure-gethash key (%cache builder) (call-next-method))))

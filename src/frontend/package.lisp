@@ -113,9 +113,23 @@
    :search-path
    :if-ambiguous)
 
+  ;; `source-level-caching-mixin' mixin class
+  (:export
+   :source-level-caching-mixin)
+
   (:documentation
    "This package contains frontend-related protocols and
 infrastructure of the rosetta compiler.
 
-In particular the `parse' generic function and function and some
-default methods are contained in this package."))
+* `parse'                           [generic function]
+
+There is a class family of format classes which can be manipulated
+using:
+
+* `no-such-format-class'            [condition]
+* `find-format-class'               [generic function]
+* `format-classes'                  [function]
+
+See
+
+  (documentation SYMBOL 'rs.f:format)"))

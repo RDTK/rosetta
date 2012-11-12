@@ -27,7 +27,8 @@
 (defmethod find-builder-class ((spec (eql :model)))
   (find-class 'model-builder))
 
-(defclass model-builder (dependency-delegating-mixin
+(defclass model-builder (source-level-caching-mixin
+			 dependency-delegating-mixin
 			 location-attaching-mixin
 			 comment-attaching-mixin
 			 lazy-resolver-mixin
