@@ -57,15 +57,16 @@ location information to elements."))
 				  (kind    t)
 				  &key
 				  bounds)
-		   (let+ (((&accessors-r/o locations) builder)
-			  (element (call-next-method)))
-		     (when element
-		       (setf (location-of locations element)
-			     (make-instance 'location-info
-					    :source         *source*
-					    :source-content *source-content*
-					    :bounds         bounds)))
-		     element))))
+
+	  (let+ (((&accessors-r/o locations) builder)
+		 (element (call-next-method)))
+	    (when (and element (not (location-of locations element)))
+	      (setf (location-of locations element)
+		    (make-instance 'location-info
+				   :source         *source*
+				   :source-content *source-content*
+				   :bounds         bounds)))
+	    element))))
   (define-method find-node)
   (define-method make-node))
 
@@ -82,7 +83,10 @@ location information to elements."))
 			  (source  string)
 			  (builder location-attaching-mixin)
 			  &key &allow-other-keys)
-  (let ((*source-content* source))
+  (let ((*source*         (if (and *source* (not (stringp *source*)))
+			      *source*
+			      source))
+	(*source-content* source))
     (call-next-method)))
 
 

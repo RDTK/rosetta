@@ -282,9 +282,10 @@ See `version/list' for details on keyword parameters."
 		(:module     "frontend"
 		 :pathname   "test/frontend"
 		 :depends-on ("package" "model")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "util"
-			       :depends-on ("package"))))))
+			      (:file       "util")
+			      (:file       "builder-mixins")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
