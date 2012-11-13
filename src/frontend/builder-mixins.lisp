@@ -60,6 +60,8 @@ location information to elements."))
 
 	  (let+ (((&accessors-r/o locations) builder)
 		 (element (call-next-method)))
+	    ;;; TODO(jmoringe, 2012-11-13): if ELEMENT already has a
+	    ;;; location, attach a sequence of locations
 	    (when (and element (not (location-of locations element)))
 	      (setf (location-of locations element)
 		    (make-instance 'location-info
@@ -219,66 +221,66 @@ building process."))
    "This mixin adds to builder classes the ability to treat initially
 unresolved references as forward references and resolve them later."))
 
-;;; TODO(jmoringe, 2012-05-03): do not repeat these methods
-;;; TODO(jmoringe, 2012-05-03): can we use toplevel-mixin?
 (macrolet
-    ((define-resolver-methods (kind)
+    ((define-resolver-methods (find? make? kind)
        `(progn
-	  (defmethod find-node ((builder lazy-resolver-mixin)
-				(kind    ,kind)
-				&rest args
-				&key
-				(qname                    (missing-required-argument :qname))
-				(if-does-not-exist        #'error)
-				(allow-forward-reference? t))
-	    (check-type qname name-expression/absolute)
+	  ,@(when find?
+	      `((defmethod find-node
+		    ((builder lazy-resolver-mixin)
+		     (kind    ,kind)
+		     &rest args
+		     &key
+		     (qname                    (missing-required-argument :qname))
+		     (if-does-not-exist        #'error)
+		     (allow-forward-reference? t))
+		  (check-type qname name-expression/absolute)
 
-	    (let+ (((&accessors-r/o repository) builder))
-	      (or (query repository kind qname)
-		  (typecase if-does-not-exist
-		    (null
-		     nil)
-		    (t
-		     (when allow-forward-reference?
-		       (setf (lookup repository kind qname)
-			     (make-instance 'rs.m.d::forward-reference
-					    :kind kind
-					    :args args))))))))
+		  ;; If the object designated by KIND and QNAME cannot
+		  ;; be found in REPOSITORY, return nil, if requested
+		  ;; via IF-DOES-NOT-EXIST or put a
+		  ;; `forward-reference' instance into REPOSITORY, if
+		  ;; allowed via ALLOW-FORWARD-REFERENCE?.
+		  (let+ (((&accessors-r/o repository) builder))
+		    (or (query repository kind qname)
+			(typecase if-does-not-exist
+			  (null
+			   nil)
+			  (t
+			   (when allow-forward-reference?
+			     (setf (lookup repository kind qname)
+				   (make-instance 'forward-reference
+						  :kind kind
+						  :args args))))))))))
 
-	  #+maybe?
-	  (defmethod add-child :around ((builder lazy-resolver-mixin)
-					(parent  t)
-					(child   t))
-	    (setf (lookup (repository builder) kind qname
-			  :if-exists
-			  (lambda (condition)
-			    (declare (ignore condition))
-			    (when-let ((restart (find-restart 'upgrade)))
-			      (invoke-restart restart child))))
-		  child)
-	    (call-next-method))
+	  ,@(when make?
+	      `((defmethod make-node :around
+		    ((builder lazy-resolver-mixin)
+		     (kind    ,kind)
+		     &key
+		     (qname (missing-required-argument :qname))
+		     &allow-other-keys)
+		  (check-type qname name/absolute)
 
-	  (defmethod make-node :around ((builder lazy-resolver-mixin)
-					(kind    ,kind)
-					&key
-					(qname (missing-required-argument :qname))
-					&allow-other-keys)
-	    (check-type qname name/absolute)
+		  ;; Put the object created and returned by the next
+		  ;; method into the repository. If REPOSITORY has an
+		  ;; object for KIND and QNAME and the object is a
+		  ;; `forward-reference' instance, an `upgrade'
+		  ;; restart will be active. Invoke it to upgrade the
+		  ;; forward reference to the constructed object.
+		  (let+ (((&accessors-r/o repository) builder)
+			 (node (call-next-method)))
+		    (setf (lookup repository kind qname
+				  :if-exists
+				  (lambda (condition)
+				    (declare (ignore condition))
+				    (when-let ((restart (find-restart 'upgrade)))
+				      (invoke-restart restart node))))
+			  node))))))))
 
-	    (let+ (((&accessors-r/o repository) builder)
-		   (node (call-next-method)))
-	      (setf (lookup repository kind qname
-			    :if-exists
-			    (lambda (condition)
-			      (declare (ignore condition))
-			      (when-let ((restart (find-restart 'upgrade)))
-				(invoke-restart restart node))))
-		    node))))))
-
-  (define-resolver-methods list) ;;; TODO(jmoringe, 2012-05-03): only find-node
-  (define-resolver-methods (eql :enum))
-  (define-resolver-methods (eql :structure))
-  (define-resolver-methods (eql :package)))
+  (define-resolver-methods t   nil list)
+  (define-resolver-methods t   t   (eql :enum))
+  (define-resolver-methods t   t   (eql :structure))
+  (define-resolver-methods t   t   (eql :package)))
 
 (defmethod parse :after ((format  t)
 			 (source  t)

@@ -54,6 +54,10 @@
 
    :duplicate-child-key)
 
+  ;; Restarts
+  (:export
+   :upgrade)
+
   ;; Name protocol
   (:export
    :kind
