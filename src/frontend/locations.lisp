@@ -97,12 +97,7 @@ string."))
   (define-method line
       (count #\Newline content :end position))
   (define-method column
-      (- position (or (when-let ((position
-				  (position #\Newline content
-					    :end      position
-					    :from-end t))) ;;; TODO(jmoringe, 2012-05-21): function, use in format-content
-			(1+ position))
-		      0))))
+      (- position (%position-of-newline-before content position))))
 
 (defmethod location= ((left  location-info)
 		      (right location-info)
@@ -127,27 +122,35 @@ CONDITION narrowed to that bounds. Otherwise return the full source of
 CONDITION."
   (declare (ignore at?))
 
-  (let ((content (source-content info))
-	(bounds  (bounds info)))
-    (declare (type (or null bounds/cons) bounds))
+  (let+ (((&accessors-r/o (content source-content) bounds) info)
+	 ((&flet write/maybe-truncate (string)
+	    (let ((truncate-at (cond
+				 ((not *print-length*)
+				  nil)
+				 ((< *print-length* (length string))
+				  (1- *print-length*)))))
+	      (apply #'write-string string stream
+		     (when truncate-at (list :end truncate-at)))
+	      (when truncate-at (write-char #\… stream))))))
     (cond
+      ;; Content and bounds are available => extract and print the
+      ;; interesting section of the content.
       ((and content bounds)
        (let+ (((start . end) bounds)
-	      (start/line (or (when-let ((position
-					  (position #\Newline content
-						    :end      start
-						    :from-end t)))
-				(1+ position))
-			      0))
+	      (start/line (%position-of-newline-before content start))
 	      (end/line   (or (when end
 				(position #\Newline content
 					  :start    (1- end)))
 			      (length content))))
-	 (write-string content stream
-		       :start start/line
-		       :end   end/line)))
+	 (write/maybe-truncate (subseq content start/line end/line))))
+
+      ;; Content is available, but we have no bounds => print entire
+      ;; or truncated content.
       (content
-       (write-string content stream))
+       (write/maybe-truncate content))
+
+      ;; We have no content to print. The colon argument
+      ;; controls whether we still should print something.
       ((not colon?)
        (format stream "~@<<No content and/or region information for ~A>~@:>"
 	       info)))))
@@ -196,3 +199,20 @@ instances to arbitrary objects."))
 			       (repository location-repository)
 			       (for        t))
   (setf (gethash for (%assoc repository)) new-value))
+
+
+;;; Utility functions
+;;
+
+(defun %position-of-newline-before (string position)
+  "Return the position of the rightmost newline character left of
+POSITION in STRING or 0 if there is none."
+  (if-let ((newline-position (position #\Newline string
+				       :end      position
+				       :from-end t)))
+    (1+ newline-position)
+    0))
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
