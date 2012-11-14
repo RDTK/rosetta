@@ -285,6 +285,7 @@ See `version/list' for details on keyword parameters."
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "util")
+			      (:file       "locations")
 			      (:file       "builder-mixins")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
