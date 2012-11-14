@@ -31,5 +31,17 @@
 (deftype bounds/cons ()
   "Upper and lower bound of a region within a string. Upper bound can
   be nil if not known or applicable."
-  '(cons non-negative-integer
-         (or non-negative-integer null)))
+  '(and (cons non-negative-integer
+              (or non-negative-integer null))
+        (satisfies %valid-bounds)))
+
+
+;;; Helper functions
+;;
+
+(defun %valid-bounds (bounds)
+  (and (consp bounds)
+       (let+ (((start . end) bounds))
+	 (or (null end)
+	     (and (integerp start) (integerp end)
+		  (<= start end))))))

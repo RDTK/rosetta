@@ -60,13 +60,26 @@ string."))
 				     position)
   (cond
     ((and bounds position)
-     (error 'incompatible-initargs
-	    :class      'location-info
-	    :parameters (list :bounds :position)
-	    :values     (list bounds position)))
+     (incompatible-initargs 'location-info
+			    :bounds   bounds
+			    :position position))
 
     (position
-     (setf (bounds instance) (cons position nil)))))
+     (check-type position non-negative-integer)
+     (setf (bounds instance) (cons position nil))))
+
+  (let+ (((&accessors-r/o source-content bounds) instance)
+	 ((&flet check-position (position &optional (inclusive? t))
+	    (unless (or (not position) (not source-content)
+			(<= 0 position (- (length source-content)
+					  (if inclusive? 1 0))))
+	      (incompatible-initargs 'location-info
+				     :source-content source-content
+				     :bounds         bounds)))))
+    (when bounds
+      (check-type bounds bounds/cons)
+      (check-position (car bounds))
+      (check-position (cdr bounds)))))
 
 (macrolet
     ((define-method (name &body body)
@@ -147,14 +160,18 @@ produce a parser-friendly representation."
 
   (let+ (((&accessors-r/o source line column) info)
 	 (line/human-readable   (when line (1+ line)))
-	 (column/human-readable (when column (1+ column))))
+	 (column/human-readable (when column (1+ column)))
+	 (source-label          (typecase source
+				  (null   "<unknown source>")
+				  (string "<string>")
+				  (t      source))))
     (if colon?
 	;; Textual format.
-	(format stream "~@[column ~D of ~]~@[line ~D of ~]~:[<unknown source>~;~:*~A~]"
-		column/human-readable line/human-readable source)
+	(format stream "~@[column ~D of ~]~@[line ~D of ~]~A"
+		column/human-readable line/human-readable source-label)
 	;; Grep-like format.
-	(format stream "~:[<unknown source>~;~:*~A~]~@[:~D~]~@[:~D~]"
-		source line/human-readable column/human-readable))))
+	(format stream "~A~@[:~D~]~@[:~D~]"
+		source-label line/human-readable column/human-readable))))
 
 
 ;;; `location-repository' class
