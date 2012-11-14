@@ -1,4 +1,4 @@
-;;; location.lisp --- Unit tests for the location machinery.
+;;; locations.lisp --- Unit tests for the location machinery.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -24,13 +24,13 @@
 
 (cl:in-package :rosetta.frontend.test)
 
-(deftestsuite frontend-location-root (frontend-root)
+(deftestsuite frontend-locations-root (frontend-root)
   ()
   (:documentation
    "Unit tests for the location machinery, namely `location-info',
 `format-content' and `format-location'."))
 
-(deftestsuite location-info-root (frontend-location-root)
+(deftestsuite location-info-root (frontend-locations-root)
   ()
   (:documentation
    "Unit tests for the `location-info' class."))
@@ -49,7 +49,7 @@
 	  :position 1)             incompatible-initargs)
 
 	((:source-content "foo"    ; start out of bounds
-	  :bounds         (3 . 3)) incompatible-initargs) 
+	  :bounds         (3 . 3)) incompatible-initargs)
 	((:source-content "foo"    ; end out of bounds
 	  :bounds         (1 . 5)) incompatible-initargs)
 	((:source-content "foo"    ; start out of bounds
@@ -109,9 +109,73 @@ oo"                                                (2 . 3) 1    0)))
 	  :bounds         (1 . 2)) "<string>:1:2")
 	((:source         "foo"
 	  :source-content "f
-oo"                            
+oo"
 	  :bounds         (2 . 3)) "<string>:2:1"))
 
     (let ((result (princ-to-string
 		   (apply #'make-instance 'location-info initargs))))
-      (ensure (search expected result :test #'string=)))))
+      (ensure-same expected result
+		   :test (rcurry #'search :test #'string=)))))
+
+(addtest (frontend-locations-root
+          :documentation
+	  "Test `format-content' on different `location-info'
+instances.")
+  format-location/smoke
+
+  (ensure-cases ((source content bounds) expected expected/colon)
+      ;;  source     content bounds   expected           expected/colon
+      `(((nil        nil     nil)     "<unknown source>" "<unknown source>")
+	((,#P"foo.c" nil     nil)     "foo.c"            "foo.c")
+	(("foo"      nil     nil)     "<string>"         "<string>")
+	(("foo"      "foo"   nil)     "<string>"         "<string>")
+	(("foo"      nil     (1))     "<string>"         "<string>")
+	(("foo"      nil     (1 . 2)) "<string>"         "<string>")
+	(("foo"      "foo"   (1 . 2)) "<string>:1:2"     "column 2 of line 1 of <string>")
+	(("foo"      "f
+oo"                          (2 . 3)) "<string>:2:1"     "column 1 of line 2 of <string>"))
+
+    (let+ ((info   (apply #'make-instance 'location-info
+			  (append
+			   (when source  (list :source         source))
+			   (when content (list :source-content content))
+			   (when bounds  (list :bounds         bounds)))))
+	   ((&flet do-it (colon?)
+	      (with-output-to-string (stream)
+		(format-location stream info colon?)))))
+      (ensure-same (do-it nil) expected       :test #'string=
+		   :report "Without colon")
+      (ensure-same (do-it t)   expected/colon :test #'string=
+		   :report "With colon"))))
+
+(addtest (frontend-locations-root
+          :documentation
+	  "Test `format-content' on different `location-info'
+instances.")
+  format-content/smoke
+
+  (ensure-cases ((content bounds colon? *print-length*) expected)
+      ;;  content   bounds   colon *print-length* expected
+      `(((nil       nil      nil   nil)           "<No content and/or")
+	((nil       nil      t     nil)           "")
+	(("foo bar" nil      nil   nil)           "foo bar")
+	(("foo bar" nil      nil   4)             "foo…")
+	(("foo bar" (1 . 2)  nil   nil)           "foo bar")
+	(("foo bar
+baz fez"            (2 . 3)  nil   nil)           "foo bar")
+	(("foo bar
+baz fez"            (8 . 11) nil   nil)           "baz fez")
+	(("foo bar
+baz fez"            (8 . 11) nil   4)             "baz…"))
+
+    (let* ((info   (apply #'make-instance 'location-info
+			  (append
+			   (when content (list :source-content content))
+			   (when bounds  (list :bounds         bounds)))))
+	   (result (with-output-to-string (stream)
+		     (format-content stream info colon?))))
+      (ensure-same result  expected
+		   :test   (if (null content)
+			       #'(lambda (result expected)
+				   (search expected result :test #'string=))
+			       #'string=)))))
