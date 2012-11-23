@@ -43,20 +43,35 @@ the rosetta.model.data package."))
 				   (find-symbol (string kind) :rosetta.model.data))))
 	  (ensure-list kind))
 	 (args (mapcar #'ensure-list args))
-	 ((&flet+ make-parameter ((name &optional nil))
-	    `(,name (required-argument ,(make-keyword name)))))
-	 ((&flet+ make-type-check ((name type))
-	    `(check-type ,name ,type)))
-	 ((&flet+ make-initarg ((name &optional nil))
-	    `(,(make-keyword name) ,name))))
+	 ((&flet make-supplied-var (name)
+	    (symbolicate name '#:-supplied?)))
+	 ((&flet+ make-parameter ((name &optional nil (required? t)))
+	    `(,name
+	      ,(when required?
+		 `(required-argument ,(make-keyword name)))
+	      ,(make-supplied-var name))))
+	 ((&flet+ make-type-check ((name &optional type (required? t)))
+	    (cond
+	      ((not type)
+	       nil)
+	      (required?
+	       `(check-type ,name ,type))
+	      (t
+	       `(when ,(make-supplied-var name)
+		  (check-type ,name ,type) )))))
+	 ((&flet+ make-initarg ((name &optional nil nil))
+	    `(when ,(make-supplied-var name)
+	       (list ,(make-keyword name) ,name)))))
    `(defmethod make-node ((builder model-builder)
 			  (kind    (eql ,kind))
 			  &key
 			  ,@(mapcar #'make-parameter args))
-      ,@(mapcar #'make-type-check (remove nil args :key #'second))
+      (declare (ignorable ,@(mapcar (compose #'make-supplied-var #'first)
+				    args)))
+      ,@(remove nil (mapcar #'make-type-check args))
       ,@(or body
-	    `((make-instance ',class
-			     ,@(mappend #'make-initarg args)))))))
+	    `((apply #'make-instance ',class
+		     (append ,@(mapcar #'make-initarg args))))))))
 
 (defmethod find-node ((builder model-builder)
 		      (kind    (eql :fundamental))
@@ -97,20 +112,30 @@ type with width ~D.~@>" signed? width)))
 (define-make-node :comment ((content string))
   content)
 
-(define-make-node :constant ((name string) value)
+(define-make-node :constant ((name          string)
+			     value
+			     (documentation string nil))
   (warn "~@<Ignoring constant ~S = ~S~@:>" name value))
 
-(define-make-node :enum-value ((name string) value))
+(define-make-node :enum-value ((name          string)
+			       value
+			       (documentation string nil)))
 
-(define-make-node :enum ((name string) type))
+(define-make-node :enum ((name          string)
+			 type
+			 (documentation string nil)))
 
-(define-make-node (:field base-field) ((name string) type))
+(define-make-node (:field base-field) ((name          string)
+				       type
+				       (documentation string nil)))
 
-(define-make-node (:structure base-structure) ((name string)))
+(define-make-node (:structure base-structure) ((name          string)
+					       (documentation string nil)))
 
 (define-make-node (:array base-array) (element-type index-type))
 
-(define-make-node (:package package1) ((name string)))
+(define-make-node (:package package1) ((name          string)
+				       (documentation string nil)))
 
 (defmethod add-child ((builder model-builder) ;;; TODO(jmoringe, 2012-04-24):
 		      (parent  rs.m.d::base-repository)
