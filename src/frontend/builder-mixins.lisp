@@ -350,8 +350,13 @@ cache parsing results."))
 			  (source  t)
 			  (builder source-level-caching-mixin)
 			  &key &allow-other-keys)
-  ;; Construct a key based on FORMAT and SOURCE and retrieve the
-  ;; parsing result from the cache or delegate to the next method to
-  ;; perform a parse.
-  (let ((key (cons format source)))
-    (ensure-gethash key (%cache builder) (call-next-method))))
+  ;; Construct a key based on FORMAT and a normalized version of
+  ;; SOURCE and retrieve the parsing result from the cache or delegate
+  ;; to the next method to perform a parse.
+  (let ((key (typecase source
+	       (pathname (cons format (truename source) ))
+	       (stream   nil)
+	       (t        (cons format source)))))
+    (if key
+	(ensure-gethash key (%cache builder) (call-next-method))
+	(call-next-method))))

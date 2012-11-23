@@ -35,7 +35,10 @@
    :rosetta.frontend)
 
   (:import-from :rosetta.frontend
-   :guess-format)
+   :guess-format
+
+   :locations
+   :resolver)
 
   (:export
    :frontend-root)
@@ -115,9 +118,22 @@
 ;;
 
 (defclass mock-builder ()
-  ()
+  ((calls :initarg  :calls
+	  :type     list
+	  :accessor calls
+	  :initform nil
+	  :documentation
+	  "Stores the arguments to all `parse' calls."))
   (:documentation
    "Mock builder for unit tests. Delegates to list builder."))
+
+(defmethod parse ((format  format-mock)
+		  (source  t)
+		  (builder mock-builder)
+		  &key &allow-other-keys)
+  (appendf (calls builder) (list (list format source)))
+  (when (next-method-p)
+    (call-next-method)))
 
 (defmethod find-node ((builder mock-builder) (kind t) &rest args)
   (apply #'find-node 'list kind args))
