@@ -69,17 +69,17 @@ string."))
      (setf (bounds instance) (cons position nil))))
 
   (let+ (((&accessors-r/o source-content bounds) instance)
-	 ((&flet check-position (position &optional (inclusive? t))
+	 ((&flet check-position (position &key (inclusive? t))
 	    (unless (or (not position) (not source-content)
-			(<= 0 position (- (length source-content)
-					  (if inclusive? 1 0))))
+			(<= 0 position (max 0 (- (length source-content)
+						 (if inclusive? 1 0)))))
 	      (incompatible-initargs 'location-info
 				     :source-content source-content
 				     :bounds         bounds)))))
     (when bounds
       (check-type bounds bounds/cons)
-      (check-position (car bounds))
-      (check-position (cdr bounds)))))
+      (check-position (car bounds) :inclusive? t)
+      (check-position (cdr bounds) :inclusive? nil))))
 
 (macrolet
     ((define-method (name &body body)
@@ -117,9 +117,8 @@ string."))
     (format-location stream object)))
 
 (defun format-content (stream info &optional colon? at?)
-  "If CONDITIONS contains bounds information, return the source of
-CONDITION narrowed to that bounds. Otherwise return the full source of
-CONDITION."
+  "If INFO contains bounds information, return the source of INFO
+narrowed to that bounds. Otherwise return the full source of INFO."
   (declare (ignore at?))
 
   (let+ (((&accessors-r/o (content source-content) bounds) info)
@@ -140,7 +139,7 @@ CONDITION."
 	      (start/line (%position-of-newline-before content start))
 	      (end/line   (or (when end
 				(position #\Newline content
-					  :start    (1- end)))
+					  :start    (max 0 (1- end))))
 			      (length content))))
 	 (write/maybe-truncate (subseq content start/line end/line))))
 
@@ -167,8 +166,8 @@ content."
     (cond
       ((source-content info)
        (format stream "~@[  ~V@Tv~&~]~
-~<| ~@;~/rosetta.frontend::format-content/~:>~&~
-~@[  ~V@T^~]"
+~<| ~@;~/rosetta.frontend::format-content/~:>~
+~@[~&  ~V@T^~]"
 	       start-column (list info) end-column))
       ((not colon?)
        (format-content stream info)))))
@@ -179,20 +178,32 @@ If COLON? is non-nil produce a human-readable description. Otherwise
 produce a parser-friendly representation."
   (declare (ignore at?))
 
-  (let+ (((&accessors-r/o source line column) info)
-	 (line/human-readable   (when line (1+ line)))
-	 (column/human-readable (when column (1+ column)))
-	 (source-label          (typecase source
-				  (null   "<unknown source>")
-				  (string "<string>")
-				  (t      source))))
+  (let+ (((&accessors-r/o source) info)
+	 (start-line+1   (when-let ((line (line info :of :start)))
+			   (1+ line)))
+	 (start-column+1 (when-let ((column (column info :of :start)))
+			   (1+ column)))
+	 (end-line+1     (when-let ((line (line info :of :end)))
+			   (1+ line)))
+	 (end-column+1   (when-let ((column (column info :of :end)))
+			   (1+ column)))
+	 (source-label   (typecase source
+			   (null   "<unknown source>")
+			   (string "<string>")
+			   (t      source))))
     (if colon?
 	;; Textual format.
-	(format stream "~@[column ~D of ~]~@[line ~D of ~]~A"
-		column/human-readable line/human-readable source-label)
+	(cond
+	  ((and start-column+1 end-column+1 start-line+1 end-line+1
+		(= start-line+1 end-line+1))
+	   (format stream "columns ~D to ~D of ~@[line ~D of ~]~A"
+		   start-column+1 end-column+1 start-line+1 source-label))
+	  (t
+	   (format stream "~@[column ~D of ~]~@[line ~D of ~]~A"
+		   start-column+1 start-line+1 source-label)))
 	;; Grep-like format.
 	(format stream "~A~@[:~D~]~@[:~D~]"
-		source-label line/human-readable column/human-readable))))
+		source-label start-line+1 start-column+1))))
 
 
 ;;; `location-repository' class

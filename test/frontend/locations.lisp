@@ -55,22 +55,24 @@
 	((:source-content "foo"    ; start out of bounds
 	  :position       5)       incompatible-initargs)
 
-	;; These are OK.            source content bounds  line column
-	((:source         "foo")   ("foo"  nil     nil     nil  nil))
+	;; These are OK.            source content bounds  l/s c/s l/e c/e
+	((:source         "foo")   ("foo"  nil     nil     nil nil nil nil))
 	((:source         "foo"
-	  :source-content "foo")   ("foo"  "foo"   nil     nil  nil))
+	  :source-content "foo")   ("foo"  "foo"   nil     nil nil nil nil))
 	((:source         "foo"
-	  :position       1)       ("foo"  nil     (1)     nil  nil))
+	  :position       1)       ("foo"  nil     (1)     nil nil nil nil))
 	((:source         "foo"
-	  :bounds         (1 . 2)) ("foo"  nil     (1 . 2) nil  nil))
+	  :bounds         (1 . 2)) ("foo"  nil     (1 . 2) nil nil nil nil))
 	((:source         "foo"
 	  :source-content "foo"
-	  :bounds         (1 . 2)) ("foo"  "foo"   (1 . 2) 0    1))
+	  :bounds         (1 . 2)) ("foo"  "foo"   (1 . 2) 0   1   0   2))
+	((:source-content "foo"
+	  :bounds         (0 . 3)) (nil    "foo"   (0 . 3) 0   0   0   3))
 	((:source         "foo"    ; in case of a newline, the newline
 	  :source-content "f
 oo"                                ; itself is on the "previous" line
 	  :bounds         (2 . 3)) ("foo"  "f
-oo"                                                (2 . 3) 1    0)))
+oo"                                                (2 . 3) 1   0   1   1)))
 
     (case expected
       (type-error
@@ -81,15 +83,24 @@ oo"                                                (2 . 3) 1    0)))
 	 (apply #'make-instance 'location-info initargs)))
       (t
        (let+ (((expected-source expected-content expected-bounds
-		expected-line expected-column) expected)
+		expected-line/start expected-column/start
+		expected-line/end expected-column/end) expected)
 	      (location (apply #'make-instance 'location-info initargs)))
 	 (ensure-same (source         location) expected-source)
 	 (ensure-same (source-content location) expected-content)
 	 (ensure-same (bounds         location) expected-bounds)
-	 (ensure-same (line           location) expected-line
-		      :report "Wrong line")
-	 (ensure-same (column         location) expected-column
-		      :report "Wrong column"))))))
+	 (ensure-same (line           location :of :start)
+		      expected-line/start
+		      :report "Wrong start line")
+	 (ensure-same (line           location :of :end)
+		      expected-line/end
+		      :report "Wrong end line")
+	 (ensure-same (column         location :of :start)
+		      expected-column/start
+		      :report "Wrong start column")
+	 (ensure-same (column         location :of :end)
+		      expected-column/end
+		      :report "Wrong end column"))))))
 
 (addtest (location-info-root
           :documentation
@@ -131,9 +142,11 @@ instances.")
 	(("foo"      "foo"   nil)     "<string>"         "<string>")
 	(("foo"      nil     (1))     "<string>"         "<string>")
 	(("foo"      nil     (1 . 2)) "<string>"         "<string>")
-	(("foo"      "foo"   (1 . 2)) "<string>:1:2"     "column 2 of line 1 of <string>")
+	(("foo"      ""      (0 . 0)) "<string>:1:1"     "columns 1 to 1 of line 1 of <string>")
+	(("foo"      "foo"   (1))     "<string>:1:2"     "column 2 of line 1 of <string>")
+	(("foo"      "foo"   (1 . 2)) "<string>:1:2"     "columns 2 to 3 of line 1 of <string>")
 	(("foo"      "f
-oo"                          (2 . 3)) "<string>:2:1"     "column 1 of line 2 of <string>"))
+oo"                          (2))     "<string>:2:1"     "column 1 of line 2 of <string>"))
 
     (let+ ((info   (apply #'make-instance 'location-info
 			  (append
@@ -160,6 +173,7 @@ instances.")
 	((nil       nil      t     nil)           "")
 	(("foo bar" nil      nil   nil)           "foo bar")
 	(("foo bar" nil      nil   4)             "foo…")
+	(("foo bar" (0 . 0)  nil   nil)           "foo bar")
 	(("foo bar" (1 . 2)  nil   nil)           "foo bar")
 	(("foo bar
 baz fez"            (2 . 3)  nil   nil)           "foo bar")
