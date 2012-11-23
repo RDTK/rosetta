@@ -86,7 +86,8 @@
    :location-info
 
    :format-location
-   :format-content)
+   :format-content
+   :format-content-with-delimiters)
 
 
 ;;; Parsing- and format-related stuff

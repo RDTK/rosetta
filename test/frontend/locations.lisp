@@ -179,3 +179,46 @@ baz fez"            (8 . 11) nil   4)             "baz…"))
 			       #'(lambda (result expected)
 				   (search expected result :test #'string=))
 			       #'string=)))))
+
+(addtest (frontend-locations-root
+          :documentation
+	  "Test `format-content' on different `location-info'
+instances.")
+  format-content-with-delimiters/smoke
+
+  (ensure-cases ((content bounds colon? *print-length*) expected)
+      ;;  content   bounds   colon *print-length* expected
+      `(((nil       nil      nil   nil)           "<No content and/or")
+	((nil       nil      t     nil)           "")
+	(("foo bar" nil      nil   nil)           "| foo bar")
+	(("foo bar" nil      nil   4)             "| foo…")
+	(("foo bar" (0 . 0)  nil   nil)           "  v
+| foo bar
+  ^")
+	(("foo bar" (1 . 2)  nil   nil)           "   v
+| foo bar
+    ^")
+	(("foo bar
+baz fez"            (2 . 3)  nil   nil)           "    v
+| foo bar
+     ^")
+	(("foo bar
+baz fez"            (8 . 11) nil   nil)           "  v
+| baz fez
+     ^")
+	(("foo bar
+baz fez"            (8 . 11) nil   4)             "  v
+| baz…
+     ^"))
+
+    (let* ((info   (apply #'make-instance 'location-info
+			  (append
+			   (when content (list :source-content content))
+			   (when bounds  (list :bounds         bounds)))))
+	   (result (with-output-to-string (stream)
+		     (format-content-with-delimiters stream info colon?))))
+      (ensure-same result  expected
+		   :test   (if (null content)
+			       #'(lambda (result expected)
+				   (search expected result :test #'string=))
+			       #'string=)))))

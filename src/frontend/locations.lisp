@@ -155,6 +155,24 @@ CONDITION."
        (format stream "~@<<No content and/or region information for ~A>~@:>"
 	       info)))))
 
+(defun format-content-with-delimiters (stream info &optional colon? at?)
+  "Use `format-content' to print the content of INFO and add
+indicators delimiting the region of interest within the printed
+content."
+  (declare (ignore at?))
+
+  (let ((start-column   (column info :of :start))
+	(end-column     (column info :of :end))
+	(*print-pretty* t))
+    (cond
+      ((source-content info)
+       (format stream "~@[  ~V@Tv~&~]~
+~<| ~@;~/rosetta.frontend::format-content/~:>~&~
+~@[  ~V@T^~]"
+	       start-column (list info) end-column))
+      ((not colon?)
+       (format-content stream info)))))
+
 (defun format-location (stream info &optional colon? at?)
   "Format the `location-info' object INFO onto STREAM.
 If COLON? is non-nil produce a human-readable description. Otherwise

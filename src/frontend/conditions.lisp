@@ -71,16 +71,12 @@ have an associated builder object."))
   ()
   (:report
    (lambda (condition stream)
-     (let+ (((&accessors-r/o location source-content)
-	     condition)
-	    (start-column (column location))
-	    (end-column   (column location :of :end)))
-       (format stream "~<When parsing ~
-~:/rosetta.frontend::format-location/~@:>~:[ ~3*~; which is ~2&~
-~@[  ~V@Tv~&~]~<| ~@;~/rosetta.frontend::format-content/~:>~&~
-~@[  ~V@T^~&~]~2&~]~@<~/more-conditions::maybe-print-cause/~@:>"
+     (let+ (((&accessors-r/o location source-content) condition))
+       (format stream "~<When parsing ~:/rosetta.frontend::format-location/~@:>~
+~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
+~@<~/more-conditions::maybe-print-cause/~@:>"
 	       (list location)
-	       source-content start-column (list location) end-column
+	       source-content location
 	       condition))))
   (:documentation
    "Instances of subclasses of this condition are signaled during
@@ -92,19 +88,13 @@ parsing the contents of a source."))
   ()
   (:report
    (lambda (condition stream)
-     (let+ (((&accessors-r/o location source-content builder)
-	     condition)
-	    (start-column (column location))
-	    (end-column   (column location :of :end)))
-       (format stream "~<When processing ~
-~:/rosetta.frontend::format-location/~@:>~:[ ~3*~; which is ~2&~
-~@[  ~V@Tv~&~]~<| ~@;~/rosetta.frontend::format-content/~:>~&~
-~@[  ~V@T^~&~]~2&~]~@<~@[with builder ~A~].~
-~/more-conditions::maybe-print-cause/~@:>"
+     (let+ (((&accessors-r/o location source-content builder) condition))
+       (format stream "~<When processing ~:/rosetta.frontend::format-location/~@:>~
+~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]
+~@<~@[with builder ~A~].~/more-conditions::maybe-print-cause/~@:>"
 	       (list location)
-	       source-content start-column (list location) end-column
-	       builder
-	       condition))))
+	       source-content location
+	       builder condition))))
   (:documentation
    "Instances of subclasses of this conditions are signaled during
 processing the contents of a source after or during parsing."))
