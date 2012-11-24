@@ -27,6 +27,7 @@
    :cl
    :alexandria
    :let-plus
+   :iterate
    :more-conditions
    :lift
 
@@ -106,6 +107,8 @@
 				:name   name
 				:qname  `(:absolute ,name)
 				:bounds '(6 . 7))))
+    (signal 'location-condition
+	    :location (make-instance 'location-info))
     (add-child builder package import)
     (add-child builder structure comment1)
     (add-child builder structure comment2)

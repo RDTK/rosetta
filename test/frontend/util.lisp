@@ -40,9 +40,10 @@
   smoke
 
   (ensure-cases (input format/expected found?/expected)
-      `((,#P"bla/"        nil             nil)  ; no type
-	(,#P"bla."        nil             nil)  ; empty type
-	(,#P"bla.bla"     :bla            nil)) ; unknown format class
+      `((,#P"foo/"     nil   nil) ; no type
+	(,#P"foo."     nil   nil) ; empty type
+	(,#P"foo.bla"  :bla  nil) ; unknown format class
+	(,#P"foo.mock" :mock t))  ; use `format-mock' class
 
     (ensure-same (guess-format input)
 		 (values format/expected found?/expected))))
