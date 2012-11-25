@@ -1,4 +1,4 @@
-;;; type-array.lisp ---
+;;; type-array.lisp --- Representation of basic array types.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -32,4 +32,4 @@
 		      print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent simple array types"))

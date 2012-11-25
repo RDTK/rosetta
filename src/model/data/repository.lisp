@@ -1,4 +1,4 @@
-;;; repository.lisp ---
+;;; repository.lisp --- A basic repository class for storing data types.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -36,7 +36,9 @@
 		       :documentation
 		       ""))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This class is intended to be mixed into repository classes which
+permit temporary forward references to be stored and later upgraded to
+the objects they represent."))
 
 (defmethod lookup ((repository forward-reference-upgrader-mixin)
 		   (kind       symbol)
@@ -100,7 +102,8 @@
 			   print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instance of this class provide basic repository behavior of
+storing data type objects and satisfying queries for these objects."))
 
 (defmethod contents/plist ((repository base-repository))
   (hash-table-plist (%nested repository)))

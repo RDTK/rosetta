@@ -46,4 +46,14 @@
 
   (:documentation
    "This package contains functions and classes which model
-programming languages."))
+programming languages.
+
+There is a class family of languages which can be manipulated using:
+
+* `no-such-language-class'          [condition]
+* `find-language-class'             [generic function]
+* `language-classes'                [function]
+
+See
+
+  (documentation SYMBOL 'rs.m.l:language)"))

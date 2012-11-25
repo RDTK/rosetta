@@ -34,7 +34,8 @@
 		      print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent fields, consisting of a name and
+a type, of structure types."))
 
 
 ;;; `base-structure' class
@@ -49,7 +50,8 @@
 			  print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent simple structures, that is,
+named objects containing ordered sets of named, typed fields."))
 
 (defmethod shared-initialize :after ((instance   base-structure)
                                      (slot-names t)

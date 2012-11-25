@@ -30,7 +30,8 @@
 		    print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent packages, that is named
+containers for data types."))
 
 (defmethod kind ((type package1))
   :package)

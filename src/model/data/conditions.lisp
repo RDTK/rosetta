@@ -28,7 +28,7 @@
   ((type :initarg  :type
 	 :reader   data-type-error-type
 	 :documentation
-	 ""))
+	 "Stores the data type object for which the error occurred."))
   (:documentation
    "This error condition class is intended to used as a superclass for
 type-related error condition classes."))

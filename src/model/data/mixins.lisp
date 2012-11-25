@@ -70,7 +70,8 @@ instances of which represent named data types."))
   (:default-initargs
    :type (missing-required-initarg 'typed-mixin :type))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This class is intended to be mixed into data type classes which
+refer to another type such as a field of a structure."))
 
 (defmethod print-items append ((object typed-mixin))
   "Try to enforce a meaningful order of the name and type print
@@ -228,9 +229,12 @@ which implement the composite protocol for kind ~A."
 	     :accessor %children
 	     :initform nil
 	     :documentation
-	     ""))
+	     "Stores an ordered set of references to \"child\"
+types. "))
   (:documentation
-   "TODO(jmoringe): document"))
+   "This class is intended to be mixed into data type classes which
+maintain an ordered set of references to \"child\" data types such as
+structures or tuples."))
 
 (defmethod contents ((container ordered-mixin)
 		     (kind      (eql :nested)))
@@ -266,7 +270,8 @@ types."))
 (defclass field-mixin (named-component-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "This class is intended to be mixed into classes which represent
+concepts similar to fields in a structure."))
 
 (defmethod kind ((type field-mixin))
   :field)

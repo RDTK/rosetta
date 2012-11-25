@@ -1,4 +1,4 @@
-;;; type-enum.lisp ---
+;;; type-enum.lisp --- Representation of basic enum types.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -33,8 +33,11 @@
 		      documentation-mixin
 		      print-items-mixin)
   ()
+  (:default-initargs
+   :type (make-instance 'type-uint32))
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent enumeration values consisting of
+a name and an associated, usually numeric, value."))
 
 
 ;;; `base-enum' class
@@ -53,7 +56,11 @@
 		print-items-mixin)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Instances of this class represent enum data types, that is a named
+collection of value objects each associated a name and a, usually
+numeric, value.
+
+One example of a class representing such values is `enum-value'."))
 
 (defmethod kind ((type enum))
   :enum)
