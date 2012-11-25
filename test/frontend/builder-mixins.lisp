@@ -55,7 +55,7 @@ classes."
 
        (addtest (,suite-name
 		 :documentation
-		 ,(format nil "Test constructing a ~(~A~) instance."
+		 ,(format nil "Test constructing a `~(~A~)' instance."
 			  class))
 	 construct/smoke
 

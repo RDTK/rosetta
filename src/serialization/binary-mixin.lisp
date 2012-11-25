@@ -31,7 +31,7 @@
 represent binary serialization mechanisms."))
 
 (defmethod wire-type ((mechanism binary-mixin))
-  (make-instance 'rs.m.d::type-octet-vector))
+  (make-instance 'rs.m.d:type-octet-vector))
 
 (defmethod pack ((mechanism   binary-mixin)
 		 (source      t)

@@ -113,7 +113,7 @@
 ;;; Enum types
 ;;
 
-(defmethod emit :around ((node     rs.m.d::enum)
+(defmethod emit :around ((node     enum)
 			 (target   target-class)
 			 (language language-lisp)
 			 &key)
@@ -125,14 +125,14 @@
 					  "~A-CODE" name)))))
     (call-next-method)))
 
-(defmethod emit ((node     rs.m.d::enum)
+(defmethod emit ((node     enum)
 		 (target   target-class)
 		 (language language-lisp)
 		 &key)
   "Emit an enum definition for NODE."
   (with-emit-symbols
     (let+ (((&env-r/o name name-name code-name))
-	   (pairs (map 'list #'recur (contents node :values)))) ;;; TODO(jmoringe, 2012-05-04): call-next-method?
+	   (pairs (map 'list #'recur (contents node :value)))) ;;; TODO(jmoringe, 2012-05-04): call-next-method?
       `(progn
 	 (deftype ,name ()
 	   '(member ,@(mapcar #'first pairs)))
@@ -149,13 +149,13 @@
 	     (t (error "~@<Symbol ~S is invalid for enum ~S.~@:>"
 		       name ',name))))))))
 
-(defmethod emit ((node     rs.m.d::enum-value)
+(defmethod emit ((node     enum-value)
 		 (target   target-class)
 		 (language language-lisp)
 		 &key)
   "Emit an enum definition for NODE."
   (let+ (((&env-r/o name)))
-    (list (make-keyword name) (rs.m.d::value node)))) ;;; TODO(jmoringe, 2012-05-04):
+    (list (make-keyword name) (value node))))
 
 
 ;;; Structure
@@ -195,7 +195,7 @@
       `(progn
 	 (defclass ,name () ()) ;; TODO do we want to this here?
 	 (defclass ,name (#+no ,@superclasses)
-	   ,(map 'list #'recur (contents node :fields)) ;;; TODO(jmoringe, 2012-05-04): next method should do this
+	   ,(map 'list #'recur (contents node :field)) ;;; TODO(jmoringe, 2012-05-04): next method should do this
 	   #+no ,@(when metaclass
 			`((:metaclass ,metaclass))))))))
 

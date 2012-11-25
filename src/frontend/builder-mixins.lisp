@@ -358,5 +358,5 @@ cache parsing results."))
 	       (stream   nil)
 	       (t        (cons format source)))))
     (if key
-	(ensure-gethash key (%cache builder) (call-next-method))
+	(values (ensure-gethash key (%cache builder) (call-next-method)))
 	(call-next-method))))
