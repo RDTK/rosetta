@@ -43,6 +43,19 @@ documentation of type 'data-type."
 ;;; Composite data type protocol
 ;;
 
+(defgeneric contents (container kind)
+  (:documentation
+   "Return a sequence of the elements in CONTAINER which are of kind
+KIND.
+
+If KIND is t, the returned sequence consists of all elements contained
+in CONTAINER."))
+
+(defgeneric contents/plist (container)
+  (:documentation
+   "Return a plist of kinds and elements for the elements of
+CONTAINER."))
+
 (defgeneric lookup (container kind key
 		    &key
 		    if-does-not-exist

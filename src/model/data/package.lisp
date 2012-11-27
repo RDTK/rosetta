@@ -59,6 +59,8 @@
   ;; Composition protocol
   (:export
    :contents
+   :contents/plist
+
    :lookup
    :query
 
