@@ -33,14 +33,8 @@
    :let-plus
    :more-conditions
 
-   :rosetta)
-
-  ;; Types
-  (:export
-   :name-component
-   :name/absolute
-   :name-expression/absolute
-   :name/relative)
+   :rosetta
+   :rosetta.model)
 
   ;; Conditions
   (:export
@@ -57,13 +51,6 @@
   ;; Restarts
   (:export
    :upgrade)
-
-  ;; Name protocol
-  (:export
-   :kind
-
-   :name
-   :qname)
 
   ;; Documentation protocol
   (:export

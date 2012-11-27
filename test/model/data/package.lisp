@@ -30,6 +30,7 @@
    :lift
 
    :rosetta
+   :rosetta.model
    :rosetta.model.data
 
    :rosetta.test

@@ -107,12 +107,19 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "package")
 			      (:file       "print-items")))
 
-		(:module     "model-data-early"
-		 :pathname   "src/model/data"
+		(:module     "model"
+		 :pathname   "src/model"
 		 :depends-on ("src")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "types")
+			      (:file       "protocol")))
+
+		(:module     "model-data-early"
+		 :pathname   "src/model/data"
+		 :depends-on ("src" "model")
+		 :serial     t
+		 :components ((:file       "package")
 			      (:file       "conditions")
 			      (:file       "protocol")))
 
@@ -261,7 +268,8 @@ See `version/list' for details on keyword parameters."
 		(:module     "model"
 		 :pathname   "test/model"
 		 :depends-on ("package")
-		 :components ((:file       "package")))
+		 :components ((:file       "package")
+			      (:file       "protocol")))
 
 		(:module     "model-data"
 		 :pathname   "test/model/data"

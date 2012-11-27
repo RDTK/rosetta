@@ -34,6 +34,7 @@
    :iterate
    :more-conditions
 
+   :rosetta.model
    :rosetta.model.data
    :rosetta.model.language
    :rosetta.model.serialization)
@@ -41,8 +42,10 @@
   (:shadow
    :generate)
 
+  (:shadowing-import-from :rosetta.model
+   :name)
+
   (:shadowing-import-from :rosetta.model.data
-   :name
    :type1)
 
   ;; Conditions

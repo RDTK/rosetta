@@ -1,6 +1,6 @@
-;;; package.lisp --- Package definition for unit tests of the model module.
+;;; package.lisp --- Package definition for the model module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -22,24 +22,39 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:defpackage :rosetta.model.test
+(cl:defpackage :rosetta.model
+  (:nicknames
+   :rs.m)
+
   (:use
    :cl
-   :lift
+   :alexandria
+   :let-plus)
 
-   :rosetta.model
-
-   :rosetta.test)
-
+  ;; Types
   (:export
-   :model-root)
+   :name-component
+
+   :name/absolute
+   :name-expression/absolute
+
+   :name/relative
+   :name-expression/relative
+
+   :name
+   :name-expression)
+
+  ;; Name protocol
+  (:export
+   :kind
+
+   :name
+   :qname)
+
+  ;; Utility functions
+  (:export
+   :print-qname)
 
   (:documentation
-   "This package contains unit tests for the model module."))
-
-(cl:in-package :rosetta.model.test)
-
-(deftestsuite model-root (root)
-  ()
-  (:documentation
-   "Root unit test suite for the model module."))
+   "This package contains general model-related functions and
+classes."))

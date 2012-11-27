@@ -287,7 +287,7 @@ unresolved references as forward references and resolve them later."))
 			 (builder lazy-resolver-mixin)
 			 &key &allow-other-keys)
   (when-let ((unresolved (rs.m.d::forward-references (repository builder))))
-    (iter (for (name . object) in unresolved)
+    (iter (for ((kind . qname) . object) in unresolved)
 	  (restart-case
 	      (error 'processing-error
 		     :location (if (compute-applicable-methods #'locations (list builder))
@@ -296,8 +296,9 @@ unresolved references as forward references and resolve them later."))
 		     :builder  builder
 		     :cause    (make-instance
 				'simple-error
-				:format-control   "~@<Unresolved forward reference to ~{~(~A~) \"~*~@{~A~^.~}\"~}.~@:>"
-				:format-arguments (list name)))
+				:format-control "~@<Unresolved forward ~
+reference to the ~A named \"~/rosetta.model::print-qname/\".~@:>"
+				:format-arguments (list kind qname)))
 	    (continue ()
 	      :report (lambda (stream)
 			(format stream "~@<Ignore the unresolved ~

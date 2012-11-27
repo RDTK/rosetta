@@ -25,22 +25,6 @@
 (cl:in-package :rosetta.model.data)
 
 
-;;; Name protocol
-;;
-
-(defgeneric kind (thing)
-  (:documentation
-   "Return a keyword describing the kind of THING."))
-
-(defgeneric name (thing)
-  (:documentation
-   "Return the name of THING."))
-
-(defgeneric qname (thing)
-  (:documentation
-   "Return the fully qualified name of THING."))
-
-
 ;;; Documentation protocol
 ;;
 

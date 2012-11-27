@@ -34,6 +34,7 @@
    :more-conditions
 
    :rosetta
+   :rosetta.model
    :rosetta.model.data)
 
   ;; Conditions
