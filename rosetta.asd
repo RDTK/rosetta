@@ -295,7 +295,8 @@ See `version/list' for details on keyword parameters."
 			      (:file       "util")
 			      (:file       "locations")
 			      (:file       "builder-mixins")
-			      (:file       "format-mixins")))))
+			      (:file       "format-mixins")
+			      (:file       "model-builder")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))

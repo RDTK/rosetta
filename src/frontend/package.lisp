@@ -133,6 +133,10 @@
 
    :search-path-resolver)
 
+  ;; Recursive package creation protocol
+  (:export
+   :ensure-package)
+
   ;; `location-attach-mixin' mixin class
   (:export
    :location-attaching-mixin)

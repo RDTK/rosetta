@@ -182,6 +182,17 @@ comment2")))
 
 (define-builder-mixin-suite root-package-creating-mixin ())
 
+(addtest (root-package-creating-mixin-root
+          :documentation
+	  "Smoke test for method on `ensure-package'.")
+  ensure-package/smoke
+
+  (let ((builder (make-instance 'root-package-creating-mixin-mock-builder)))
+    (ensure-package builder :qname '(:absolute))
+    (ensure-package builder :qname '(:absolute))
+    (ensure-package builder :qname '(:absolute "bar" "baz"))
+    (ensure-package builder :qname '(:absolute "bar" "baz"))))
+
 
 ;;; `lazy-resolver-mixin' mixin class
 ;;

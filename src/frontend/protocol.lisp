@@ -221,3 +221,38 @@ dependencies."))
   (:documentation
    "Set the policy RESOLVER applies when encountering ambiguous
 dependencies to NEW-VALUE."))
+
+
+;;; Ensure package protocol
+;;
+
+(defgeneric ensure-package (builder
+			    &key
+			    qname
+			    &allow-other-keys)
+  (:documentation
+   "Use builder to create the package designated by QNAME and its
+parents, if necessary. Return the created package."))
+
+(defmethod ensure-package ((builder t)
+			   &rest args
+			   &key
+			   (qname (missing-required-argument :qname)))
+  (let+ (((&labels ensure-one-name (qname)
+	    (let* ((parent   (when (rest qname)
+			       (ensure-one-name (butlast qname))))
+		   (package  (find-node builder :package :qname qname
+							 :if-does-not-exist nil))
+		   (created? nil))
+	      (unless package
+		(setf package  (apply #'make-node builder :package
+				      :name  (if (length= 1 qname)
+						 ""
+						 (lastcar qname))
+				      :qname qname
+				      (remove-from-plist args :qname))
+		      created? t)
+		(when parent
+		  (add-child builder parent package)))
+	      (values package created?)))))
+    (ensure-one-name qname)))

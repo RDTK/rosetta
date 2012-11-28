@@ -182,6 +182,27 @@ comment elements to the elements to which they refer."))
 	       nil))
        (call-next-method)))))
 
+(defmethod ensure-package :around ((builder comment-attaching-mixin)
+				   &key &allow-other-keys)
+  ;; Disable comment processing during `ensure-package' to prevent
+  ;; intermediate parent packages from picking up comments intended
+  ;; for the ultimately created package.
+  (let* ((*processing-comment?* t)
+	 (package               (call-next-method)))
+    ;; Successively visit all parents of PACKAGE, the ensured package,
+    ;; until one has a dangling comment. If such a comment exists,
+    ;; attach it to package.
+    (iter (for parent initially (parent package) then (parent parent))
+	  (while parent)
+	  (when-let ((comment (most-recent-comment builder parent)))
+	    (setf (most-recent-comment builder parent) nil
+		  (comment builder package)
+		  (string-trim
+		   '(#\Space #\Tab #\Newline)
+		   (format nil "~{~A~%~}"
+			   (mapcar (curry #'comment? builder) comment))))))
+    package))
+
 
 ;;; `root-package-creating-mixin' mixin class
 ;;
@@ -196,13 +217,7 @@ on a root package being present in the type repository."))
                                      (slot-names t)
                                      &key)
   ;; Create the root package unless there is one.
-  (unless (find-node instance :package
-		     :name  ""
-		     :qname '(:absolute)
-		     :if-does-not-exist nil)
-    (make-node instance :package
-	       :name  ""
-	       :qname '(:absolute))))
+  (ensure-package instance :qname '(:absolute)))
 
 
 ;;; `lazy-resolver-mixin' mixin class
