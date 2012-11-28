@@ -182,6 +182,11 @@ associate to object FOR."))
   (:documentation
    "Return non-nil when BUILDER should treat THING as a comment."))
 
+(defgeneric prettify (builder comment)
+  (:documentation
+   "Try to clean up COMMENT, e.g. by removing unnecessary whitespace,
+and return the result."))
+
 
 ;;; Dependency resolution protocol
 ;;

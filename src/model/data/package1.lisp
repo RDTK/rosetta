@@ -27,6 +27,7 @@
 (defclass package1 (named-mixin
 		    parented-mixin
 		    container/relative-mixin
+		    documentation-mixin
 		    print-items-mixin)
   ()
   (:documentation

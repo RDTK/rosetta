@@ -39,6 +39,14 @@
    "This class is intended to be mixed into data type classes to which
 documentation can be associated."))
 
+;; Hint for generic builders
+
+(defmethod add-child ((builder t)
+		      (parent  documentation-mixin)
+		      (child   string))
+  (setf (documentation1 parent) child)
+  parent)
+
 
 ;;; `named-mixin' mixin class
 ;;

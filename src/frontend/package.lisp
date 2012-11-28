@@ -120,7 +120,8 @@
   (:export
    :most-recent-comment
    :comment
-   :comment?)
+   :comment?
+   :prettify)
 
   ;; Dependency resolution protocol
   (:export

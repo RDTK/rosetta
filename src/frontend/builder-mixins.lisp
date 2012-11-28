@@ -152,6 +152,34 @@ comment elements to the elements to which they refer."))
 		     (thing     string))
   thing)
 
+(defmethod prettify ((builder comment-attaching-mixin)
+		     (comment list))
+  (let+ (((&flet starts-with-or-harmless (character)
+	    #'(lambda (line)
+		(or (emptyp line) (starts-with character line)))))
+	 ((&flet trim-first (line)
+	    (if (emptyp line)
+		line
+		(subseq line 1))))
+	 ((&labels trim (lines)
+	    "Strip common leading whitespace from LINES."
+	    (cond
+	      ((not lines) ; terminate recursion
+	       nil)
+	      ((or (every (starts-with-or-harmless #\Space) lines)
+		   (every (starts-with-or-harmless #\Tab) lines))
+	       (trim (mapcar #'trim-first lines)))
+	      (t
+	       (mapcar (curry #'string-right-trim '(#\Space #\Tab)) lines)))))
+	 ;; Note that `comment?' returns a string representation of
+	 ;; comment nodes.
+	 (lines (trim (mapcar (curry #'comment? builder) comment))))
+    (string-trim '(#\Newline) (format nil "~{~A~%~}" lines))))
+
+(defmethod prettify ((builder comment-attaching-mixin)
+		     (comment string))
+  (string-trim '(#\Space #\Tab #\Newline) comment))
+
 (defmethod add-child :around ((builder comment-attaching-mixin)
 			      (parent  t)
 			      (child   t))
@@ -167,19 +195,12 @@ comment elements to the elements to which they refer."))
      parent)
 
     ;; If CHILD is not a comment and comments are queued, concatenate
-    ;; them and attach the resulting string to CHILD.
+    ;; and prettify them and attach the resulting string to CHILD.
     (t
      (let ((*processing-comment?* t))
        (when-let ((comment (most-recent-comment builder parent)))
-	 ;; Note that `comment?' returns a string representation of
-	 ;; comment nodes.
-	 (setf (comment builder child)
-	       (string-trim
-		'(#\Space #\Tab #\Newline)
-		(format nil "~{~A~%~}"
-			(mapcar (curry #'comment? builder) comment)))
-	       (most-recent-comment builder parent)
-	       nil))
+	 (setf (comment builder child)              (prettify builder comment)
+	       (most-recent-comment builder parent) nil))
        (call-next-method)))))
 
 (defmethod ensure-package :around ((builder comment-attaching-mixin)
@@ -191,16 +212,13 @@ comment elements to the elements to which they refer."))
 	 (package               (call-next-method)))
     ;; Successively visit all parents of PACKAGE, the ensured package,
     ;; until one has a dangling comment. If such a comment exists,
-    ;; attach it to package.
+    ;; attach it to PACKAGE.
     (iter (for parent initially (parent package) then (parent parent))
 	  (while parent)
 	  (when-let ((comment (most-recent-comment builder parent)))
-	    (setf (most-recent-comment builder parent) nil
-		  (comment builder package)
-		  (string-trim
-		   '(#\Space #\Tab #\Newline)
-		   (format nil "~{~A~%~}"
-			   (mapcar (curry #'comment? builder) comment))))))
+	    (setf (comment builder package)            (prettify builder comment)
+		  (most-recent-comment builder parent) nil)
+	    (terminate)))
     package))
 
 

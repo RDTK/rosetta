@@ -176,6 +176,28 @@ comment2")))
       (ensure-same (comment builder structure) expected/structure)
       (ensure-same (comment builder field)     expected/field))))
 
+(addtest (comment-attaching-mixin-root
+          :documentation
+	  "Test interaction of comment attaching and
+`ensure-package'.")
+  ensure-package
+
+  ;;; TODO(jmoringe, 2012-11-28): use simple builder
+  (let* ((builder (make-instance (find-builder-class :model)
+				 :resolver   (make-instance 'search-path-resolver)
+				 :locations  (make-instance 'location-repository)
+				 :repository (make-instance 'rs.m.d::base-repository)))
+	 (root    (let ((package (ensure-package
+				  builder :qname '(:absolute))))
+		    (add-child builder package "at root")))
+	 (bar     (let ((package (ensure-package
+				  builder :qname '(:absolute "bar"))))
+		    (add-child builder package "at bar")))
+	 (baz     (ensure-package builder :qname '(:absolute "bar" "baz"))))
+    (ensure-same (documentation1 root) nil :test #'equal)
+    (ensure-same (documentation1 bar)  "at root" :test #'equal)
+    (ensure-same (documentation1 baz)  "at bar" :test #'equal)))
+
 
 ;;; `root-package-creating-mixin' mixin class
 ;;
