@@ -29,19 +29,22 @@
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the default behavior of the `validate/type'
-generic function.")
-  validate-type/smoke
+	  "Test default behavior of the `validate/type' generic
+function.")
+  validate-type/default-behavior
 
   ;; Test behavior in case of invalid types.
   (let ((mechanism :does-not-matter)
 	(type      :does-not-matter))
+
     ;; Type is invalid; should signal an error.
     (ensure-condition type-invalid-for-mechanism
       (validate-type mechanism type))
+
     ;; Return nil instead of signaling an error.
-    (ensure-same (validate-type  mechanism type :if-invalid nil)
+    (ensure-same (validate-type mechanism type :if-invalid nil)
 		 nil)
+
     ;; Use `continue' restart
     (ensure-same (validate-type mechanism type :if-invalid #'continue)
 		 t)))

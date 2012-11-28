@@ -67,21 +67,28 @@ a condition object."))
 				  (type      t)
 				  &key
 				  (if-invalid #'error))
-  (or (call-next-method)
-      (etypecase if-invalid
-	(null
-	 nil)
-	(function
-	 (restart-case
-	     (funcall if-invalid
-		      (make-condition 'type-invalid-for-mechanism
-				      :mechanism mechanism
-				      :type      type))
-	   (continue ()
-	     :report (lambda (stream)
-		       (format stream "~@<Ignore the incompatibility ~
-and try to continue.~@:>"))
-	     t))))))
+  (let+ (((&flet handle-invalid (&optional cause)
+	    (etypecase if-invalid
+	      (null
+	       (return-from validate-type (values nil cause)))
+	      (function
+	       (restart-case
+		   (funcall if-invalid
+			    (apply #'make-condition
+				   'type-invalid-for-mechanism
+				   :mechanism mechanism
+				   :type      type
+				   (when cause
+				     (list :cause cause))))
+		 (continue ()
+		   :report (lambda (stream)
+			     (format stream "~@<Ignore the incompatibility.~@:>"))
+		   t)))))))
+    (or (handler-bind
+	    (((or simple-error type-invalid-for-mechanism)
+	       #'handle-invalid))
+	  (call-next-method))
+	(handle-invalid))))
 
 (defmethod validate-type ((mechanism t)
 			  (type      t)
@@ -91,13 +98,17 @@ and try to continue.~@:>"))
 (defmethod validate-type ((mechanism t)
 			  (type      composite-mixin)
 			  &key &allow-other-keys)
-  (every (curry #'validate-type mechanism)
-	 (contents type t)))
+  (every (curry #'validate-type mechanism) (contents type t)))
 
 (defmethod validate-type ((mechanism t)
 			  (type      typed-mixin)
 			  &key &allow-other-keys)
   (validate-type mechanism (rs.m.d:type1 type)))
+
+(defmethod validate-type ((mechanism t)
+			  (type      array-mixin)
+			  &key &allow-other-keys)
+  (validate-type mechanism (element-type type)))
 
 
 ;;; Mechanisms
