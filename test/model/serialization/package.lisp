@@ -25,6 +25,7 @@
 (cl:defpackage :rosetta.model.serialization.test
   (:use
    :cl
+   :let-plus
    :lift
 
    :rosetta.model.serialization
@@ -44,3 +45,11 @@ module."))
   ()
   (:documentation
    "Root unit test suite for the model.serialization module."))
+
+(defclass mock-mechanism/validate-type ()
+  ())
+
+(defmethod validate-type ((mechanism mock-mechanism/validate-type)
+			  (type      t)
+			  &key &allow-other-keys)
+  (error "~@<Mock type validation error.~@:>"))

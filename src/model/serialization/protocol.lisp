@@ -52,13 +52,17 @@ represent lengths of arrays. The returned object models a type."))
 			   &key
 			   if-invalid)
   (:documentation
-   "Check whether the type represented by TYPE can be processed by the
-serialization mechanism represented by MECHANISM. Return non-nil, if
-TYPE can be processed by MECHANISM.
+   "Check whether TYPE can be processed by MECHANISM.
+
+Return non-nil, if TYPE can be processed by MECHANISM. If TYPE is
+invalid for MECHANISM (depending on IF-INVALID), return two values:
+nil and potentially a condition describing the cause.
 
 IF-INVALID controls the behavior in case TYPE cannot be processed by
 MECHANISM. Valid values are nil or a function which can be called with
-a condition object."))
+a condition object (of type `type-invalid-for-mechanism'). If
+IF-INVALID is a function, a `cl:continue' restart is established
+around the call."))
 
 (defmethod name ((mechanism t))
   (class-name (class-of mechanism)))
@@ -67,19 +71,19 @@ a condition object."))
 				  (type      t)
 				  &key
 				  (if-invalid #'error))
-  (let+ (((&flet handle-invalid (&optional cause)
+  (let+ (((&flet make-error (&optional cause)
+	    (apply #'make-condition 'type-invalid-for-mechanism
+		   :mechanism  mechanism
+		   :type       type
+		   (when cause
+		     (list :cause cause)))))
+	 ((&flet handle-invalid (&optional cause)
 	    (etypecase if-invalid
 	      (null
-	       (return-from validate-type (values nil cause)))
+	       (return-from validate-type (values nil (make-error cause))))
 	      (function
 	       (restart-case
-		   (funcall if-invalid
-			    (apply #'make-condition
-				   'type-invalid-for-mechanism
-				   :mechanism mechanism
-				   :type      type
-				   (when cause
-				     (list :cause cause))))
+		   (funcall if-invalid (make-error cause))
 		 (continue ()
 		   :report (lambda (stream)
 			     (format stream "~@<Ignore the incompatibility.~@:>"))

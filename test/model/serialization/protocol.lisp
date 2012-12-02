@@ -22,16 +22,21 @@
 
 (cl:in-package :rosetta.model.serialization.test)
 
-(deftestsuite protocol-root (model-serialization-root)
+(deftestsuite model-serialization-protocol-root (model-serialization-root)
   ()
   (:documentation
    "Unit tests for the protocol of the model.serialization module."))
 
-(addtest (protocol-root
+(deftestsuite validate-type-root (model-serialization-protocol-root)
+  ()
+  (:documentation
+   "Tests for the `validate-type' generic function."))
+
+(addtest (validate-type-root
           :documentation
 	  "Test default behavior of the `validate/type' generic
 function.")
-  validate-type/default-behavior
+  default-behavior
 
   ;; Test behavior in case of invalid types.
   (let ((mechanism :does-not-matter)
@@ -48,3 +53,16 @@ function.")
     ;; Use `continue' restart
     (ensure-same (validate-type mechanism type :if-invalid #'continue)
 		 t)))
+
+(addtest (validate-type-root
+          :documentation
+	  "Test that `validate-type' returns the causing condition as
+a second return value.")
+  cause
+
+  ;; Expect result nil, second return value causing condition.
+  (let+ ((mechanism (make-instance 'mock-mechanism/validate-type))
+	 ((&values result cause) (validate-type mechanism :does-not-matter
+						:if-invalid nil)))
+    (ensure-null result)
+    (ensure (typep cause 'type-invalid-for-mechanism))))

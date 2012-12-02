@@ -253,21 +253,18 @@ See `version/list' for details on keyword parameters."
 		(:module     "serialization"
 		 :pathname   "test/serialization"
 		 :depends-on ("package")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "protocol"
-			       :depends-on ("package"))
-			      (:file       "textual-mixin"
-			       :depends-on ("package"))
-			      (:file       "textual-stream-mixin"
-			       :depends-on ("package" "textual-mixin"))
-			      (:file       "binary-mixin"
-			       :depends-on ("package"))
-			      (:file       "data-holder-mixin"
-			       :depends-on ("package"))))
+			      (:file       "protocol")
+			      (:file       "textual-mixin")
+			      (:file       "textual-stream-mixin")
+			      (:file       "binary-mixin")
+			      (:file       "data-holder-mixin")))
 
 		(:module     "model"
 		 :pathname   "test/model"
 		 :depends-on ("package")
+		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")))
 
@@ -285,9 +282,9 @@ See `version/list' for details on keyword parameters."
 		(:module     "model-serialization"
 		 :pathname   "test/model/serialization"
 		 :depends-on ("package" "model")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "protocol"
-			       :depends-on ("package"))))
+			      (:file       "protocol")))
 
 		(:module     "frontend"
 		 :pathname   "test/frontend"
