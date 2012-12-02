@@ -62,6 +62,22 @@ numeric, value.
 
 One example of a class representing such values is `enum-value'."))
 
+(defmethod shared-initialize :after ((instance   enum)
+                                     (slot-names t)
+                                     &key
+				     values)
+  (etypecase values
+    ((cons (or string keyword))
+     (iter (for (name value) on values :by #'cddr)
+	   (setf (lookup instance :value name)
+		 (make-instance 'enum-value
+				:name  name
+				:type  (type1 instance)
+				:value value))))
+    (list
+     (iter (for value in values)
+	   (setf (lookup instance :value (name value)) value)))))
+
 (defmethod kind ((type enum))
   :enum)
 
@@ -73,22 +89,24 @@ One example of a class representing such values is `enum-value'."))
   ;; Make sure that we can obtain a numeric value from
   ;; NEW-VALUE. Otherwise, reject it.
   (unless (compute-applicable-methods #'value (list new-value))
-    (error "~@<Supplied value ~A for ~A does not specialize the ~S ~
-method.~@:>"
-	   new-value container 'value))
+    (simple-child-error container new-value
+			"~@<Supplied value ~A for ~A does not ~
+specialize the ~S method.~@:>"
+			new-value container 'value))
 
   (let ((value (value new-value)))
     ;; Make sure we do not already have the numeric value associated
     ;; to NEW-VALUE.
-    (when-let ((collision (find value (contents container :value)
-				:key #'value)))
-      (error "~@<Duplicate numeric value ~D for existing item ~A and ~
-new item ~A.~@:>"
-	     value collision new-value))
+    (when-let ((existing (find value (contents container :value)
+			       :key #'value)))
+      (duplicate-child-key container (list :value value) existing))
 
     ;; Finally make sure the numeric value associated to NEW-VALUE is
     ;; valid for the numeric type used by CONTAINER.
-    (validate-value (type1 container) value)))
+    (let+ (((&values valid? cause)
+	    (validate-value (type1 container) value :if-invalid nil)))
+      (unless valid?
+	(chainable-child-error container key cause)))))
 
 (defmethod validate-value ((type enum) (value t)
 			   &key &allow-other-keys)
