@@ -41,13 +41,17 @@ which consist of singleton values."))
                                      (slot-names t)
                                      &key
 				     value)
-  (validate-value instance value))
+  (validate-value (type1 instance) value))
 
 (defmethod kind ((type singleton))
   :singleton)
 
 (defmethod name ((type singleton))
   (format nil "=~A" (value type)))
+
+(defmethod validate-value ((type singleton) (value t)
+			   &key &allow-other-keys)
+  (equal value (value type)))
 
 (defmethod print-items append ((type singleton))
   (list (list :value (value type))))

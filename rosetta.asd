@@ -276,6 +276,7 @@ See `version/list' for details on keyword parameters."
 			      (:file       "protocol")
 			      (:file       "named-mixin")
 			      (:file       "structure-mixin")
+			      (:file       "type-singleton")
 			      (:file       "type-fundamental")
 			      (:file       "type-enum")))
 
