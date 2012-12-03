@@ -242,8 +242,12 @@ parents, if necessary. Return the created package."))
 (defmethod ensure-package ((builder t)
 			   &rest args
 			   &key
+			   name
 			   (qname (missing-required-argument :qname)))
-  (let+ (((&labels ensure-one-name (qname)
+  (let+ ((name/from-qname (if (length= 1 qname)
+			      ""
+			      (lastcar qname)))
+	 ((&labels ensure-one-name (qname)
 	    (let* ((parent   (when (rest qname)
 			       (ensure-one-name (butlast qname))))
 		   (package  (find-node builder :package :qname qname
@@ -251,13 +255,15 @@ parents, if necessary. Return the created package."))
 		   (created? nil))
 	      (unless package
 		(setf package  (apply #'make-node builder :package
-				      :name  (if (length= 1 qname)
-						 ""
-						 (lastcar qname))
+				      :name  name/from-qname
 				      :qname qname
 				      (remove-from-plist args :qname))
 		      created? t)
 		(when parent
 		  (add-child builder parent package)))
 	      (values package created?)))))
+    (when (and name (not (string= name name/from-qname)))
+      (incompatible-arguments :name  name
+			      :qname qname))
+
     (ensure-one-name qname)))

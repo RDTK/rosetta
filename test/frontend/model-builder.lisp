@@ -34,11 +34,27 @@
 	  "Smoke test for method on `ensure-package'.")
   ensure-package/smoke
 
-  (let ((builder (make-instance (find-builder-class :model)
-				:resolver   (make-instance 'search-path-resolver)
-				:locations  (make-instance 'location-repository)
-				:repository (make-instance 'rs.m.d::base-repository))))
-    (ensure-package builder :qname '(:absolute))
-    (ensure-package builder :qname '(:absolute))
-    (ensure-package builder :qname '(:absolute "bar" "baz"))
-    (ensure-package builder :qname '(:absolute "bar" "baz"))))
+  (let+ ((builder (make-instance (find-builder-class :model)
+				 :resolver   (make-instance 'search-path-resolver)
+				 :locations  (make-instance 'location-repository)
+				 :repository (make-instance 'rs.m.d::base-repository)))
+	 ((&flet do-it (args)
+	    (apply #'ensure-package builder args))))
+    (ensure-cases (args expected)
+	`(;; These are invalid.
+	  ((:qname (:absolute) :name "foo")             incompatible-arguments)
+	  ((:qname (:absolute "bar" "baz") :name "foo") incompatible-arguments)
+
+	  ;; These are OK.
+	  ((:qname (:absolute))                         nil)
+	  ((:qname (:absolute) :name "")                nil)
+	  ((:qname (:absolute))                         nil)
+	  ((:qname (:absolute "bar" "baz"))             nil)
+	  ((:qname (:absolute "bar" "baz") :name "baz") nil)
+	  ((:qname (:absolute "bar" "baz"))             nil))
+
+	(case expected
+	  (incompatible-arguments
+	   (ensure-condition 'incompatible-arguments (do-it args)))
+	  (t
+	   (do-it args))))))
