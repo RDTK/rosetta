@@ -44,9 +44,13 @@
    :child-error
    :data-type-error-key
 
-   :no-such-child
+   :chainable-child-error ; condition and function
 
-   :duplicate-child-key)
+   :simple-child-error    ; condition and function
+
+   :no-such-child         ; condition and function
+
+   :duplicate-child-key)  ; condition and function
 
   ;; Restarts
   (:export

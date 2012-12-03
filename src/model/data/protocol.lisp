@@ -69,10 +69,12 @@ if (KIND KEY) does not designate a element within CONTAINER. The
 following values are allowed:
 
   a function
-    Make a `no-such-child' error and call the supplied function with
-    it as the sole argument.
+
+    Make a `no-such-child' error and call IF-DOES-NOT-EXIST with it as
+    the sole argument.
 
   nil
+
     nil is returned.
 
 IF-EXISTS is accepted for parity with the `setf' method and
@@ -93,14 +95,17 @@ associated with (KIND KEY) in CONTAINER. The following values are
 allowed:
 
   :KEEP
+
     Do not modify CONTAINER and return the existing value.
 
   :SUPERSEDE
+
     Replace the existing value with NEW-VALUE.
 
   a function
-    Make a `duplicate-child-key' error and call the supplied function
-    with it as the sole argument."))
+
+    Make a `duplicate-child-key' error and call IF-EXISTS with it as
+    the sole argument."))
 
 (defmethod lookup ((container t)
 		   (kind      t)
