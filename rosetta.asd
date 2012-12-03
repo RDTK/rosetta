@@ -274,11 +274,13 @@ See `version/list' for details on keyword parameters."
 		(:module     "model-data"
 		 :pathname   "test/model/data"
 		 :depends-on ("package" "model")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "named-mixin"
-			       :depends-on ("package"))
-			      (:file       "structure-mixin"
-			       :depends-on ("package"))))
+			      (:file       "protocol")
+			      (:file       "named-mixin")
+			      (:file       "structure-mixin")
+			      (:file       "type-fundamental")
+			      (:file       "type-enum")))
 
 		(:module     "model-serialization"
 		 :pathname   "test/model/serialization"

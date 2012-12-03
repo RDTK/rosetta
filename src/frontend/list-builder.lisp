@@ -60,6 +60,22 @@
   (define-fundamental-accessor element-type)
   (define-fundamental-accessor index-type))
 
+(defmethod validate-value ((type list) (value t)
+			   &key &allow-other-keys)
+  ;; This method exists mainly for the sake of unit tests.
+  (when (eq (kind type) :fundamental)
+    (when-let ((type-spec
+		(case (category type)
+		  (:bool    'boolean)
+		  (:integer
+		   `(,(if (signed? type) 'signed-byte 'unsigned-byte)
+		     ,(width type)))
+		  (:float
+		   `(real most-negative-double-float most-positive-double-float))
+		  (:string  'string)
+		  (:bytes   'nibbles:octet-vector))))
+      (typep value type-spec))))
+
 (defmethod find-node ((builder (eql 'list))
 		      (kind    t)
 		      &rest args &key &allow-other-keys)
@@ -67,6 +83,14 @@
 	  (apply #'make-node builder kind
 		 (remove-from-plist args :if-does-not-exist))))
     (list* (list :find kind) nil args)))
+
+(defmethod make-node :before ((builder (eql 'list))
+			      (kind    (eql :singleton))
+			      &key
+			      type
+			      value)
+  ;; This method exists mainly for the sake of unit tests.
+  (validate-value type value))
 
 (defmethod make-node ((builder (eql 'list))
 		      (kind    t)

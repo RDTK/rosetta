@@ -68,8 +68,37 @@ One example of a class representing such values is `enum-value'."))
 (defmethod (setf lookup) :before ((new-value t)
 				  (container enum)
 				  (kind      (eql :value))
-				  (key      string)
+				  (key       string)
 				  &key &allow-other-keys)
+  ;; Make sure that we can obtain a numeric value from
+  ;; NEW-VALUE. Otherwise, reject it.
   (unless (compute-applicable-methods #'value (list new-value))
-    (error "~@<Supplied value ~A for ~A does not specialize the ~S method.~@:>"
-	   new-value container 'value)))
+    (error "~@<Supplied value ~A for ~A does not specialize the ~S ~
+method.~@:>"
+	   new-value container 'value))
+
+  (let ((value (value new-value)))
+    ;; Make sure we do not already have the numeric value associated
+    ;; to NEW-VALUE.
+    (when-let ((collision (find value (contents container :value)
+				:key #'value)))
+      (error "~@<Duplicate numeric value ~D for existing item ~A and ~
+new item ~A.~@:>"
+	     value collision new-value))
+
+    ;; Finally make sure the numeric value associated to NEW-VALUE is
+    ;; valid for the numeric type used by CONTAINER.
+    (validate-value (type1 container) value)))
+
+(defmethod validate-value ((type enum) (value t)
+			   &key &allow-other-keys)
+  (unless (find value (contents type :value)
+		:key #'value)
+    (let ((values (mapcar #'value (contents type :value))))
+     (error "~@<~S is not one of the valid values of ~A. ~[There are ~
+no valid values~;The only valid value is ~:;Valid values are ~]~{~S~^, ~
+~}.~@:>"
+	    value type (length values) values)))
+
+  (when (next-method-p)
+    (call-next-method)))

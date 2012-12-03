@@ -101,6 +101,10 @@ storage."))
 (define-fundamental-type (bool (fixed-width-mixin) :bool)
   :width 1)
 
+(defmethod validate-value ((type type-bool) (value t)
+			   &key &allow-other-keys)
+  (typep value 'boolean))
+
 (defclass integer-mixin ()
   ((signed? :initarg  :signed?
 	    :type     boolean
@@ -113,6 +117,11 @@ data type represents signed or unsigned integers."))
   (:documentation
    "This mixin class adds a signed? slot to integer data type
 classes."))
+
+(defmethod validate-value ((type integer-mixin) (value integer)
+			   &key &allow-other-keys)
+  (typep value `(,(if (signed? type) 'signed-byte 'unsigned-byte)
+		 ,(width type))))
 
 (macrolet
     ((define-fundamental-integer-type (signed? width)
@@ -137,8 +146,16 @@ classes."))
 (define-fundamental-type (float32 (type-float*) :float)
   :width 32)
 
+(defmethod validate-value ((type type-float32) (value float)
+			   &key &allow-other-keys)
+  (typep value `(real ,most-negative-single-float ,most-positive-single-float)))
+
 (define-fundamental-type (float64 (type-float*) :float)
   :width 64)
+
+(defmethod validate-value ((type type-float64) (value float)
+			   &key &allow-other-keys)
+  (typep value `(real ,most-negative-double-float ,most-positive-double-float)))
 
 (defclass string-mixin ()
   ((encoding :initarg  :encoding
@@ -155,7 +172,19 @@ classes."))
 (define-fundamental-type (ascii-string (type-string*) :string)
   :encoding :ascii)
 
+(defmethod validate-value ((type type-ascii-string) (value string)
+			   &key &allow-other-keys)
+  (every #'(lambda (code) (<= 0 (char-code code) 127)) value))
+
 (define-fundamental-type (utf-8-string (type-string*) :string)
   :encoding :utf-8)
 
+(defmethod validate-value ((type type-utf-8-string) (value string)
+			   &key &allow-other-keys)
+  t)
+
 (define-fundamental-type (octet-vector (variable-width-mixin) :bytes))
+
+(defmethod validate-value ((type type-octet-vector) (value simple-array)
+			   &key &allow-other-keys)
+  (typep value 'nibbles:octet-vector))

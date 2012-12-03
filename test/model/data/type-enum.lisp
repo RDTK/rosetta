@@ -1,4 +1,4 @@
-;;; type-singleton.lisp --- Singleton data type.
+;;; type-enum.lisp --- Unit tests for the enum data type.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -22,32 +22,29 @@
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
 ;;     Bielefeld University
 
-(cl:in-package :rosetta.model.data)
+(cl:in-package :rosetta.model.data.test)
 
-;;; TODO(jmoringe, 2012-05-03): mixin?
-(defclass singleton (typed-mixin
-		     print-items-mixin)
-  ((value :initarg  :value
-	  :reader   value
-	  :documentation
-	  "Stores the singleton value."))
-  (:default-initargs
-   :value (missing-required-initarg 'singleton :value))
+(deftestsuite model-data-enum-root (model-data-root)
+  ()
   (:documentation
-   "Instances of this type class represent types the extension of
-which consist of singleton values."))
+   "Tests for the `enum' and `enum-value' types."))
 
-(defmethod shared-initialize :after ((instance   singleton)
-                                     (slot-names t)
-                                     &key
-				     value)
-  (validate-value instance value))
+(addtest (model-data-enum-root
+          :documentation
+	  "Test method on `validate-value'.")
+  validate-value
 
-(defmethod kind ((type singleton))
-  :singleton)
+  (let ((enum (make-instance 'enum
+			     :name "enum"
+			     :type (make-instance 'type-uint8))))
+    (setf (lookup enum :value "a")
+	  (make-instance 'enum-value
+			 :name  "a"
+			 :value 1))
+    (ensure-cases (value expected)
+	'((-1 nil)
+	  ( 0 nil)
+	  ( 1 t)
+	  ( 2 nil))
 
-(defmethod name ((type singleton))
-  (format nil "=~A" (value type)))
-
-(defmethod print-items append ((type singleton))
-  (list (list :value (value type))))
+      (validate-value enum value :if-invalid nil))))

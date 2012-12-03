@@ -26,6 +26,7 @@
   (:use
    :cl
    :alexandria
+   :let-plus
    :more-conditions
    :lift
 
@@ -48,3 +49,11 @@
   ()
   (:documentation
    "Root unit test suite for the model.data module."))
+
+(defclass mock-type/validate-value ()
+  ())
+
+(defmethod validate-value ((type  mock-type/validate-value)
+			   (value t)
+			   &key &allow-other-keys)
+  (error "~@<Mock value validation error.~@:>"))

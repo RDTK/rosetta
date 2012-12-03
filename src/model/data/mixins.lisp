@@ -81,6 +81,10 @@ instances of which represent named data types."))
    "This class is intended to be mixed into data type classes which
 refer to another type such as a field of a structure."))
 
+(defmethod validate-value ((type typed-mixin) (value t)
+			   &key &allow-other-keys)
+  (validate-value (type1 type) value))
+
 (defmethod print-items append ((object typed-mixin))
   "Try to enforce a meaningful order of the name and type print
 items."

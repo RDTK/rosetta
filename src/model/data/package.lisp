@@ -41,16 +41,19 @@
    :data-type-error
    :data-type-error-type
 
+   :value-invalid-for-type ; condition and function
+   :data-type-error-value
+
    :child-error
    :data-type-error-key
 
-   :chainable-child-error ; condition and function
+   :chainable-child-error  ; condition and function
 
-   :simple-child-error    ; condition and function
+   :simple-child-error     ; condition and function
 
-   :no-such-child         ; condition and function
+   :no-such-child          ; condition and function
 
-   :duplicate-child-key)  ; condition and function
+   :duplicate-child-key)   ; condition and function
 
   ;; Restarts
   (:export
@@ -81,6 +84,10 @@
   ;; Typed protocol
   (:export
    :type1)
+
+  ;; Value validation protocol
+  (:export
+   :validate-value)
 
   ;; Fundamental type protocol
   (:export

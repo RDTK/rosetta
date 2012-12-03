@@ -241,6 +241,54 @@ other types."))
    "Return a type instance representing the type of THING."))
 
 
+;;; Value validation protocol
+;;
+
+(defgeneric validate-value (type value
+			    &key
+			    if-invalid)
+  (:documentation
+   "Check whether VALUE is valid for TYPE.
+
+ Return non-nil, if VALUE is valid for TYPE. If VALUE is invalid for
+TYPE (depending on IF-INVALID), return two values: nil and a
+`value-invalid-for-type' condition.
+
+IF-INVALID controls the behavior in case VALUE is invalid for
+TYPE. Valid values are nil or a function which can be called with a
+condition object (of type `valid-invalid-for-type'). If IF-INVALID is
+a function, a `cl:continue' restart is established around the call."))
+
+(defmethod validate-value :around ((type t) (value t)
+				   &key
+				   (if-invalid #'error))
+  (let+ (((&flet make-error (&optional cause)
+	    (apply #'make-condition 'value-invalid-for-type
+		   :type  type
+		   :value value
+		   (when cause
+		     (list :cause cause)))))
+	 ((&flet handle-invalid (&optional cause)
+	    (etypecase if-invalid
+	      (null
+	       (return-from validate-value (values nil (make-error cause))))
+	      (function
+	       (restart-case
+		   (funcall if-invalid (make-error cause))
+		 (continue ()
+		   :report (lambda (stream)
+			     (format stream "~@<Ignore the incompatibility.~@:>"))
+		   t)))))))
+    (or (handler-bind
+	    (((or simple-error value-invalid-for-type) #'handle-invalid))
+	  (call-next-method))
+	(handle-invalid))))
+
+(defmethod validate-value ((type t) (value t)
+			   &key &allow-other-keys)
+  nil)
+
+
 ;;; Fundamental type protocol
 ;;
 
