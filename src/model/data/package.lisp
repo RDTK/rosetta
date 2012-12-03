@@ -115,6 +115,10 @@
    :data-holder
    :wire-schema)
 
+  ;; `documentation-mixin' mixin class
+  (:export
+   :documentation-mixin)
+
   ;; `named-mixin' mixin class
   (:export
    :named-mixin)

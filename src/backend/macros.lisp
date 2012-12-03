@@ -53,7 +53,7 @@
 		(go :retry))
 
 	      ;; Skip the emit method.
-	      (skip ()
+	      (continue ()
 		:report
 		(lambda (stream)
 		  (format stream
@@ -108,9 +108,9 @@ TARGET-VAR and push NODE-VAR onto the context stack."
 		     (grandparent (third (context-stack *context*)))
 		     (ancestors   (rest (context-stack *context*))))
      (flet ((recur (node)
-	      (emit node
-		    (context-target *context*)
-		    (context-language *context*)))
+	      (generate node
+			(context-target *context*)
+			(context-language *context*)))
 	    (cget (key)
 	      (context-get *context* key))
 	    ((setf cget) (new-value key)

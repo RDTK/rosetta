@@ -296,7 +296,14 @@ See `version/list' for details on keyword parameters."
 			      (:file       "locations")
 			      (:file       "builder-mixins")
 			      (:file       "format-mixins")
-			      (:file       "model-builder")))))
+			      (:file       "model-builder")))
+
+		(:module     "backend"
+		 :pathname   "test/backend"
+		 :depends-on ("package")
+		 :serial     t
+		 :components ((:file       "package")
+			      (:file       "protocol")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))

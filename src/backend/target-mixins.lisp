@@ -62,8 +62,7 @@ methods."))
 
 (defmethod emit ((node     t)
 		 (target   method-target-mixin)
-		 (language t)
-		 &key)
+		 (language t))
   (generate node (body-target target) language))
 
 

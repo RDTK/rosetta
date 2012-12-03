@@ -171,32 +171,58 @@ This state consists of:
 
 ;;; Generate/emit protocol
 ;;
+;; The protocol consists of the following cascade of method calls:
+;; 1. client calls `generate'
+;;    a) `generate' performs target and language lookup and
+;;       instantiation
+;; 2. `generate' calls `emit/setup'
+;;    a) `emit/setup' establishes restarts
+;;    b) `emit/setup' establishes a `context'
+;;    c) `emit/setup' establishes condition translation to
+;;       `emit-error', `emit-warning'
+;; 3. `emit/setup' calls `emit/context'
+;;    a) client-supplied methods on `emit/context' establish a
+;;       suitable context for the respective target
+;;    b) client-supplied methods on `emit/context' `call-next-method'
+;;       until (emit/context t t t) is called
+;; 4. (emit/context t t t) calls `emit'
+;;    a) client-supplied methods on `emit', using the established
+;;       context produce the actual result
 
 (defgeneric generate (node target language
 		      &key
 		      verbose
 		      print
 		      &allow-other-keys)
-  (:argument-precedence-order language target node)
   (:documentation
    "Emit the appropriate object for NODE with respect to TARGET."))
 
-(defgeneric emit (node target language
-		  &key
-		  verbose
-		  print
-		  &allow-other-keys)
-  (:argument-precedence-order language target node)
+(defgeneric emit/setup (node target language)
+  (:documentation
+   "Emit the appropriate object for NODE with respect to TARGET.
+
+No methods must not be installed on `emit/setup'."))
+
+(defgeneric emit/context (node target language)
+  (:argument-precedence-order target language node)
   (:documentation
    "Emit the appropriate object for NODE with respect to TARGET."))
+
+(defgeneric emit (node target language)
+  (:argument-precedence-order target language node)
+  (:documentation
+   "Emit the appropriate object for NODE with respect to TARGET."))
+
+
+;;; Default behavior for `generate'
+;;
+;; 1. Maybe resolve target class
+;; 2. Maybe resolve language class
+;; 3. Dispatch to `emit/setup'
 
 (defmethod generate ((node t) (target t) (language t)
 		     &key)
-  (emit node target language))
-
-
-;;; Target class lookup
-;;
+  (emit/setup node target language))
 
 (defmethod generate ((node t) (target list) (language t)
 		     &key)
@@ -206,12 +232,8 @@ This state consists of:
     (generate node instance language)))
 
 (defmethod generate ((node t) (target symbol) (language t)
-		 &key)
+		     &key)
   (generate node (list target) language))
-
-
-;;; Language class lookup
-;;
 
 (defmethod generate ((node t) (target t) (language list)
 		     &key)
@@ -221,36 +243,45 @@ This state consists of:
     (generate node target instance)))
 
 (defmethod generate ((node t) (target t) (language symbol)
-		 &key)
+		     &key)
   (generate node target (list language)))
 
 
-;;; Housekeeping and such
+;;; Default behavior for `emit/steup'
 ;;
+;; Establish context, restarts and condition translation, then
+;; dispatch to `emit/context'.
 
-(defmethod emit :before ((node     standard-object)
-			 (target   standard-object)
-			 (language standard-object)
-			 &key
-			 (verbose *emit-verbose*)
-			 (print   *emit-print*))
-  ;; Printing
-  (when verbose
-    (format *standard-output* "~@<; ~@;emitting ~S for target ~S~@:>~%"
-	    node target))
-  (when print
-    (format *standard-output* "~@<; ~@;emitting (~A)~@:>~%" (type-of node))))
-
-(defmethod emit :around ((node     t)
-			 (target   t)
-			 (language t)
-			 &key)
+(defmethod emit/setup :around ((node     t)
+			       (target   t)
+			       (language t))
   (with-emit-restarts (node target)
     (with-updated-context (node target language)
       (with-condition-translation
 	  (((error emit-error)
 	    :context (copy-context *context*))
 	   ((warning emit-warning
-	     :signal-via warn)
+		     :signal-via warn)
 	    :context (copy-context *context*)))
 	(call-next-method)))))
+
+(defmethod emit/setup ((node     t)
+		       (target   t)
+		       (language t))
+  (emit/context node target language))
+
+(defmethod emit/context ((node     t)
+			 (target   t)
+			 (language t))
+  (emit node target language))
+
+(macrolet
+    ((define-delegating-method (name &optional method?)
+       `(defmethod ,name ((function (eql (fdefinition 'emit/context)))
+			  ,@(when method? '((method t)))
+			  &rest args)
+	  (if (compute-applicable-methods (fdefinition 'emit) args)
+	      (apply #'emit args)
+	      (error "~@<No emitter for ~{~A~^, ~}.~@:>" args)))))
+  (define-delegating-method no-applicable-method)
+  (define-delegating-method no-next-method t))

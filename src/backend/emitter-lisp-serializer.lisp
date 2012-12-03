@@ -1,4 +1,4 @@
-;;; emitter-serializer-base-lisp.lisp ---
+;;; emitter-serializer-base-lisp.lisp --- Emitter for lisp serialization code.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -28,87 +28,118 @@
 ;;; Serialization code for fundamental types
 ;;
 
-(defmethod emit ((node     rs.m.d::fundamental-type-mixin)
+(defmethod emit ((node     fixed-width-mixin)
 		 (target   target-pack)
-		 (language language-lisp)
-		 &key)
-  (let+ (((&accessors-r/o category width) node)
-	 ((&env-r/o source-var offset-var destination-var))
-	 (packer (%packer-name category width)))
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var offset-var destination-var))
+	 (packer (%packer-name node)))
     `(progn
-       (setf (,packer ,destination-var ,offset-var) ,source-var)
-       ,(emit node :packed-size language))))
+       ,@(when source-var
+	   `((setf (,packer ,destination-var ,offset-var) ,source-var)))
+       ,(generate node :packed-size language))))
 
-(defmethod emit ((node     rs.m.d::fundamental-type-mixin)
+(defmethod emit ((node     fixed-width-mixin)
 		 (target   target-unpack)
-		 (language language-lisp)
-		 &key)
-  (let+ (((&accessors-r/o category width) node)
-	 ((&env-r/o source-var offset-var destination-var))
-	 (packer (%packer-name category width)))
-    `(,packer ,source-var ,offset-var)))
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var offset-var destination-var))
+	 (packer (%packer-name node)))
+    `(progn
+       ,@(when destination-var
+	   `((setf ,destination-var (,packer ,source-var ,offset-var))))
+       ,(generate node :packed-size language))))
+
+(defmethod emit ((node     type-octet-vector)
+		 (target   target-pack)
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var offset-var destination-var)))
+    (if source-var
+	`(progn
+	   (replace ,destination-var ,source-var :start1 ,offset-var)
+	   (length ,source-var))
+	0)))
+
+(defmethod emit ((node     type-octet-vector)
+		 (target   target-unpack)
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var offset-var end-var destination-var)))
+    `(progn
+       ,@(when destination-var
+	   `((let ((length (- ,end-var ,offset-var)))
+	       (unless (= (length ,destination-var) length)
+		 (setf ,destination-var
+		       (nibbles:make-octet-vector length)))
+	       (replace ,destination-var ,source-var
+			:start2 ,offset-var :end2 ,end-var))))
+       (- ,end-var ,offset-var))))
 
 
 ;;; Serialization-related methods
 ;;
 
-(defmethod emit ((node     rs.m.d::toplevel-mixin)
-		 (target   target-packed-size/method)
-		 (language language-lisp)
-		 &key)
-  (let+ (((&env-r/o name))
-	 ((&env mechanism-var source-var)))
-    `(defmethod packed-size ((,mechanism-var mechanism-ros-msg)
-			     (,source-var    ,name)
-			     &key)
-       ,(call-next-method))))
+(macrolet
+    ((define-method-target (target &body body)
+       `(defmethod emit ((node     toplevel-mixin)
+			 (target   ,target)
+			 (language language-lisp))
+	  (let+ (((&accessors-r/o mechanism) target)
+		 (mechanism-class-name (class-name (class-of mechanism)))
+		 ((&accessors-r/o wire-type offset-type) mechanism)
+		 ((&env-r/o name)))
+	    (check-type wire-type   (not null)) ; workaround to use the variables
+	    (check-type offset-type (not null))
 
-(defmethod emit ((node     rs.m.d::toplevel-mixin)
-		 (target   target-pack/method)
-		 (language language-lisp)
-		 &key)
-  (let+ (((&env-r/o name))
-	 ((&env mechanism-var source-var destination-var start-var end-var)))
-    `(defmethod pack ((,mechanism-var   mechanism-ros-msg)
-		      (,source-var      ,name)
-		      (,destination-var simple-array)
-		      &key
-		      ((:start ,start-var) 0)
-		      ((:end   ,end-var)   (length ,destination-var)))
-       (check-type ,destination-var nibbles:octet-vector)
+	    ,@body))))
 
-       ,(call-next-method))))
+  (define-method-target target-packed-size/method
+    (let+ (((&env mechanism-var source-var)))
+      `(defmethod packed-size ((,mechanism-var ,mechanism-class-name)
+			       (,source-var    ,name)
+			       &key)
+	 ,(call-next-method))))
 
-(defmethod emit ((node     rs.m.d::toplevel-mixin)
-		 (target   target-unpack/method)
-		 (language language-lisp)
-		 &key)
-  (let+ (((&env-r/o name))
-	 ((&env mechanism-var source-var destination-var start-var end-var)))
-    `(defmethod unpack ((,mechanism-var   mechanism-ros-msg)
-			(,source-var      simple-array)
-			(,destination-var ,name)
+  (define-method-target target-pack/method
+    (let+ (((&env mechanism-var source-var destination-var start-var end-var)))
+      `(defmethod pack ((,mechanism-var   ,mechanism-class-name)
+			(,source-var      ,name)
+			(,destination-var simple-array)
 			&key
 			((:start ,start-var) 0)
-			((:end   ,end-var)   (length ,source-var)))
-       (check-type ,source-var nibbles:octet-vector "an octet-vector")
+			((:end   ,end-var)   (length ,destination-var)))
+	 (declare (ignorable ,end-var)
+		  (type ,(generate offset-type :reference language) ,start-var ,end-var))
 
-       ,(call-next-method))))
+	 (values ,(call-next-method) ,destination-var))))
+
+  (define-method-target target-unpack/method
+    (let+ (((&env mechanism-var source-var destination-var start-var end-var)))
+      `(defmethod unpack ((,mechanism-var   ,mechanism-class-name)
+			  (,source-var      simple-array)
+			  (,destination-var ,name)
+			  &key
+			  ((:start ,start-var) 0)
+			  ((:end   ,end-var)   (length ,source-var)))
+	 (declare (ignorable ,end-var)
+		  (type ,(generate offset-type :reference language) ,start-var ,end-var))
+
+	 (values ,destination-var ,(call-next-method))))))
 
 
 ;;; Utility functions
 ;;
 
-(defun %packer-name (category width)
+(defun %packer-name (node)
   "Return the a name of a function in the nibbles package which can be
 used to accesses the fundamental type characterized by CATEGORY and
 WIDTH."
-  (format-symbol :nibbles "~A~Aref/le"
-		 (ecase category
-		   (:float   :ieee-)
-		   (:integer :ub))
-		 (ecase category
-		   (:float   (ecase width
-			       (32 :single)
-			       (64 :double)))
-		   (:integer width))))
+  (ecase (category node)
+    (:integer
+     (format-symbol :nibbles "~A~DREF/LE"
+		    (ecase (signed? node)
+		      ((nil) '#:ub)
+		      (t     '#:sb))
+		    (width node)))
+    (:floatp
+     (format-symbol :nibbles "IEEE-~A-REF/LE"
+		    (ecase (width node)
+		      (32 '#:single)
+		      (64 '#:double))))))

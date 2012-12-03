@@ -67,6 +67,7 @@
   ;; generate/emit protocol
   (:export
    :generate
+   :emit/context
    :emit)
 
   ;; Context protocol

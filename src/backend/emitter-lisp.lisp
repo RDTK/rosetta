@@ -25,89 +25,109 @@
 (cl:in-package :rosetta.backend)
 
 
-;;; Generic behavior
+;;; Evaluate generated code
 ;;
 
-#+maybe
-(defmethod emit :around ((node     package1)
-			 (target   method-target-mixin)
-			 (language language-lisp)
-			 &key)
-  (let* ((package-name (pb::file-desc-package node))
-	 (package      (progn
-			 (pbb::maybe-make-package package-name)
-			 (pbb::maybe-find-package-or-loose package-name))))
-    (setf (context-package *context*) package)
-    (unwind-protect
-	 (handler-bind (#+sbcl (sb-c::redefinition-warning #'muffle-warning))
-	   (call-next-method))
-      (setf (context-package *context*) nil))))
-
-#+maybe
-(defmethod emit :around ((node     toplevel-mixin)
-			 (target   method-target-mixin)
-			 (language language-lisp)
-			 &key)
-  (let* ((package-name (pb::file-desc-package node))
-	 (package      (progn
-			 (pbb::maybe-make-package package-name)
-			 (pbb::maybe-find-package-or-loose package-name))))
-    (setf (context-package *context*) package)
-    (unwind-protect
-	 (handler-bind (#+sbcl (sb-c::redefinition-warning #'muffle-warning))
-	   (call-next-method))
-      (setf (context-package *context*) nil))))
-
-(defmethod emit :around ((node     toplevel-mixin)
-			 (target   code-generating-target-mixin)
-			 (language language-lisp)
-			 &key)
-  (let+ (((&env-r/o (toplevel? t)))
-	 ((&env (toplevel? nil)))
-	 ((&accessors-r/o optimization-settings) target)
-	 (speed (second (find 'speed optimization-settings
-			      :key #'first))))
-    (if toplevel?
-	(handler-bind (#+sbcl (sb-c::redefinition-warning #'muffle-warning))
-	  (eval `(progn
-		   (declaim (optimize ,@(when speed `((speed ,speed)))))
-		   ,(call-next-method))))
-	(call-next-method))))
+(defmethod emit/context :around ((node     toplevel-mixin)
+				 (target   code-generating-target-mixin)
+				 (language language-lisp))
+  ;; If lisp-toplevel-emitted? is nil, bind it to t to prevent next
+  ;; method/recursive calls from evaluating anything. With
+  ;; lisp-toplevel-emitted? bound to t, call next method to obtain
+  ;; generated code, then evaluate it.
+  ;;
+  ;; If lisp-toplevel-emitted? is non-nil, just call the next method.
+  (let+ (((&env-r/o (lisp-toplevel-emitted? nil)))
+	 ((&env ((nil :lisp-toplevel-emitted?) t))))
+    (if lisp-toplevel-emitted?
+	(call-next-method)
+	(let ((code (call-next-method)))
+	  (handler-bind
+	      (#+sbcl (sb-c::redefinition-warning #'muffle-warning)
+	       (error #'(lambda (condition)
+			  (error "~@<Failed to compile code~2%~S~2%Caused by:~%~A~@:>"
+				 code condition))))
+	    (eval code))))))
 
 
 ;;; Generic stuff
 ;;
 
-(defmethod emit :around ((node     named-mixin)
+(defmethod emit/context ((node     named-mixin)
 			 (target   t)
-			 (language language-lisp)
-			 &key)
+			 (language language-lisp))
   (let+ (((&env (name (intern (name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
     (call-next-method)))
 
-(defmethod emit :after ((node     rs.m.d::documentation-mixin)
+(defmethod emit :after ((node     documentation-mixin)
 			(target   target-class)
-			(language language-lisp)
-			&key)
+			(language language-lisp))
   (when-let ((name          (context-get *context* :name :default nil))
 	     (documentation (documentation1 node)))
     (setf (documentation name 'type) documentation)))
 
-(defmethod emit :after ((node     rs.m.d::documentation-mixin)
-			(target   code-generating-target-mixin)
-			(language language-lisp)
-			&key)
+(defmethod emit :after ((node     documentation-mixin)
+			(target   method-target-mixin)
+			(language language-lisp))
   (when-let ((name          (context-get *context* :name :default nil))
 	     (documentation (documentation1 node)))
     (setf (documentation name 'function) documentation)))
 
 (defmethod emit :after ((node     t)
 			(target   code-generating-target-mixin)
-			(language language-lisp)
-			&key)
+			(language language-lisp))
   (when-let ((name (context-get *context* :name :default nil)))
     (export name (symbol-package name))))
 ;;; TODO(jmoringe): config in target; could use a predicate (funcall export node)
+
+(defmethod emit ((node     named-mixin)
+		 (target   target-reference)
+		 (language language-lisp))
+  (let+ (((&env-r/o name)))
+    name))
+
+
+;;; Fundamental types
+;;
+
+(defmethod emit ((node     fundamental-type-mixin)
+		 (target   target-class)
+		 (language language-lisp))
+  (ecase (category node)
+    (:integer
+     `(,(if (signed? node) 'signed-byte 'unsigned-byte) ,(width node)))
+    (:float
+     (ecase (width node)
+       (32 'single-float)
+       (64 'double-float)))
+    (:string
+     'string)
+    (:bytes
+     'nibbles:octet-vector)))
+
+(defmethod emit ((node     fundamental-type-mixin)
+		 (target   target-reference)
+		 (language language-lisp))
+  (generate node :class language))
+
+(defmethod emit ((node     type-octet-vector)
+		 (target   target-instantiate)
+		 (language t))
+  `(nibbles:octet-vector))
+
+
+;;; Singleton type
+;;
+
+(defmethod emit ((node     singleton)
+		 (target   target-class)
+		 (language language-lisp))
+  `(eql ,(value node)))
+
+(defmethod emit ((node     singleton)
+		 (target   target-reference)
+		 (language language-lisp))
+  (generate node :class language))
 
 
 ;;; Enum types
@@ -115,24 +135,19 @@
 
 (defmethod emit :around ((node     enum)
 			 (target   target-class)
-			 (language language-lisp)
-			 &key)
+			 (language language-lisp))
   "Emit an enum definition for NODE."
   (let+ (((&env-r/o name))
-	 ((&env (name-name (format-symbol (symbol-package name)
-					  "~A-NAME" name))
-		(code-name (format-symbol (symbol-package name)
-					  "~A-CODE" name)))))
+	 ((&env (name-name (symbolicate name '#:-name))
+		(code-name (symbolicate name '#:-code)))))
     (call-next-method)))
 
 (defmethod emit ((node     enum)
 		 (target   target-class)
-		 (language language-lisp)
-		 &key)
-  "Emit an enum definition for NODE."
+		 (language language-lisp))
   (with-emit-symbols
     (let+ (((&env-r/o name name-name code-name))
-	   (pairs (map 'list #'recur (contents node :value)))) ;;; TODO(jmoringe, 2012-05-04): call-next-method?
+	   (pairs (map 'list #'recur (contents node :value))))
       `(progn
 	 (deftype ,name ()
 	   '(member ,@(mapcar #'first pairs)))
@@ -147,15 +162,21 @@
 	   (case name
 	     ,@pairs
 	     (t (error "~@<Symbol ~S is invalid for enum ~S.~@:>"
-		       name ',name))))))))
+		       name ',name))))
+
+	 (values ',name ',name-name ',code-name)))))
 
 (defmethod emit ((node     enum-value)
 		 (target   target-class)
-		 (language language-lisp)
-		 &key)
-  "Emit an enum definition for NODE."
+		 (language language-lisp))
   (let+ (((&env-r/o name)))
     (list (make-keyword name) (value node))))
+
+(defmethod emit ((node     enum)
+		 (target   target-value->code)
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var code-name)))
+    `(,code-name ,source-var)))
 
 
 ;;; Structure
@@ -163,162 +184,39 @@
 
 (defmethod emit ((node     field-mixin)
 		 (target   target-class)
-		 (language language-lisp)
-		 &key)
+		 (language language-lisp))
   "Emit a slot specification for NODE."
   (with-emit-symbols
     (let+ (((&accessors-r/o (type type1)) node)
 	   ((&env-r/o name))
 	   (initarg     (make-keyword name))
-	   (type        (recur type))
+	   (type        (if (typep type '(or fundamental-type-mixin singleton))
+			    (recur type)
+			    (progn
+			      (let+ (((&env (lisp-toplevel-emitted? nil))))
+				(recur type))
+			      t #+later (name type)))) ;;; TODO(jmoringe, 2012-05-09): dependency architecture
 	   (reader-name name)
-	   (writer-name name)
+	   (writer-name `(setf ,name))
 	   (initform    nil))
       `(,name :initarg ,initarg
 	      :type    ,type
 	      :reader  ,reader-name
-	      :writer  ,writer-name
-	      ,@(when nil
-	          `(:initform ,initform))))))
+	      :writer  ,writer-name))))
 
 (defmethod emit ((node     structure-mixin)
 		 (target   target-class)
-		 (language language-lisp)
-		 &key)
-  "Define a Lisp class for NODE. "
+		 (language language-lisp))
+  "Generate code which defines a CLOS class for NODE."
   (with-emit-symbols
-    (let+ (#+no((&accessors-r/o
-		 (metaclass    target-metaclass)
-		 (superclasses target-superclasses)) target)
+    (let+ (((&accessors-r/o
+	     (metaclass    target-metaclass)
+	     (superclasses target-superclasses)) target)
 	   ((&env-r/o name)))
       ;; Emit the actual class definition.
       `(progn
-	 (defclass ,name () ()) ;; TODO do we want to this here?
-	 (defclass ,name (#+no ,@superclasses)
-	   ,(map 'list #'recur (contents node :field)) ;;; TODO(jmoringe, 2012-05-04): next method should do this
-	   #+no ,@(when metaclass
-			`((:metaclass ,metaclass))))))))
-
-
-;;; Class Generation
-;;
-
-#+no
-(defun generate-initform (type repeated? packed?
-			  &key
-			    (default nil default-supplied?))
-  "Generate an initform for a slot of type TYPE."
-  (cond
-    ;; Scalar types
-    ((not repeated?)
-     (cond
-       ((eq type :bool)
-	(if default-supplied?
-	    (cond
-	      ((string= default "true")  t)
-	      ((string= default "false") nil)
-	      (t                         (error "invalid default"))) ;; TODO
-	    nil))
-       ((eq type :double)
-	(if default-supplied?
-	    (coerce (read-from-string default) 'double-float)
-	    0d0))
-       ((eq type :float)
-	(if default-supplied?
-	    (coerce (read-from-string default) 'single-float)
-	    0s0))
-       ((enum-type-p type)
-	(if default-supplied?
-	    (make-lisp-enum-value default)
-	    nil))
-       ((integer-type-p type)
-	(if default-supplied?
-	    (read-from-string default)
-	    0))
-       ((eq type :string)
-	(or default ""))
-       ((eq type :bytes)
-	(if default-supplied?
-	    (sb-ext:string-to-octets default) ;; TODO this is not correct: from descriptor.proto: For bytes, contains the C escaped value.  All bytes >= 128 are escaped.
-	    '(make-array 0 :element-type '(unsigned-byte 8))))
-       ((find-class type)
-	#+or-maybe?
-	`(let ((class (find-class ',type)))
-	   (unless (closer-mop:class-finalized-p class)
-	     (closer-mop:finalize-inheritance class))
-	   (closer-mop:class-prototype class))
-	`(make-instance ',type))
-
-       (t
-	(error "Cannot generate initform for ~:[~; repeated~] ~:[~; ~
-packed~] type ~S"
-	       repeated? packed? type)))) ;; TODO can this happen? proper condition?
-
-    ;; Not packed array
-    ((not packed?)
-     `(make-array 0
-		  :element-type ',(proto-type->lisp-type type)
-		  :fill-pointer t
-		  :adjustable   t))
-
-    ;; Packed array
-    (t
-     `(make-array 0
-		  :element-type ',(proto-type->lisp-type type)
-		  :fill-pointer nil
-		  :adjustable   nil))))
-
-#+no
-(defun generate-slot (name type label packed?
-		      &key
-			class-name
-			(default nil default-supplied?))
-  (let ((repeated? (eq label :repeated))
-	(optional? (eq label :optional)))
-    `(,name
-      :initarg  ,(make-keyword name)
-      :type     ,(proto-type->lisp-type type repeated? optional?)
-      ,@(when class-name
-	      `(:accessor ,(%make-lisp-accessor-name class-name name)))
-      ;; TODO maybe (unless optional?
-      :initform ,(apply #'generate-initform type repeated? packed?
-			(when default-supplied?
-			  (list :default default))))))
-
-#+no
-(defun generate-coercing-writer (name type label packed?
-				 &key
-				   class-name)
-  (let* ((accessor-name (%make-lisp-accessor-name class-name name))
-	 (repeated?     (eq label :repeated))
-	 (optional?     (eq label :optional))
-	 (slot-type     (proto-type->lisp-type type repeated? optional?)))
-    `(defmethod (setf ,accessor-name) :around ((new-value sequence)
-					       (instance  ,class-name))
-		(if (typep new-value ,slot-type)
-		    (call-next-method)
-		    (call-next-method
-		     (make-array (length new-value)
-				 :element-type     ',(proto-type->lisp-type type)
-				 :fill-pointer     t
-				 :adjustable       t
-				 :initial-contents new-value)
-		     instance)))))
-
-#+test
-(emit (make-instance 'rs.m.d::base-structure
-		     :name "foo"
-		     :documentation "1 2 3")
-      :class
-      :lisp)
-
-#+test
-(emit (make-instance 'rs.m.d::enum
-		     :name "foo"
-		     :fields `("bla" ,(make-instance 'rs.m.d::enum-value
-						     :name "bla"
-						     :type (make-instance 'rs.m.d::type-uint32)
-						     :value 5))
-		     :documentation "1 2 3")
-      :class
-      :lisp)
+	 (defclass ,name () ())
+	 (defclass ,name (,@superclasses)
+	   ,(map 'list #'recur (contents node :field))
+	   ,@(when metaclass
+	       `((:metaclass ,metaclass))))))))

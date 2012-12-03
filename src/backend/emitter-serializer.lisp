@@ -25,59 +25,21 @@
 (cl:in-package :rosetta.backend)
 
 
-;;; Generic behavior
-;;
-
-;;; TODO(jmoringe, 2012-06-06): called too often: LANGUAGE may still be a symbol or list
-(defmethod generate :before ((node     t)
-			     (target   mechanism-target-mixin)
-			     (language t)
-			     &key)
-  (when (mechanism target) ;;; TODO(jmoringe, 2012-05-08): ok?
-    (rs.m.s:validate-type (mechanism target) node)))
-
-#+difficult
-(macrolet
-    ((define-skip-method (type)
-       `(defmethod emit ((node     ,type)
-			 (target   target-pack)
-			 (language t)
-			 &key)
-	  (let+ (((&env-r/o source-var)))
-	    (if source-var
-		(call-next-method)
-		(generate node :packed-size language))))))
-
-  (define-skip-method fundamental-type-mixin)
-  (define-skip-method enum)
-  (define-skip-method structure-mixin))
-
-
 ;;; Fundamental types
 ;;
 
-(defmethod emit/leaf ((node     fixed-width-mixin)
-		      (target   target-packed-size)
-		      (language t))
-  (max (ash (width node) -3) 1))
-
 (defmethod emit ((node     fixed-width-mixin)
-		 (target   target-unpack)
-		 (language t)
-		 &key)
-  (let+ (((&env-r/o destination-var)))
-    (if destination-var
-	(call-next-method)
-	(generate node (list target :packed-size) language))))
+		 (target   target-packed-size)
+		 (language t))
+  (max (ceiling (width node) 8) 1))
 
 (macrolet
     ((define-variable-width-method ((target &optional qualifier) &body body)
-       `(defmethod emit/leaf ,@(when qualifier `(,qualifier))
+       `(defmethod emit ,@(when qualifier `(,qualifier))
 	  ((node     variable-width-mixin)
 	   (target   ,target)
 	   (language t))
-	  (let+ ((mechanism (or (mechanism target)
-				(mechanism (second (second (context-stack *context*)))))) ;; TODO hack
+	  (let+ ((mechanism (mechanism target))
 		 ((&accessors-r/o length-type) mechanism)
 		 (length-size (generate length-type :packed-size language)))
 	    ,@body))))
@@ -110,229 +72,365 @@
 ;;; `typed-mixin'
 ;;
 
-;;; TODO(jmoringe, 2012-05-10): simplify
 (defmethod emit ((node     typed-mixin)
 		 (target   target-packed-size)
-		 (language t)
-		 &key)
-  (emit (type1 node) target language))
+		 (language t))
+  (generate (type1 node) target language))
 
 (defmethod emit ((node     typed-mixin)
 		 (target   target-pack)
-		 (language t)
-		 &key)
-  (emit (type1 node) target language))
+		 (language t))
+  (generate (type1 node) target language))
 
 (defmethod emit ((node     typed-mixin)
 		 (target   target-unpack)
-		 (language t)
-		 &key)
-  (emit (type1 node) target language))
+			 (language t))
+  (generate (type1 node) target language))
 
 
 ;;; Singleton types
 ;;
 
-(defmethod emit ((node     singleton)
+(defmethod emit/context ((node     singleton)
 		 (target   target-packed-size)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o (type rs.m.d::type1) (value rs.m.d::value)) node)
-	 ((&env (source-var value))))
-    (emit type target language)))
+		 (language t))
+  (let+ (((&env (source-var (value node)))))
+    (call-next-method)))
 
-(defmethod emit ((node     singleton)
+(defmethod emit/context ((node     singleton)
 		 (target   target-pack)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o (type rs.m.d::type1) (value rs.m.d::value)) node)
-	 ((&env-r/o offset-var))
-	 ((&env (source-var value))))
-    `(incf ,offset-var ,(emit type target language))))
+		 (language t))
+  (let+ (((&env (source-var (value node)))))
+    (call-next-method)))
 
-(defmethod emit ((node     singleton)
+(defmethod emit/context ((node     singleton)
 		 (target   target-unpack)
-		 (language t)
-		 &key)
-  "Generate code to unpack a single field."
-  (let+ (((&accessors-r/o (type rs.m.d::type1) (value rs.m.d::value)) node)
-	 ((&env-r/o offset-var destination-var)))
+		 (language t))
+  (let+ (((&accessors-r/o (type type1) value) node)
+	 ((&env-r/o destination-var)))
     `(progn
-       (incf ,offset-var ,(emit type :packed-size language))
        ,@(when destination-var
-	   `((setf ,destination-var ,value))))))
+	   `((setf ,destination-var ,value)))
+       ,(let+ (((&env (destination-var nil))))
+	  (emit type target language)))))
+
+
+;;; Enum types
+;;
+
+(defmethod emit/context ((node     enum)
+		 (target   target-pack)
+		 (language t))
+  (let+ ((values (contents node :value))
+	 ((&env-r/o source-var))
+	 (new-source-var
+	  (cond
+	    ((not source-var)
+	     nil)
+
+	    ;; If we are asked to pack a constant value, we can look
+	    ;; it up now and just store the result at runtime.
+	    ((constantp source-var)
+	     (value (lookup node :value (string source-var))))
+
+	    ;; If the enum only has one value, we can just store that.
+	    ((length= 1 values)
+	     (value (first values)))
+
+	    ;; Otherwise we generate code to perform the lookup at
+	    ;; runtime.
+	    (t
+	     (generate node :value->code language)))))
+
+    (if new-source-var
+	(let+ (((&env (source-var new-source-var))))
+	  (call-next-method))
+	(call-next-method))))
+
+(defmethod emit/context ((node     enum)
+		 (target   target-unpack)
+		 (language t))
+  (let+ (((&accessors-r/o mechanism) target)
+	 ((&accessors-r/o offset-type) mechanism)
+	 ((&accessors-r/o (type type1)) node)
+	 (values (contents node :value))
+	 ((&env-r/o destination-var)))
+    (cond
+      ((not destination-var)
+       (call-next-method))
+
+      ((length= 1 values)
+       `(progn
+	  (setf ,destination-var ,(value (first values)))
+	  (let+ (((&env (destination-var nil))))
+	    (call-next-method))))
+
+      (t
+       (let+ (((&with-gensyms temp1 temp2))
+	      ((&env ((nil :destination-var) temp1))))
+	 `(let (,temp1
+		(,temp2 ,(call-next-method)))
+	    (declare (type ,(generate type        :reference language) ,temp1)
+		     (type ,(generate offset-type :reference language) ,temp2))
+	    (setf ,temp1 ,(let+ (((&env (source-var temp2))))
+			    (generate node :code->value language)))
+	    ,temp2))))))
 
 
 ;;; Fields
 ;;
 
-(defmethod emit ((node     field-mixin)
-		 (target   target-packed-size)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o name (type type1)) node)
-	 ((&env-r/o instance-var))
-	 ((&env (source-var `(slot-value ,instance-var ,(make-keyword name))))))
-    (emit type target language)))
+(defmethod emit/context :before ((node     field-mixin)
+				 (target   target-pack) ;; TODO extend to code-generating-target-mixin
+				 (language t))
+  (let+ (((&env-r/o (instance-var nil) (source-var nil))))
+    (unless (or instance-var source-var)
+      (error "~@<Exactly? one of ~S (~:[not supplied~;~:*~A supplied~]) ~
+and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
+~A~@:>"
+	     :instance-var instance-var
+	     :source-var   source-var
+	     node))))
 
-(defmethod emit ((node     field-mixin)
-		 (target   target-pack)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o name (type type1)) node)
-	 ((&env-r/o offset-var ((instance :source-var))))
-	 ((&env (source-var `(slot-value ,instance ,(make-keyword name))))))
-    `(incf ,offset-var ,(emit type target language))))
+(defmethod emit/context ((node     field-mixin)
+			 (target   target-packed-size)
+			 (language t))
+  (let+ (((&accessors-r/o (type type1)) node)
+	 ((&env-r/o name (instance-var nil) (source-var nil)))
+	 ((&env (source-var (if (eq source-var t)
+				`(slot-value ,instance-var ',name)
+				source-var)))))
+    (generate type target language)))
 
-(defmethod emit ((node     field-mixin)
-		 (target   target-unpack)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o name (type type1)) node)
-	 ((&env-r/o offset-var (destination-var nil) (instance-var nil)))
-	 ((&env (destination-var (progn
-				   (cond
-				    ((eq destination-var :skip)
-				     nil)
-				    (destination-var)
-				    (instance-var
-				     `(slot-value ,instance-var ,(make-keyword name)))
-				    (t
-				     (error "No destination"))))))))
-    `(incf ,offset-var ,(emit type target language))))
+(defmethod emit/context ((node     field-mixin)
+			 (target   target-pack)
+			 (language t))
+  (let+ (((&accessors-r/o (type type1)) node)
+	 ((&env-r/o name offset-var (instance-var nil) (source-var nil)))
+	 ((&env (source-var (if (eq source-var t)
+				`(slot-value ,instance-var ',name)
+				source-var)))))
+    `(incf ,offset-var ,(generate type target language))))
+
+(defmethod emit/context ((node     field-mixin)
+			 (target   target-unpack)
+			 (language t))
+  (let+ (((&accessors-r/o (type type1)) node)
+	 ((&env-r/o name offset-var (instance-var nil) (destination-var nil)))
+	 ((&env (destination-var (if (eq destination-var t)
+				     `(slot-value ,instance-var ',name)
+				     destination-var)))))
+    `(incf ,offset-var ,(generate type target language))))
 
 
 ;;; Structure types
 ;;
 
-;;; TODO(jmoringe, 2012-04-27): to this?
-(defmethod emit :around ((node     structure-mixin)
-			 (target   target-packed-size)
-			 (language t)
-			 &key)
-  (if (contents node :fields)
-      (call-next-method)
-      0))
-
 ;;; TODO(jmoringe, 2012-04-25): all composites?
 (macrolet
-    ((define-structure-method (target op)
+    ((define-structure-method (target op var)
        `(defmethod emit ((node     structure-mixin)
 			 (target   ,target)
-			 (language t)
-			 &key)
+			 (language t))
 	  (with-emit-symbols
-	    (let+ (((&env-r/o source-var))
-		   ((&env (instance-var source-var)))
-		   (destinations (or (context-get *context* :destinations :default nil)
-				     #+no (make-list (length (composite-children node))
-						:initial-element t)
-				     (make-hash-table :test #'eq)))
-		   ((&flet do-child (child)
-		      (let ((destination (or (gethash child destinations)
-					     (let+ (((&values value found?)
-						     (gethash :default destinations)))
-					       (if found?
-						   value
-						   t)))))
-		       (case destination
-			 ((t)
-			  (recur child))
-			 (t
-			  (let+ (((&env (destination-var destination))))
-			    (recur child))))))))
-	      `(,',op ,@(map 'list #'do-child (contents node :fields))))))))
+	    (let+ (((&env-r/o ,var (locations nil)))
+		   ((&env (instance-var ,var)))
+		   ((&labels field-location (field)
+		      (if locations (funcall locations field) t)))
+		   ((&labels recur/location (field)
+		      (let+ (((&values location nested-locations)
+			      (field-location field))
+			     ((&env (,var      location)
+				    (locations nested-locations))))
+			(check-type nested-locations (or null function))
+			(recur field)))))
+	      (check-type locations (or null function))
+	      (if ,(if (eq target 'target-pack) 'source-var t)
+		  `(,',op ,@(mapcar #'recur/location (contents node :field)))
+		  (generate node :packed-size language)))))))
 
-  (define-structure-method target-packed-size +)
-  (define-structure-method target-pack        progn)
-  (define-structure-method target-unpack      progn))
+  (define-structure-method target-packed-size +     source-var)
+  (define-structure-method target-pack        progn source-var)
+  (define-structure-method target-unpack      progn destination-var))
 
 
 ;;; Array types
 ;;
 
+(defmethod emit/context ((node     array-mixin)
+			 (target   mechanism-target-mixin)
+			 (language t))
+  (let+ (((&accessors-r/o element-type (fixed-dimensions? fixed-size?)) node)
+	 ;; Compute element size expression with dummy
+	 ;; SOURCE-VAR. This can only be constant if it does not use
+	 ;; the dummy variable.
+	 (element-size (let+ (((&env source-var)))
+			 (generate element-type :packed-size language)))
+	 ((&env (fixed-dimensions? fixed-dimensions?)
+		(element-size      (when (constantp element-size)
+				     (eval element-size))))))
+    (call-next-method)))
+
 (defmethod emit ((node     array-mixin)
 		 (target   target-packed-size)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o index-type element-type (fixed-size? rs.m.d::fixed-size?)) node)
-	 ((&env-r/o source-var))
-	 (element-size (emit element-type target language)))
-    (if fixed-size?
-	(let+ ((length (rs.m.d::value (index-type node))))
-	  `(* ,element-size ,length))
-	`(+ ,(emit index-type target language)
-	    (* ,(emit element-type target language)
-	       (length ,source-var))))))
+		 (language t))
+  (let+ (((&accessors-r/o element-type index-type) node)
+	 ((&env-r/o source-var fixed-dimensions? element-size (locations nil)))
+	 ((&flet element-location (index)
+	    (cond
+	      ((or (not locations)
+		   (eq (funcall locations index) t))
+	       (if (eq index :length)
+		   `(length ,source-var)
+		   `(aref ,source-var ,index)))
+	      (t
+	       (funcall locations index))))))
+    (cond
+      ((and fixed-dimensions? (zerop (value index-type)))
+       0)
+
+      ((and fixed-dimensions? element-size)
+       `(* ,element-size ,(value index-type)))
+
+      ((and (not source-var) (not locations))
+       (generate index-type target language))
+
+      (element-size
+       `(+ ,(generate index-type target language)
+	   (* ,element-size ,(element-location :length))))
+
+      (t
+       (let+ (((&with-gensyms size i)))
+	 `(let ((,size 0))
+	    (declare (type ,(generate index-type :reference language) ,size))
+	    (dotimes (,i ,(element-location :length))
+	      (declare (type ,(generate index-type :reference language) ,i))
+	      (incf ,size
+		    ,(let+ (((&env (source-var (element-location i)))))
+		       (generate element-type target language))))
+	    (+ ,(generate index-type target language) ,size)))))))
 
 (defmethod emit ((node     array-mixin)
 		 (target   target-pack)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o index-type element-type (fixed-size? rs.m.d::fixed-size?)) node)
-	 ((&env-r/o source-var offset-var))
-	 (element-size (emit element-type :packed-size language))) ;;; TODO(jmoringe, 2012-04-24): same mechanism!
-    (if fixed-size? ;;; TODO(jmoringe, 2012-04-24):
-	(let+ ((length (rs.m.d::value (index-type node))))
-	  `(+ ,@(iter (for i :from 0 :below length)
-		      (collect
-			  (let+ (((&env (source-var `(aref ,source-var ,i))
-					(offset-var `(+ ,offset-var ,(* element-size i))))))
-			    (emit element-type target language))))))
-	(let+ (((&with-gensyms i)))
-	  `(+ ,(let+ (((&env (source-var `(length ,source-var)))))
-		     (emit index-type target language))
-	      (dotimes (,i (length ,source-var))
-		,(let+ (((&env (source-var `(aref ,source-var ,i))
-			       (offset-var `(+ ,offset-var (* ,element-size ,i))))))
-		   (emit element-type target language))))))))
+		 (language t))
+  (let+ (((&accessors-r/o element-type index-type) node)
+	 ((&env-r/o source-var offset-var fixed-dimensions? element-size)))
+    (cond
+      ((or (not source-var)
+	   (and fixed-dimensions?
+		(or (zerop (value index-type))
+		    element-size))) ;;; TODO(jmoringe, 2012-04-24):
+       (let ((length (if source-var (value index-type) 0)))
+	 `(progn
+	    (incf ,offset-var ,(let+ (((&env (source-var length))))
+				 (generate index-type :pack language)))
+	    ,@(iter (for i :from 0 :below length)
+		    (collect
+			(let+ (((&env (source-var `(aref ,source-var ,i))
+				      (offset-var `(+ ,offset-var ,(* element-size i))))))
+			  (generate element-type target language))))
+	    ,@(when (plusp length)
+		`((incf ,offset-var ,(* element-size length)))))))
+
+      (element-size
+       (let+ (((&with-gensyms i)))
+	 `(progn
+	    (incf ,offset-var
+		  ,(let+ (((&env (source-var `(length ,source-var)))))
+		     (generate index-type :pack language)))
+	    (dotimes (,i (length ,source-var))
+	      (declare (type ,(generate index-type :reference language) ,i))
+	      ,(let+ (((&env (source-var `(aref ,source-var ,i))
+			     (offset-var `(+ ,offset-var (* ,element-size ,i))))))
+	         (generate element-type target language)))
+	    (incf ,offset-var (* ,element-size (length ,source-var))))))
+
+      (t
+       (let+ (((&with-gensyms i)))
+	 `(progn
+	    (incf ,offset-var
+		  ,(let+ (((&env (source-var `(length ,source-var)))))
+		     (generate index-type :pack language)))
+	    (dotimes (,i (length ,source-var))
+	      (declare (type ,(generate index-type :reference language) ,i))
+	      (incf ,offset-var
+		    ,(let+ (((&env (source-var `(aref ,source-var ,i)))))
+		       (generate element-type target language))))))))))
 
 (defmethod emit ((node     array-mixin)
 		 (target   target-unpack)
-		 (language t)
-		 &key)
-  (let+ (((&accessors-r/o index-type element-type (fixed-size? rs.m.d::fixed-size?)) node)
-	 ((&env-r/o destination-var offset-var))
-	 (element-size (emit element-type :packed-size language))) ;;; TODO(jmoringe, 2012-04-24): same mechanism!
-    (if fixed-size? ;;; TODO(jmoringe, 2012-04-24):
-	(let+ ((length (rs.m.d::value (index-type node))))
-	  `(progn ,@(iter (for i :from 0 :below length)
-			  (collect
-			      (let+ (((&env (destination-var `(aref ,destination-var ,i))
-					    (offset-var      `(+ ,offset-var ,(* element-size i))))))
-				(emit element-type target language))))))
-	(let+ (((&with-gensyms i length)))
-	  `(dotimes (,i ,(let+ (((&env (destination-var length))))
-			   (emit index-type target language)))
-	     (incf ,offset-var ,(let+ (((&env (destination-var `(aref ,destination-var ,i))
-					     #+no (offset-var `(+ ,offset-var (* ,element-size ,i))))))
-				     (emit element-type target language))))))))
+		 (language t))
+  (let+ (((&accessors-r/o element-type index-type) node)
+	 ((&env-r/o destination-var offset-var fixed-dimensions? element-size)))
+    (cond
+      ((and fixed-dimensions?
+	    (or (zerop (value index-type))
+		element-size))
+       (let+ ((length (value index-type)))
+	 `(progn
+	    (incf ,offset-var ,(let+ (((&env ((nil :destination-var) nil))))
+				 (generate index-type :unpack language)))
+	    ,@(iter (for i :from 0 :below length)
+		    (collect
+			(let+ (((&env (destination-var `(aref ,destination-var ,i))
+				      (offset-var      `(+ ,offset-var ,(* element-size i))))))
+			  (generate element-type target language))))
+	    ,@(when (plusp length)
+		`((incf ,offset-var ,(* element-size length)))))))
+
+      (element-size
+       (let+ (((&with-gensyms i length)))
+	 `(let ((,length))
+	    (declare (type ,(generate index-type :reference language) ,length))
+	    (incf ,offset-var
+		  ,(let+ (((&env (destination-var length))))
+		     (generate index-type :unpack language)))
+	    (adjust-array ,destination-var (,length))
+	    (dotimes (,i (length ,length))
+	      (declare (type ,(generate index-type :reference language) ,i))
+	      ,(let+ (((&env (destination-var `(aref ,destination-var ,i))
+			     (offset-var `(+ ,offset-var (* ,element-size ,i))))))
+	         (generate element-type target language)))
+	    (incf ,offset-var (* ,element-size ,length)))))
+
+      (t
+       (let+ (((&with-gensyms i length)))
+	 `(let ((,length))
+	    (declare (type ,(generate index-type :reference language) ,length))
+	    (incf ,offset-var
+		  ,(let+ (((&env (destination-var length))))
+		     (generate index-type :unpack language)))
+	    (adjust-array ,destination-var (,length))
+	    (dotimes (,i ,length)
+	      (declare (type ,(generate index-type :reference language) ,i))
+	      (incf ,offset-var
+		    ,(let+ (((&env (destination-var `(aref ,destination-var ,i)))))
+		       (generate element-type target language))))))))))
 
 
 ;;; Toplevel
 ;;
 
-(declaim (special *toplevel-emitted?*))
+(defun invoke-with-scope (target language thunk)
+  (let+ ((offset-type (offset-type (mechanism target)))
+	 ((&env-r/o start-var))
+	 ((&env ((nil :scope-emitted?) t) offset-var)))
+    `(let ((,offset-var ,start-var))
+       (declare (type ,(generate offset-type :reference language) ,offset-var))
+       ,(let+ (((&env (start-var offset-var))))
+	  (funcall thunk))
+       (- ,offset-var ,start-var))))
 
-(defvar *toplevel-emitted?* nil
-  "TODO(jmoringe): document")
+(defmacro with-scope ((target language) &body body)
+  `(invoke-with-scope ,target ,language #'(lambda () ,@body)))
 
 (macrolet
     ((define-toplevel-method (target)
-       `(defmethod emit :around ((node     toplevel-mixin)
+       `(defmethod emit/context ((node     toplevel-mixin)
 				 (target   ,target)
-				 (language t)
-				 &key)
-	  (if *toplevel-emitted?*
-	      (call-next-method)
-	      (let+ ((*toplevel-emitted?* t)
-		     ((&env-r/o start-var))
-		     ((&env offset-var)))
-		`(let ((,offset-var ,start-var))
-		   (declare (type ,(emit (make-instance 'rs.m.d::type-uint64) :class language) ,offset-var)) ;;; TODO(jmoringe, 2012-05-02):
-		   ,(let+ (((&env (start-var offset-var))))
-		      (call-next-method))
-		   (- ,offset-var ,start-var)))))))
+				 (language t))
+	  (with-scope (target language)
+	    (call-next-method)))))
 
   (define-toplevel-method target-pack)
   (define-toplevel-method target-unpack))
