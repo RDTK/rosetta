@@ -46,17 +46,26 @@
      (first thing))))
 
 (macrolet ((define-fundamental-accessor (name
-					 &optional
-					 (keyword (make-keyword name)) )
-	     `(defmethod ,name ((thing list))
-		(getf (nthcdr 2 thing) ,keyword))))
+					 &key
+					 (keyword (make-keyword name))
+					 (writer? nil))
+	     `(progn
+		(defmethod ,name ((thing list))
+		  (getf (cddr thing) ,keyword))
+
+		,@(when writer?
+		    `((defmethod (setf ,name) ((new-value t) (thing list))
+			(setf (getf (cddr thing) ,keyword) new-value)))))))
 
   (define-fundamental-accessor name)
   (define-fundamental-accessor qname)
+  (define-fundamental-accessor documentation1
+    :writer? t)
   (define-fundamental-accessor category)
   (define-fundamental-accessor width)
   (define-fundamental-accessor signed?)
-  (define-fundamental-accessor type1        :type)
+  (define-fundamental-accessor type1
+    :keyword :type)
   (define-fundamental-accessor element-type)
   (define-fundamental-accessor index-type))
 
