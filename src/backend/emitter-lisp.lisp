@@ -54,9 +54,10 @@
 ;;
 
 (defmethod emit/context ((node     named-mixin)
-			 (target   t)
+			 (target   code-generating-target-mixin)
 			 (language language-lisp))
-  (let+ (((&env (:name (intern (name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
+  (let+ (((&env (package (find-package :cl-user)) ;;; TODO(jmoringe, 2012-12-07): package
+		(:name (intern (name node) package))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
     (call-next-method)))
 
 (defmethod emit :after ((node     documentation-mixin)
@@ -133,13 +134,13 @@
 ;;; Enum types
 ;;
 
-(defmethod emit :around ((node     enum)
-			 (target   target-class)
+(defmethod emit/context ((node     enum)
+			 (target   t)
 			 (language language-lisp))
   "Emit an enum definition for NODE."
-  (let+ (((&env-r/o name))
-	 ((&env (:name-name (symbolicate name '#:-name))
-		(:code-name (symbolicate name '#:-code)))))
+  (let+ (((&env-r/o package name))
+	 ((&env (:name-name (format-symbol package "~A-NAME" name))
+		(:code-name (format-symbol package "~A-CODE" name)))))
     (call-next-method)))
 
 (defmethod emit ((node     enum)
@@ -147,16 +148,21 @@
 		 (language language-lisp))
   (with-emit-symbols
     (let+ (((&env-r/o name name-name code-name))
-	   (pairs (map 'list #'recur (contents node :value))))
+	   (pairs (map 'list #'recur (contents node :value)))
+	   (code-type (generate (type1 node) :reference language)))
       `(progn
 	 (deftype ,name ()
 	   '(member ,@(mapcar #'first pairs)))
+
+	 (declaim (ftype (function (,code-type) (values ,name &optional)) ,name-name))
 
 	 (defun ,name-name (code)
 	   (case code
 	     ,@(mapcar #'reverse pairs)
 	     (t (error "~@<Code ~D is invalid for enum ~S.~@:>"
 		       code ',name))))
+
+	 (declaim (ftype (function (,name) (values ,code-type &optional)) ,code-name))
 
 	 (defun ,code-name (name)
 	   (case name
@@ -177,6 +183,12 @@
 		 (language language-lisp))
   (let+ (((&env-r/o source-var code-name)))
     `(,code-name ,source-var)))
+
+(defmethod emit ((node     enum)
+		 (target   target-code->value)
+		 (language language-lisp))
+  (let+ (((&env-r/o source-var name-name)))
+    `(,name-name ,source-var)))
 
 
 ;;; Structure

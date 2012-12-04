@@ -51,7 +51,7 @@ a name and an associated, usually numeric, value."))
 		typed-mixin
 		ordered-mixin
 		values-mixin
-		;; toplevel-mixin
+		toplevel-mixin
 		documentation-mixin
 		print-items-mixin)
   ()
@@ -69,9 +69,9 @@ One example of a class representing such values is `enum-value'."))
   (etypecase values
     ((cons (or string keyword))
      (iter (for (name value) on values :by #'cddr)
-	   (setf (lookup instance :value name)
+	   (setf (lookup instance :value (string name))
 		 (make-instance 'enum-value
-				:name  name
+				:name  (string name)
 				:type  (type1 instance)
 				:value value))))
     (list

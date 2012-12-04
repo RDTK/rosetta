@@ -50,6 +50,17 @@
 
   ;; Conditions
   (:export
+   :conversion-condition
+   :conversion-condition-from
+   :conversion-condition-to
+
+   :conversion-error        :conversion-warning
+   :simple-conversion-error :simple-conversion-warning
+
+   :cannot-narrow
+
+   :loss-of-precision
+
    :context-condition
    :context-condition-context
 
@@ -107,7 +118,8 @@
    :target-reference
    :target-instantiate
    :target-value->code
-   :target-code->value)
+   :target-code->value
+   :target-convert)
 
   ;; Serialization-related target classes
   (:export

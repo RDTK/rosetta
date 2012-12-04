@@ -290,3 +290,12 @@ No methods must not be installed on `emit/setup'."))
 	      (error "~@<No emitter for ~{~A~^, ~}.~@:>" args)))))
   (define-delegating-method no-applicable-method)
   (define-delegating-method no-next-method t))
+
+
+;;; Conversion protocol
+;;
+
+(defgeneric emit-conversion (from to language)
+  (:documentation
+   "Emit code for LANGUAGE for converting instances of FROM to
+instances of TO."))

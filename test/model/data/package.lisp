@@ -41,6 +41,11 @@
   (:shadow
    :root)
 
+  ;; Some simple types
+  (:export
+   :+enum/uint8/simple+
+   :+enum/uint32/simple+)
+
   (:documentation
    "This package contains unit tests for the model.data module."))
 
@@ -51,6 +56,10 @@
   (:documentation
    "Root unit test suite for the model.data module."))
 
+
+;;; `mock-type/validate-value'
+;;
+
 (defclass mock-type/validate-value ()
   ())
 
@@ -58,3 +67,17 @@
 			   (value t)
 			   &key &allow-other-keys)
   (error "~@<Mock value validation error.~@:>"))
+
+
+;;; Simple data types
+;;
+
+(defparameter +enum/uint8/simple+
+  (make-instance 'enum :name   "simple/uint8"
+		       :type   (make-instance 'type-uint8)
+		       :values '(:a 1 :b 2)))
+
+(defparameter +enum/uint32/simple+
+  (make-instance 'enum :name   "simple/uint32"
+		       :type   (make-instance 'type-uint32)
+		       :values '(:a 1 :b 2)))

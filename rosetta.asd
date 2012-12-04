@@ -231,6 +231,7 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "target-mixins")
 			      (:file       "targets")
 
+			      (:file       "emitter-conversion")
 			      (:file       "emitter-serializer")
 
 			      (:file       "emitter-lisp")
@@ -300,11 +301,12 @@ See `version/list' for details on keyword parameters."
 
 		(:module     "backend"
 		 :pathname   "test/backend"
-		 :depends-on ("package")
+		 :depends-on ("package" "model-data")
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "protocol")
-			      (:file       "macros")))))
+			      (:file       "macros")
+			      (:file       "emitter-conversion")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))

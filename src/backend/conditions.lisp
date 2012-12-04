@@ -25,6 +25,83 @@
 (cl:in-package :rosetta.backend)
 
 
+;;; Conversion-related conditions
+;;
+
+(define-condition conversion-condition (condition)
+  ((from :initarg  :from
+	 :reader   conversion-condition-from
+	 :documentation
+	 "Stores the source type of the conversion in question.")
+   (to   :initarg  :to
+	 :reader   conversion-condition-to
+	 :documentation
+	 "Stores the target type of the conversion in question."))
+  (:default-initargs
+   :from (missing-required-initarg 'conversion-condition :from)
+   :to   (missing-required-initarg 'conversion-condition :to))
+  (:documentation
+   "This class is intended to be mixed into condition classes which
+describe conversions."))
+
+(macrolet
+    ((define-conversion-conditions (kind)
+       (let ((name        (symbolicate "CONVERSION-" kind))
+	     (simple-name (symbolicate "SIMPLE-CONVERSION-" kind)))
+	 `(progn
+	    (define-condition ,name (,kind
+				     conversion-condition)
+	      ()
+	      (:report
+	       (lambda (condition stream)
+		 (format stream "~@<Cannot convert from type ~A to type ~A.~@:>"
+			 (conversion-condition-from condition)
+			 (conversion-condition-to   condition))))
+	      (:documentation
+	       "Errors of this class and its subclasses are signaled
+when a conversion fails."))
+
+	    (define-condition ,simple-name (simple-error
+					    ,name)
+	      ()
+	      (:report
+	       (lambda (condition stream)
+		 (format stream "~@<Cannot convert from type ~A to type ~A: ~
+~?~@:>"
+			 (conversion-condition-from         condition)
+			 (conversion-condition-to           condition)
+			 (simple-condition-format-control   condition)
+			 (simple-condition-format-arguments condition))))
+	      (:documentation
+	       ,(format nil "A simple `~(~A~)'." name)))))))
+
+  (define-conversion-conditions error)
+  (define-conversion-conditions warning))
+
+(define-condition cannot-narrow (conversion-error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Cannot convert from wider type ~A to narrower ~
+type ~A.~@:>"
+	     (conversion-condition-from condition)
+	     (conversion-condition-to   condition))))
+  (:documentation
+   "This error is signaled when a conversion cannot be performed
+because it would illegally narrow the source type."))
+
+(define-condition loss-of-precision (conversion-warning)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Conversion from type ~A to type ~A looses ~
+precision.~:>"
+	     (conversion-condition-from condition)
+	     (conversion-condition-to   condition))))
+  (:documentation
+   "This warning is signaled when a conversion looses precision."))
+
+
 ;;; Context-related conditions
 ;;
 
@@ -113,18 +190,18 @@ Environment:
 
 Stack:
 ~~{~~&~~2@T]~~{~~A~~_~~4@T~~A~~_~~4@T~~A~~}~~}~~&~~/more-conditions::maybe-print-cause/~~@:>"
-					  fail-verb)
-			  'node     node
-			  'target   target
-			  'language language
-			  (alist-plist environment)
-			  stack
-			  condition))))
-	     (:documentation
+					 fail-verb)
+			 'node     node
+			 'target   target
+			 'language language
+			 (alist-plist environment)
+			 stack
+			 condition))))
+	    (:documentation
 
-	      ,(format nil "This ~(~A~) is signaled when something ~
+	     ,(format nil "This ~(~A~) is signaled when something ~
 goes wrong during an emission process."
-		       kind))))))
+		      kind))))))
 
   (define-emit-condition error   "failed")
   (define-emit-condition warning "warned"))

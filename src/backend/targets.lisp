@@ -69,6 +69,20 @@ symbolic value within an enumeration."))
    "Emit code for translating a symbol value to its corresponding
 numeric value within an enumeration."))
 
+(define-target convert (code-generating-target-mixin)
+    ((to :initarg  :to
+	 :reader   target-to
+	 :documentation
+	 "An object representing the target type of the conversion."))
+  (:default-initargs
+   :to (missing-required-initarg 'convert :to))
+  (:documentation
+   "Emit code for converting from a source type to a target type.
+
+The source type is the NODE argument of the surrounding `emit' call
+and the target type is stored in the `to' slot of the target
+object."))
+
 
 ;;; Serialization-related target classes
 ;;

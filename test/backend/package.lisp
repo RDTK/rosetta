@@ -4,19 +4,19 @@
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
-;; This file may be licensed under the terms of the
-;; GNU Lesser General Public License Version 3 (the ``LGPL''),
-;; or (at your option) any later version.
+;; This file may be licensed under the terms of the GNU Lesser General
+;; Public License Version 3 (the ``LGPL''), or (at your option) any
+;; later version.
 ;;
-;; Software distributed under the License is distributed
-;; on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
-;; express or implied. See the LGPL for the specific language
-;; governing rights and limitations.
+;; Software distributed under the License is distributed on an ``AS
+;; IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
+;; implied. See the LGPL for the specific language governing rights
+;; and limitations.
 ;;
 ;; You should have received a copy of the LGPL along with this
-;; program. If not, go to http://www.gnu.org/licenses/lgpl.html
-;; or write to the Free Software Foundation, Inc.,
-;; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+;; program. If not, go to http://www.gnu.org/licenses/lgpl.html or
+;; write to the Free Software Foundation, Inc., 51 Franklin Street,
+;; Fifth Floor, Boston, MA 02110-1301, USA.
 ;;
 ;; The development of this software was supported by:
 ;;   CoR-Lab, Research Institute for Cognition and Robotics
@@ -26,6 +26,7 @@
   (:use
    :cl
    :alexandria
+   :iterate
    :let-plus
    :iterate
    :lift
@@ -34,7 +35,8 @@
    :rosetta.model.language
    :rosetta.backend
 
-   :rosetta.test)
+   :rosetta.test
+   :rosetta.model.data.test)
 
   (:import-from :rosetta.backend
    :context)
@@ -44,6 +46,9 @@
 
   (:shadowing-import-from :rosetta.test
    :root)
+
+  (:import-from :rosetta.backend
+   :context)
 
   (:export
    :backend-root)
