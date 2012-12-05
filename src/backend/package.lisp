@@ -132,7 +132,8 @@
    :recur
 
    ;; let-plus
-   :&env :&env-r/o)
+   :&env :&env-r/o
+   :&context)
 
   (:documentation
    "This package contains backend-related protocols and infrastructure

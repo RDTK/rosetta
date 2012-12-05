@@ -52,20 +52,20 @@
 
   (define-variable-width-method (target-pack :around)
     (let+ (((&env-r/o source-var offset-var)))
-      `(+ ,(let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
+      `(+ ,(let+ (((&env (:source-var (if source-var `(length ,source-var) 0)))))
 	     (generate length-type :pack language))
-	  ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size)))))
+	  ,(let+ (((&env (:offset-var `(+ ,offset-var ,length-size)))))
 	     (call-next-method)))))
 
   (define-variable-width-method (target-unpack :around)
-    (let+ (((&env-r/o offset-var))
-	   ((&with-gensyms temp-var)))
+    (let+ (((&with-gensyms temp-var)))
       `(let ((,temp-var))
 	 (declare (type ,(generate length-type :reference language) ,temp-var))
-	 (+ ,(let+ (((&env (destination-var temp-var))))
+	 (+ ,(let+ (((&env (:destination-var temp-var))))
 	       (generate length-type :unpack language))
-	    ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size))
-			   (end-var    `(+ ,offset-var ,temp-var)))))
+	    ,(let+ (((&env-r/o offset-var))
+		    ((&env (:offset-var `(+ ,offset-var ,length-size))
+			   (:end-var    `(+ ,offset-var ,temp-var)))))
 		   (call-next-method)))))))
 
 
@@ -197,9 +197,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 			 (language t))
   (let+ (((&accessors-r/o (type type1)) node)
 	 ((&env-r/o name (instance-var nil) (source-var nil)))
-	 ((&env (source-var (if (eq source-var t)
-				`(slot-value ,instance-var ',name)
-				source-var)))))
+	 ((&env (:source-var (if (eq source-var t)
+				 `(slot-value ,instance-var ',name)
+				 source-var)))))
     (generate type target language)))
 
 (defmethod emit/context ((node     field-mixin)
@@ -207,9 +207,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 			 (language t))
   (let+ (((&accessors-r/o (type type1)) node)
 	 ((&env-r/o name offset-var (instance-var nil) (source-var nil)))
-	 ((&env (source-var (if (eq source-var t)
-				`(slot-value ,instance-var ',name)
-				source-var)))))
+	 ((&env (:source-var (if (eq source-var t)
+				 `(slot-value ,instance-var ',name)
+				 source-var)))))
     `(incf ,offset-var ,(generate type target language))))
 
 (defmethod emit/context ((node     field-mixin)
@@ -217,9 +217,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 			 (language t))
   (let+ (((&accessors-r/o (type type1)) node)
 	 ((&env-r/o name offset-var (instance-var nil) (destination-var nil)))
-	 ((&env (destination-var (if (eq destination-var t)
-				     `(slot-value ,instance-var ',name)
-				     destination-var)))))
+	 ((&env (:destination-var (if (eq destination-var t)
+				      `(slot-value ,instance-var ',name)
+				      destination-var)))))
     `(incf ,offset-var ,(generate type target language))))
 
 
@@ -266,9 +266,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	 ;; the dummy variable.
 	 (element-size (let+ (((&env source-var)))
 			 (generate element-type :packed-size language)))
-	 ((&env (fixed-dimensions? fixed-dimensions?)
-		(element-size      (when (constantp element-size)
-				     (eval element-size))))))
+	 ((&env (:fixed-dimensions? fixed-dimensions?)
+		(:element-size      (when (constantp element-size)
+				      (eval element-size))))))
     (call-next-method)))
 
 (defmethod emit ((node     array-mixin)

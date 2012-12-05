@@ -303,7 +303,8 @@ See `version/list' for details on keyword parameters."
 		 :depends-on ("package")
 		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "protocol")))))
+			      (:file       "protocol")
+			      (:file       "macros")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))

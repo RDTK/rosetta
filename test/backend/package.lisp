@@ -27,6 +27,7 @@
    :cl
    :alexandria
    :let-plus
+   :iterate
    :lift
 
    :rosetta.model.data
@@ -34,6 +35,9 @@
    :rosetta.backend
 
    :rosetta.test)
+
+  (:import-from :rosetta.backend
+   :context)
 
   (:shadowing-import-from :rosetta.backend
    :generate)

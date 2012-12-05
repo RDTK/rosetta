@@ -38,7 +38,7 @@
   ;;
   ;; If lisp-toplevel-emitted? is non-nil, just call the next method.
   (let+ (((&env-r/o (lisp-toplevel-emitted? nil)))
-	 ((&env ((nil :lisp-toplevel-emitted?) t))))
+	 ((&env (:lisp-toplevel-emitted? t))))
     (if lisp-toplevel-emitted?
 	(call-next-method)
 	(let ((code (call-next-method)))
@@ -56,7 +56,7 @@
 (defmethod emit/context ((node     named-mixin)
 			 (target   t)
 			 (language language-lisp))
-  (let+ (((&env (name (intern (name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
+  (let+ (((&env (:name (intern (name node)))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
     (call-next-method)))
 
 (defmethod emit :after ((node     documentation-mixin)
@@ -138,8 +138,8 @@
 			 (language language-lisp))
   "Emit an enum definition for NODE."
   (let+ (((&env-r/o name))
-	 ((&env (name-name (symbolicate name '#:-name))
-		(code-name (symbolicate name '#:-code)))))
+	 ((&env (:name-name (symbolicate name '#:-name))
+		(:code-name (symbolicate name '#:-code)))))
     (call-next-method)))
 
 (defmethod emit ((node     enum)
@@ -193,7 +193,7 @@
 	   (type        (if (typep type '(or fundamental-type-mixin singleton))
 			    (recur type)
 			    (progn
-			      (let+ (((&env (lisp-toplevel-emitted? nil))))
+			      (let+ (((&env (:lisp-toplevel-emitted? nil))))
 				(recur type))
 			      t #+later (name type)))) ;;; TODO(jmoringe, 2012-05-09): dependency architecture
 	   (reader-name name)
@@ -209,9 +209,8 @@
 		 (language language-lisp))
   "Generate code which defines a CLOS class for NODE."
   (with-emit-symbols
-    (let+ (((&accessors-r/o
-	     (metaclass    target-metaclass)
-	     (superclasses target-superclasses)) target)
+    (let+ (((&accessors-r/o (metaclass    target-metaclass)
+			    (superclasses target-superclasses)) target)
 	   ((&env-r/o name)))
       ;; Emit the actual class definition.
       `(progn
