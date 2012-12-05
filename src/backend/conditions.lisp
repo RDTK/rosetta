@@ -24,14 +24,52 @@
 
 (cl:in-package :rosetta.backend)
 
-(define-condition emit-condition (condition)
+
+;;; Context-related conditions
+;;
+
+(define-condition context-condition (condition)
   ((context :initarg  :context
-	    :reader   emit-condition-context
+	    :reader   context-condition-context
 	    :documentation
 	    "Stores a copy of the context that was current when the
 condition was signaled."))
   (:default-initargs
-   :context (missing-required-initarg 'emit-condition :context))
+   :context (missing-required-initarg 'context-condition :context))
+  (:documentation
+   "This condition class is intended to be mixed into condition
+classes which report the context in which the condition has been
+signaled."))
+
+(define-condition missing-environment-entry (error
+					     context-condition)
+  ((name :initarg  :name
+	 :type     symbol
+	 :reader   missing-environment-entry-name
+	 :documentation
+	 "Stores the name of the missing environment entry."))
+  (:report
+   (lambda (condition stream)
+     (let+ (((&accessors-r/o (name    missing-environment-entry-name)
+			     (context context-condition-context)) condition))
+       (format stream "~@<The requested entry ~S could not be found in ~
+~:[empty environment ~;~:*environment~2%~2@T~<~@;~{~24S ~
+~A~^~&~}~:>~2%~]of context ~A.~@:>"
+	       name
+	       (list (alist-plist (context-environment/alist context)))
+	       context))))
+  (:default-initargs
+   :name (missing-required-initarg 'missing-environment-entry :name))
+  (:documentation
+   "This error is signaled when an environment entry is requested but
+does not exist."))
+
+
+;;; `generate'/`emit'-related conditions
+;;
+
+(define-condition emit-condition (context-condition)
+  ()
   (:documentation
    "Instances of subclasses of this condition class are signaled to
 notify events, especially errors and warning, during an emission
@@ -42,7 +80,7 @@ process."))
 		   (context-method   (symbolicate "CONTEXT-" name)))
 	      `(defgeneric ,condition-method (condition)
 		 (:method ((condition emit-condition))
-		   (,context-method (emit-condition-context condition)))))))
+		   (,context-method (context-condition-context condition)))))))
 
   (define-method node)
   (define-method target)
@@ -51,21 +89,21 @@ process."))
 (macrolet
     ((define-emit-condition (kind fail-verb)
        (let ((name (symbolicate "EMIT-" kind)))
-	 ` (define-condition ,name (,kind
-				    emit-condition
-				    chainable-condition)
-	     ()
-	     (:report
-	      (lambda (condition stream)
-		(let+ (((&accessors-r/o
-			 (node        context-node)
-			 (target      context-target)
-			 (language    context-language)
-			 (stack       context-stack)
-			 (environment context-environment/alist))
-			(emit-condition-context condition))
-		       (*package* #.*package*))
-		  (format stream ,(format nil "~~@<Emit ~A for~~&
+	 `(define-condition ,name (,kind
+				   emit-condition
+				   chainable-condition)
+	    ()
+	    (:report
+	     (lambda (condition stream)
+	       (let+ (((&accessors-r/o
+			(node        context-node)
+			(target      context-target)
+			(language    context-language)
+			(stack       context-stack)
+			(environment context-environment/alist))
+		       (context-condition-context condition))
+		      (*package* #.*package*))
+		 (format stream ,(format nil "~~@<Emit ~A for~~&
 ~~2@T~~11A~~A
 ~~2@T~~11A~~A
 ~~2@T~~11A~~A

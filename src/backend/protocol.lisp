@@ -48,11 +48,15 @@ designated by THING."
 			 &key
 			 default)
   (:documentation
-   "Retrieve the item designated by KEY from CONTEXT."))
+   "Retrieve the entry designated by KEY from CONTEXT.
+
+If DEFAULT is supplied and an item named KEY does not exist, return
+DEFAULT. If DEFAULT is not supplied and an item named KEY does not
+exist, a `missing-environment-entry' error is signaled."))
 
 (defgeneric (setf context-get) (new-value context key)
   (:documentation
-   "Store NEW-VALUE as the value of the item designated by KEY in
+   "Store NEW-VALUE as the value of the entry designated by KEY in
 CONTEXT."))
 
 (defgeneric context-node (context)
@@ -108,8 +112,9 @@ This state consists of:
 		   (when found? (list value))))
 	     (%context-environment context))
        (if (eq default :error)
-	   (error "~@<Required environment entry ~S is missing.~@:>"
-		  key)
+	   (error 'missing-environment-entry
+		  :context (copy-context context)
+		  :name    key)
 	   (list default)))))
 
 (defmethod (setf context-get) ((new-value t)

@@ -50,8 +50,13 @@
 
   ;; Conditions
   (:export
+   :context-condition
+   :context-condition-context
+
+   :missing-environment-entry
+   :missing-environment-entry-name
+
    :emit-condition
-   :emit-condition-context
    :emit-condition-node
    :emit-condition-target
    :emit-condition-language
