@@ -146,6 +146,7 @@ See `version/list' for details on keyword parameters."
 		 :depends-on ("src" "model-data")
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "types")
 			      (:file       "conditions")
 			      (:file       "protocol")
 			      (:file       "mixins")))
@@ -306,6 +307,7 @@ See `version/list' for details on keyword parameters."
 		 :components ((:file       "package")
 			      (:file       "protocol")
 			      (:file       "macros")
+			      (:file       "emitter-lisp-serializer")
 			      (:file       "emitter-conversion")))))
 
 (defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))

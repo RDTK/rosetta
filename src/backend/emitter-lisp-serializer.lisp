@@ -31,8 +31,9 @@
 (defmethod emit ((node     fixed-width-mixin)
 		 (target   target-pack)
 		 (language language-lisp))
-  (let+ (((&env-r/o source-var offset-var destination-var))
-	 (packer (%packer-name node)))
+  (let+ (((&env-r/o source-var offset-var destination-var
+		    (endian (endian-for (mechanism target) node))))
+	 (packer (%packer-name node endian)))
     `(progn
        ,@(when source-var
 	   `((setf (,packer ,destination-var ,offset-var) ,source-var)))
@@ -41,12 +42,47 @@
 (defmethod emit ((node     fixed-width-mixin)
 		 (target   target-unpack)
 		 (language language-lisp))
-  (let+ (((&env-r/o source-var offset-var destination-var))
-	 (packer (%packer-name node)))
+  (let+ (((&env-r/o source-var offset-var destination-var
+		    (endian (endian-for (mechanism target) node))))
+	 (packer (%packer-name node endian)))
     `(progn
        ,@(when destination-var
 	   `((setf ,destination-var (,packer ,source-var ,offset-var))))
        ,(generate node :packed-size language))))
+
+(defmethod emit/context ((node     type-utf-8-string) ; note: utf-8-string
+			 (target   target-packed-size)
+			 (language language-lisp))
+  (let+ (((&env-r/o source-var))
+	 ((&with-gensyms temp-var)))
+    (if source-var
+	`(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
+	   ,(let+ (((&env (:source-var temp-var))))
+	      (generate (make-instance 'type-octet-vector) target language)))
+	0)))
+
+(defmethod emit/context ((node     type-string*) ; note: any string
+			 (target   target-pack)
+			 (language language-lisp))
+  (let+ (((&env-r/o source-var))
+	 ((&with-gensyms temp-var)))
+    (if source-var
+	`(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
+	   ,(let+ (((&env (:source-var temp-var))))
+	      (generate (make-instance 'type-octet-vector) target language)))
+	0)))
+
+(defmethod emit/context ((node     type-string*) ; note: any string
+			 (target   target-unpack)
+			 (language language-lisp))
+  (let+ ((type-octet-vector (make-instance 'type-octet-vector))
+	 ((&env-r/o destination-var))
+	 ((&with-gensyms vector-var)))
+    `(let ((,vector-var ,(generate type-octet-vector :instantiate language)))
+       (prog1
+	   ,(let+ (((&env (:destination-var vector-var))))
+	      (generate type-octet-vector target language))
+	 (setf ,destination-var (sb-ext:octets-to-string ,vector-var))))))
 
 (defmethod emit ((node     type-octet-vector)
 		 (target   target-pack)
@@ -127,19 +163,36 @@
 ;;; Utility functions
 ;;
 
-(defun %packer-name (node)
+(defun sb8ref (vector index)
+  (let ((value (aref vector index)))
+    (+ (- (ash (ldb (byte 1 7) value) 7)) (ldb (byte 7 0) value))))
+
+(defun (setf sb8ref) (new-value vector index)
+  (setf (aref vector index) (dpb new-value (byte 8 0) 0)))
+
+(defun %packer-name (node endian)
   "Return the a name of a function in the nibbles package which can be
 used to accesses the fundamental type characterized by CATEGORY and
 WIDTH."
-  (ecase (category node)
-    (:integer
-     (format-symbol :nibbles "~A~DREF/LE"
-		    (ecase (signed? node)
-		      ((nil) '#:ub)
-		      (t     '#:sb))
-		    (width node)))
-    (:floatp
-     (format-symbol :nibbles "IEEE-~A-REF/LE"
-		    (ecase (width node)
-		      (32 '#:single)
-		      (64 '#:double))))))
+  (let ((endian (ecase (resolve-endian endian)
+		  (:little-endian '#:le)
+		  (:big-endian    '#:be)))
+	(width  (width node)))
+    (ecase (category node)
+      (:integer
+       (case width
+	 (8 (if (signed? node)
+		'sb8ref
+		'cl:aref))
+	 (t (format-symbol :nibbles "~A~DREF/~A"
+			   (ecase (signed? node)
+			     ((nil) '#:ub)
+			     (t     '#:sb))
+			   width
+			   endian))))
+      (:float
+       (format-symbol :nibbles "IEEE-~A-REF/~A"
+		      (ecase width
+			(32 '#:single)
+			(64 '#:double))
+		      endian)))))

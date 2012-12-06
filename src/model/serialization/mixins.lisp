@@ -74,3 +74,23 @@ corresponding serialization mechanism."))
    "This mixin class adds to serialization mechanism classes a
 length-type slot describing the array length type used by the
 corresponding serialization mechanism."))
+
+
+;;; `constant-endian-mixin' mixin class
+;;
+
+(defclass constant-endian-mixin ()
+  ((endian :initarg  :endian
+	   :type     endian-designator
+	   :reader   endian
+	   :documentation
+	   "Stores the fixed endian used by the mechanism."))
+  (:default-initargs
+   :endian (missing-required-initarg 'constant-endian-mixin :endian))
+  (:documentation
+   "This class is intended to be mixed into mechanism classes which
+use one fixed endian on the wire."))
+
+(defmethod endian-for ((mechanism constant-endian-mixin)
+		       (type      t))
+  (endian mechanism))

@@ -59,14 +59,14 @@
 
   (define-variable-width-method (target-unpack :around)
     (let+ (((&with-gensyms temp-var)))
-      `(let ((,temp-var))
+      `(let ((,temp-var 0)) ;;; TODO(jmoringe, 2012-12-05): 0 is temp
 	 (declare (type ,(generate length-type :reference language) ,temp-var))
 	 (+ ,(let+ (((&env (:destination-var temp-var))))
 	       (generate length-type :unpack language))
 	    ,(let+ (((&env-r/o offset-var))
 		    ((&env (:offset-var `(+ ,offset-var ,length-size))
-			   (:end-var    `(+ ,offset-var ,temp-var)))))
-		   (call-next-method)))))))
+			   (:end-var    `(+ ,offset-var ,length-size ,temp-var)))))
+	       (call-next-method)))))))
 
 
 ;;; `typed-mixin'

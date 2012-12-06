@@ -38,6 +38,14 @@
    :name
    :type1)
 
+  ;; Types
+  (:export
+   :endian
+   :endian-designator
+
+   :resolve-endian
+   :opposite-platform-endian)
+
   ;; Conditions
   (:export
    :type-invalid-for-mechanism
@@ -52,6 +60,8 @@
    :wire-type
    :offset-type
    :length-type
+
+   :endian-for
 
    :validate-type)
 
@@ -69,7 +79,9 @@
   (:export
    :wire-type-mixin
    :offset-type-mixin
-   :length-type-mixin)
+   :length-type-mixin
+
+   :constant-endian-mixin)
 
   (:documentation
    "This package contains model elements which represent

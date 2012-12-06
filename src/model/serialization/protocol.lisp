@@ -48,6 +48,11 @@ type."))
    "Return the type used by the serialization mechanism MECHANISM to
 represent lengths of arrays. The returned object models a type."))
 
+(defgeneric endian-for (mechanism type)
+  (:documentation
+   "Return an `endian-designator' designating the endian that should
+be used on the wire for the combination of MECHANISM and TYPE."))
+
 (defgeneric validate-type (mechanism type
 			   &key
 			   if-invalid)
@@ -66,6 +71,10 @@ around the call."))
 
 (defmethod name ((mechanism t))
   (class-name (class-of mechanism)))
+
+(defmethod endian-for ((mechanism t) (type t))
+  "Default behavior consists in using little endian."
+  :little-endian)
 
 (defmethod validate-type :around ((mechanism t)
 				  (type      t)
