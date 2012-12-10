@@ -42,7 +42,9 @@
 
    :language-lisp
 
-   :language-c++)
+   :language-c++
+   :language-python
+   :language-java)
 
   (:documentation
    "This package contains functions and classes which model

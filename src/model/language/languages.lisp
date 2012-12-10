@@ -1,4 +1,4 @@
-;;; lisp.lisp --- Common Lisp programming language.
+;;; languages.lisp --- Builtin programming languages.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -24,11 +24,64 @@
 
 (cl:in-package :rosetta.model.language)
 
+
+;;; Abstract language
+;;
+
+(defmethod find-language-class ((spec (eql :abstract)))
+  (find-class 'language-abstract))
+
+(defclass language-abstract ()
+  ()
+  (:documentation
+   "This language is intended to be used as an abstract intermediate
+representation and for debugging purposes."))
+
+
+;;; Lisp language
+;;
+
 (defmethod find-language-class ((spec (eql :lisp)))
   (find-class 'language-lisp))
 
 (defclass language-lisp ()
   ()
   (:documentation
-   "Common Lisp programming language. S-EXPRs are generated and
+   "Common Lisp programming language. S-EXPRs are generated, but not
 compiled."))
+
+
+;;; C++ language
+;;
+
+(defmethod find-language-class ((spec (eql :c++)))
+  (find-class 'language-c++))
+
+(defclass language-c++ ()
+  ()
+  (:documentation
+   "C++ programming language."))
+
+
+;;; Python language
+;;
+
+(defmethod find-language-class ((spec (eql :python)))
+  (find-class 'language-python))
+
+(defclass language-python ()
+  ()
+  (:documentation
+   "Python programming language."))
+
+
+;;; Java language
+;;
+
+(defmethod find-language-class ((spec (eql :java)))
+  (find-class 'language-java))
+
+(defclass language-java ()
+  ()
+  (:documentation
+   "Java programming language."))

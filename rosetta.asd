@@ -154,15 +154,10 @@ See `version/list' for details on keyword parameters."
 		(:module     "model-language"
 		 :pathname   "src/model/language"
 		 :depends-on ("src")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "protocol"
-			       :depends-on ("package"))
-			      (:file       "abstract"
-			       :depends-on ("package" "protocol"))
-			      (:file       "lisp"
-			       :depends-on ("package" "protocol"))
-			      (:file       "c++"
-			       :depends-on ("package" "protocol"))))
+			      (:file       "protocol")
+			      (:file       "languages")))
 
 		(:module     "serialization"
 		 :pathname   "src/serialization"
