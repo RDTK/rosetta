@@ -28,8 +28,8 @@
   ()
   (:setup
   ;; Generate enums
-   (generate +enum/uint8/simple+ :class :lisp)
-   (generate +enum/uint32/simple+ :class :lisp))
+   (generate +enum/uint8/simple+ :class :lisp/compiled)
+   (generate +enum/uint32/simple+ :class :lisp/compiled))
   (:documentation
    "Unit tests suite for conversion emitter methods."))
 

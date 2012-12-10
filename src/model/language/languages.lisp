@@ -48,7 +48,24 @@ representation and for debugging purposes."))
   ()
   (:documentation
    "Common Lisp programming language. S-EXPRs are generated, but not
-compiled."))
+compiled.
+
+See `language-lisp/compiled'."))
+
+
+;;; Compiled Lisp language
+;;
+
+(defmethod find-language-class ((spec (eql :lisp/compiled)))
+  (find-class 'language-lisp/compiled))
+
+(defclass language-lisp/compiled ()
+  ()
+  (:documentation
+   "Common Lisp programming language. S-EXPRs are generated and
+compiled.
+
+See `language-lisp'."))
 
 
 ;;; C++ language

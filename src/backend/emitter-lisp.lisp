@@ -28,26 +28,16 @@
 ;;; Evaluate generated code
 ;;
 
-(defmethod emit/context :around ((node     toplevel-mixin)
-				 (target   code-generating-target-mixin)
-				 (language language-lisp))
-  ;; If lisp-toplevel-emitted? is nil, bind it to t to prevent next
-  ;; method/recursive calls from evaluating anything. With
-  ;; lisp-toplevel-emitted? bound to t, call next method to obtain
-  ;; generated code, then evaluate it.
-  ;;
-  ;; If lisp-toplevel-emitted? is non-nil, just call the next method.
-  (let+ (((&env-r/o (lisp-toplevel-emitted? nil)))
-	 ((&env (:lisp-toplevel-emitted? t))))
-    (if lisp-toplevel-emitted?
-	(call-next-method)
-	(let ((code (call-next-method)))
-	  (handler-bind
-	      (#+sbcl (sb-c::redefinition-warning #'muffle-warning)
-	       (error #'(lambda (condition)
-			  (error "~@<Failed to compile code~2%~S~2%Caused by:~%~A~@:>"
-				 code condition))))
-	    (eval code))))))
+(defmethod emit/context ((node     t)
+			 (target   code-generating-target-mixin)
+			 (language language-lisp/compiled))
+  (let ((code (generate node target :lisp)))
+    (handler-bind
+	(#+sbcl (sb-c::redefinition-warning #'muffle-warning)
+	 (error #'(lambda (condition)
+		    (error "~@<Failed to compile code~2%~S~2%Caused by:~%~A~@:>"
+			   code condition))))
+      (eval code))))
 
 
 ;;; Generic stuff

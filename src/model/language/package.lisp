@@ -41,6 +41,7 @@
    :language-abstract
 
    :language-lisp
+   :language-lisp/compiled
 
    :language-c++
    :language-python
