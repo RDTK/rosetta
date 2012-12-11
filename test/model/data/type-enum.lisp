@@ -78,10 +78,16 @@
   (ensure-cases (args expected)
       `((("a")                                    "a")
 	(("a" :if-does-not-exist nil)             "a")
+	((1)                                      "a")
+	((1 :if-does-not-exist nil)               "a")
 	(("b")                                    "b")
 	(("b" :if-does-not-exist nil)             "b")
+	((255)                                    "b")
+	((255 :if-does-not-exist nil)             "b")
 	(("no-such-child")                        no-such-child)
-	(("no-such-child" :if-does-not-exist nil) nil))
+	(("no-such-child" :if-does-not-exist nil) nil)
+	((2)                                      no-such-child)
+	((2 :if-does-not-exist nil)               nil))
 
     (let+ ((enum (make-instance 'enum
 				:name   "enum"

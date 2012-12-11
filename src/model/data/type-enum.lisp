@@ -81,6 +81,14 @@ One example of a class representing such values is `enum-value'."))
 (defmethod kind ((type enum))
   :enum)
 
+(defmethod lookup ((container enum)
+		   (kind      (eql :value))
+		   (key       integer)
+		   &key &allow-other-keys)
+  (find key (contents container :value)
+	:test #'=
+	:key  #'value))
+
 (defmethod (setf lookup) :before ((new-value t)
 				  (container enum)
 				  (kind      (eql :value))

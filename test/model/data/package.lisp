@@ -44,6 +44,7 @@
   ;; Some simple types
   (:export
    :+enum/uint8/simple+
+   :+enum/uint8/one+
    :+enum/uint32/simple+)
 
   (:documentation
@@ -76,6 +77,11 @@
   (make-instance 'enum :name   "simple/uint8"
 		       :type   (make-instance 'type-uint8)
 		       :values '(:a 1 :b 2)))
+
+(defparameter +enum/uint8/one+
+  (make-instance 'enum :name   "one/uint8"
+		       :type   (make-instance 'type-uint8)
+		       :values '(:a 1)))
 
 (defparameter +enum/uint32/simple+
   (make-instance 'enum :name   "simple/uint32"

@@ -299,3 +299,18 @@ No methods must not be installed on `emit/setup'."))
   (:documentation
    "Emit code for LANGUAGE for converting instances of FROM to
 instances of TO."))
+
+
+;;; Offset computation protocol
+;;
+
+(defgeneric requires-offset-computation? (type mechanism)
+  (:documentation
+   "Return non-nil if the combination of TYPE and MECHANISM requires a
+local offset computation block."))
+
+(defmethod requires-offset-computation? ((type t) (mechanism t))
+  nil)
+
+(defmethod requires-offset-computation? ((type structure-mixin) (mechanism t))
+  t)

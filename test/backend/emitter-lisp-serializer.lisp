@@ -26,6 +26,10 @@
 
 (deftestsuite backend-emitter-lisp-serializer-root (backend-root)
   ()
+  (:setup
+   ;; Generate enums
+   (generate +enum/uint8/one+     :class :lisp/compiled)
+   (generate +enum/uint32/simple+ :class :lisp/compiled))
   (:documentation
    "Unit test for serialization-related emitter for Lisp."))
 
@@ -64,7 +68,11 @@ We do not verify the emitted code, but its behavior.")
 							    ("ab"   . 3)))
 	(type-utf-8-string :mock/little-endian-packed-size ((""     . 1)
 							    ("ä"    . 3)
-							    ("äb"   . 4))))
+							    ("äb"   . 4)))
+	;; Enum
+	(,+enum/uint8/one+ :mock/little-endian-packed-size ((:a . 1)))
+	(,+enum/uint32/simple+ :mock/little-endian-packed-size ((:a . 4)
+								(:b . 4))))
     (ensure-same (funcall generated input) expected :test #'=)))
 
 (addtest (backend-emitter-lisp-serializer-root
@@ -103,7 +111,11 @@ We do not verify the emitted code, but its behavior.")
 						     ("ab"   . (#x02 #x61 #x62))))
 	(type-utf-8-string :mock/little-endian-pack ((""     . (#x00))
 						     ("ä"    . (#x02 #xc3 #xa4))
-						     ("äb"   . (#x03 #xc3 #xa4 #x62)))))
+						     ("äb"   . (#x03 #xc3 #xa4 #x62))))
+	;; Enum
+	(,+enum/uint8/one+ :mock/little-endian-pack ((:a . (#x01))))
+	(,+enum/uint32/simple+ :mock/little-endian-pack ((:a . (#x01 #x00 #x00 #x00))
+							 (:b . (#x02 #x00 #x00 #x00)))))
 
     (let+ (((&values num-bytes-written result) (funcall generated input)))
       (ensure-same (values num-bytes-written (subseq result 0 num-bytes-written))
@@ -146,7 +158,13 @@ We do not verify the emitted code, but its behavior.")
 						       ((#x02 #x61 #x62)      . "ab")))
 	(type-utf-8-string :mock/little-endian-unpack (((#x00)                . "")
 						       ((#x02 #xc3 #xa4)      . "ä")
-						       ((#x03 #xc3 #xa4 #x62) . "äb"))))
+						       ((#x03 #xc3 #xa4 #x62) . "äb")))
+	;; Enum
+	(,+enum/uint8/one+ :mock/little-endian-unpack (((#x01)                . :a)
+						       #+later ((#x02)                . error))) ;;; TODO(jmoringe, 2012-12-11): we optimize too aggressively to catch this
+	(,+enum/uint32/simple+ :mock/little-endian-unpack (((#x01 #x00 #x00 #x00) . :a)
+							   ((#x02 #x00 #x00 #x00) . :b)
+							   ((#x03 #x00 #x00 #x00) . error))))
     (ensure-same (funcall generated (coerce input 'nibbles:simple-octet-vector))
 		 (values (length input) expected)
 		 :test #'equalp)))

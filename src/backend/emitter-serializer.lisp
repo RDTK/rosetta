@@ -39,8 +39,7 @@
 	  ((node     variable-width-mixin)
 	   (target   ,target)
 	   (language t))
-	  (let+ ((mechanism (mechanism target))
-		 ((&accessors-r/o length-type) mechanism)
+	  (let+ (((&accessors-r/o length-type) (mechanism target))
 		 (length-size (generate length-type :packed-size language)))
 	    ,@body))))
 
@@ -92,26 +91,26 @@
 ;;
 
 (defmethod emit/context ((node     singleton)
-		 (target   target-packed-size)
-		 (language t))
-  (let+ (((&env (source-var (value node)))))
+			 (target   target-packed-size)
+			 (language t))
+  (let+ (((&env (:source-var (value node)))))
     (call-next-method)))
 
 (defmethod emit/context ((node     singleton)
-		 (target   target-pack)
-		 (language t))
-  (let+ (((&env (source-var (value node)))))
+			 (target   target-pack)
+			 (language t))
+  (let+ (((&env (:source-var (value node)))))
     (call-next-method)))
 
 (defmethod emit/context ((node     singleton)
-		 (target   target-unpack)
-		 (language t))
+			 (target   target-unpack)
+			 (language t))
   (let+ (((&accessors-r/o (type type1) value) node)
 	 ((&env-r/o destination-var)))
     `(progn
        ,@(when destination-var
 	   `((setf ,destination-var ,value)))
-       ,(let+ (((&env (destination-var nil))))
+       ,(let+ (((&env (:destination-var nil))))
 	  (emit type target language)))))
 
 
@@ -119,8 +118,8 @@
 ;;
 
 (defmethod emit/context ((node     enum)
-		 (target   target-pack)
-		 (language t))
+			 (target   target-pack)
+			 (language t))
   (let+ ((values (contents node :value))
 	 ((&env-r/o source-var))
 	 (new-source-var
@@ -131,9 +130,10 @@
 	    ;; If we are asked to pack a constant value, we can look
 	    ;; it up now and just store the result at runtime.
 	    ((constantp source-var)
-	     (value (lookup node :value (string source-var))))
+	     (value (lookup node :value (string (eval source-var)))))
 
-	    ;; If the enum only has one value, we can just store that.
+	    ;; If the enum NODE only has one value, we can just store
+	    ;; that.
 	    ((length= 1 values)
 	     (value (first values)))
 
@@ -142,38 +142,51 @@
 	    (t
 	     (generate node :value->code language)))))
 
-    (if new-source-var
-	(let+ (((&env (source-var new-source-var))))
-	  (call-next-method))
-	(call-next-method))))
+    (let+ (((&env (:source-var new-source-var))))
+      (call-next-method))))
 
 (defmethod emit/context ((node     enum)
-		 (target   target-unpack)
-		 (language t))
-  (let+ (((&accessors-r/o mechanism) target)
-	 ((&accessors-r/o offset-type) mechanism)
+			 (target   target-unpack)
+			 (language t))
+  (let+ (((&accessors-r/o offset-type) (mechanism target))
 	 ((&accessors-r/o (type type1)) node)
 	 (values (contents node :value))
-	 ((&env-r/o destination-var)))
+	 ((&env-r/o source-var destination-var)))
     (cond
+      ;; If we are not supposed to store the unpacked value, we can
+      ;; just delegate to the next method for `typed-mixin'.
       ((not destination-var)
        (call-next-method))
 
+      ;; If we get a constant SOURCE-VAR (which is the numeric value),
+      ;; we can lookup the corresponding symbolic now and emit a
+      ;; static assignment.
+      ((constantp source-var)
+       (let ((value (lookup node :value (eval source-var))))
+	 `(progn
+	    (setf ,destination-var ,(generate value :instantiate language))
+	    ,(let+ (((&env (:destination-var nil))))
+	       (call-next-method)))))
+
+      ;; If the enum NODE only has on value, we can generate a static
+      ;; assignment of the symbolic name of that value.
       ((length= 1 values)
        `(progn
-	  (setf ,destination-var ,(value (first values)))
-	  (let+ (((&env (destination-var nil))))
-	    (call-next-method))))
+	  (setf ,destination-var ,(generate (first values) :instantiate language))
+	  ,(let+ (((&env (:destination-var nil))))
+	     (call-next-method))))
 
+      ;; Otherwise we emit code to unpack the numeric value and then
+      ;; lookup the symbolic value.
       (t
-       (let+ (((&with-gensyms temp1 temp2))
-	      ((&env ((nil :destination-var) temp1))))
-	 `(let (,temp1
-		(,temp2 ,(call-next-method)))
+       (let+ (((&with-gensyms temp1 temp2)))
+	 `(let* ((,temp1 0)
+		 (,temp2 ,(let+ (((&env (:destination-var temp1))))
+			    (call-next-method))))
 	    (declare (type ,(generate type        :reference language) ,temp1)
 		     (type ,(generate offset-type :reference language) ,temp2))
-	    (setf ,temp1 ,(let+ (((&env (source-var temp2))))
-			    (generate node :code->value language)))
+	    (setf ,destination-var ,(let+ (((&env (:source-var temp1))))
+				      (generate node :code->value language)))
 	    ,temp2))))))
 
 
@@ -240,8 +253,8 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 		   ((&labels recur/location (field)
 		      (let+ (((&values location nested-locations)
 			      (field-location field))
-			     ((&env (,var      location)
-				    (locations nested-locations))))
+			     ((&env (,var       location)
+				    (:locations nested-locations))))
 			(check-type nested-locations (or null function))
 			(recur field)))))
 	      (check-type locations (or null function))
@@ -306,7 +319,7 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	    (dotimes (,i ,(element-location :length))
 	      (declare (type ,(generate index-type :reference language) ,i))
 	      (incf ,size
-		    ,(let+ (((&env (source-var (element-location i)))))
+		    ,(let+ (((&env (:source-var (element-location i)))))
 		       (generate element-type target language))))
 	    (+ ,(generate index-type target language) ,size)))))))
 
@@ -368,12 +381,13 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 		element-size))
        (let+ ((length (value index-type)))
 	 `(progn
-	    (incf ,offset-var ,(let+ (((&env ((nil :destination-var) nil))))
+	    (incf ,offset-var ,(let+ (((&env (:destination-var nil))))
 				 (generate index-type :unpack language)))
 	    ,@(iter (for i :from 0 :below length)
 		    (collect
-			(let+ (((&env (destination-var `(aref ,destination-var ,i))
-				      (offset-var      `(+ ,offset-var ,(* element-size i))))))
+			(let+ (((&env (:destination-var (when destination-var
+							  `(aref ,destination-var ,i)))
+				      (:offset-var      `(+ ,offset-var ,(* element-size i))))))
 			  (generate element-type target language))))
 	    ,@(when (plusp length)
 		`((incf ,offset-var ,(* element-size length)))))))
@@ -383,13 +397,14 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	 `(let ((,length))
 	    (declare (type ,(generate index-type :reference language) ,length))
 	    (incf ,offset-var
-		  ,(let+ (((&env (destination-var length))))
+		  ,(let+ (((&env (:destination-var length))))
 		     (generate index-type :unpack language)))
 	    (adjust-array ,destination-var (,length))
 	    (dotimes (,i (length ,length))
 	      (declare (type ,(generate index-type :reference language) ,i))
-	      ,(let+ (((&env (destination-var `(aref ,destination-var ,i))
-			     (offset-var `(+ ,offset-var (* ,element-size ,i))))))
+	      ,(let+ (((&env (:destination-var (when destination-var
+						 `(aref ,destination-var ,i)))
+			     (:offset-var      `(+ ,offset-var (* ,element-size ,i))))))
 	         (generate element-type target language)))
 	    (incf ,offset-var (* ,element-size ,length)))))
 
@@ -398,39 +413,42 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	 `(let ((,length))
 	    (declare (type ,(generate index-type :reference language) ,length))
 	    (incf ,offset-var
-		  ,(let+ (((&env (destination-var length))))
+		  ,(let+ (((&env (:destination-var length))))
 		     (generate index-type :unpack language)))
 	    (adjust-array ,destination-var (,length))
 	    (dotimes (,i ,length)
 	      (declare (type ,(generate index-type :reference language) ,i))
 	      (incf ,offset-var
-		    ,(let+ (((&env (destination-var `(aref ,destination-var ,i)))))
+		    ,(let+ (((&env (:destination-var (when destination-var
+						       `(aref ,destination-var ,i))))))
 		       (generate element-type target language))))))))))
 
 
-;;; Toplevel
+;;; Offset computation
 ;;
 
-(defun invoke-with-scope (target language thunk)
+(defun invoke-with-offset-computation (target language thunk)
   (let+ ((offset-type (offset-type (mechanism target)))
 	 ((&env-r/o start-var))
-	 ((&env ((nil :scope-emitted?) t) offset-var)))
+	 ((&env (:offset-computation-emitted? t) offset-var)))
     `(let ((,offset-var ,start-var))
        (declare (type ,(generate offset-type :reference language) ,offset-var))
-       ,(let+ (((&env (start-var offset-var))))
+       ,(let+ (((&env (:start-var offset-var))))
 	  (funcall thunk))
        (- ,offset-var ,start-var))))
 
-(defmacro with-scope ((target language) &body body)
-  `(invoke-with-scope ,target ,language #'(lambda () ,@body)))
+(defmacro with-offset-computation ((target language) &body body)
+  `(invoke-with-offset-computation ,target ,language #'(lambda () ,@body)))
 
 (macrolet
-    ((define-toplevel-method (target)
-       `(defmethod emit/context ((node     toplevel-mixin)
-				 (target   ,target)
-				 (language t))
-	  (with-scope (target language)
-	    (call-next-method)))))
+    ((define-offset-computation-method (target)
+       `(defmethod emit/context :around ((node     t)
+					 (target   ,target)
+					 (language t))
+	  (if (requires-offset-computation? node (mechanism target))
+	      (with-offset-computation (target language)
+		(call-next-method))
+	      (call-next-method)))))
 
-  (define-toplevel-method target-pack)
-  (define-toplevel-method target-unpack))
+  (define-offset-computation-method target-pack)
+  (define-offset-computation-method target-unpack))

@@ -180,6 +180,12 @@
   (let+ (((&env-r/o source-var name-name)))
     `(,name-name ,source-var)))
 
+(defmethod emit ((node     enum-value)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  (let+ (((&env-r/o name)))
+    (make-keyword name)))
+
 
 ;;; Structure
 ;;

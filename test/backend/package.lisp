@@ -34,6 +34,7 @@
    :rosetta.model.data
    :rosetta.model.language
    :rosetta.model.serialization
+   :rosetta.serialization
    :rosetta.backend
 
    :rosetta.test
@@ -128,19 +129,22 @@
 	      (defmethod find-mechanism-class ((spec (eql ,spec)))
 		(find-class ',name))
 
-	      (defclass ,name (constant-endian-mixin
-			       length-type-mixin)
+	      (defclass ,name (binary-mixin
+			       data-holder-mixin
+			       offset-type-mixin
+			       length-type-mixin
+			       constant-endian-mixin)
 		()
 		(:default-initargs
-		 :endian      ,endian
-		 :length-type (make-instance 'type-uint8))))
+		 :offset-type (make-instance 'type-uint16)
+		 :length-type (make-instance 'type-uint8)
+		 :endian      ,endian)))
 
 	    (defmethod validate-type ((mechanism ,name) (type t)
 				      &key &allow-other-keys)
 	      t)
 
-	    (define-mechanism-targets ,name/short
-	      :method-targets nil)))))
+	    (define-mechanism-targets ,name/short)))))
 
   (define-mock-mechanism :little-endian)
   (define-mock-mechanism :big-endian))
@@ -170,19 +174,24 @@ and compare the result of the function call with EXPECTED-VAR."
   `(ensure-cases (type-spec case-target inputs-and-expected)
        ,cases
 
-     (let+ ((type   (make-instance type-spec))
+     (let+ ((type   (etypecase type-spec
+		      (symbol (make-instance type-spec))
+		      (list   (apply #'make-instance type-spec))
+		      (t      type-spec)))
 	    (target (or case-target ,default-target
 			(error "~@<Neither case-specific target nor ~S
 has been supplied.~@:>"
 			       :default-target)))
 	    ;; Generate code for TYPE and TARGET using fresh SOURCE,
 	    ;; DESTINATION and OFFSET variables.
-	    ((&with-gensyms source destination offset))
+	    ((&with-gensyms source destination offset start end))
 	    ((&flet generate-code (type)
 	       (let+ ((*context* (make-instance 'context))
 		      ((&env (:source-var      source)
 			     (:destination-var destination)
-			     (:offset-var      offset))))
+			     (:offset-var      offset)
+			     (:start-var       start)
+			     (:end-var         end))))
 		 (generate type target :lisp))))
 	    ;; Put the generated code into a simple context which binds
 	    ;; SOURCE, DESTINATION and OFFSET.
@@ -190,7 +199,12 @@ has been supplied.~@:>"
 	     (compile nil `(lambda (input)
 			     (let* ((,source      input)
 				    (,destination ,,destination-initform)
-				    (,offset      0))
+				    (,offset      0)
+				    (,start       ,offset)
+				    (,end         100))
 			       (values ,(generate-code type) ,destination ,offset))))))
        (iter (for (,input-var . ,expected-var) in inputs-and-expected)
-	     ,@body))))
+	     (let+ (((&flet do-it () ,@body)))
+	       (case ,expected-var
+		 (error (ensure-condition 'error (do-it)))
+		 (t     (do-it))))))))
