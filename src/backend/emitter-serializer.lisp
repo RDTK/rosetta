@@ -260,7 +260,7 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	      (check-type locations (or null function))
 	      (if ,(if (eq target 'target-pack) 'source-var t)
 		  `(,',op ,@(mapcar #'recur/location (contents node :field)))
-		  (generate node :packed-size language)))))))
+		  (generate node (make-target-like target :packed-size) language)))))))
 
   (define-structure-method target-packed-size +     source-var)
   (define-structure-method target-pack        progn source-var)
@@ -278,7 +278,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 	 ;; SOURCE-VAR. This can only be constant if it does not use
 	 ;; the dummy variable.
 	 (element-size (let+ (((&env source-var)))
-			 (generate element-type :packed-size language)))
+			 (generate element-type
+				   (make-target-like target :packed-size)
+				   language)))
 	 ((&env (:fixed-dimensions? fixed-dimensions?)
 		(:element-size      (when (constantp element-size)
 				      (eval element-size))))))

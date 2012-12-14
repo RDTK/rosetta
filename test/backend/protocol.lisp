@@ -90,3 +90,17 @@
 		  (ensure (find-restart 'use-value))
 		  (invoke-restart 'use-value :result-instead-of-callback))
 		 :result-instead-of-callback)))
+
+(addtest (backend-protocol-root
+          :documentation
+	  "Smoke test for methods on `make-target-like'.")
+  make-target-like/smoke
+
+  (ensure-cases (class like expected-type)
+      '((target-mock/little-endian-pack :packed-size target-mock/little-endian-packed-size)
+	(target-mock/little-endian-pack :unpack      target-mock/little-endian-unpack)
+	(target-mock/big-endian-pack    :packed-size target-mock/big-endian-packed-size)
+	(target-mock/big-endian-pack    :unpack      target-mock/big-endian-unpack))
+
+    (ensure (typep (make-target-like (make-instance class) like)
+		   expected-type))))

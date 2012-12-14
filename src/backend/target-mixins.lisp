@@ -83,3 +83,17 @@ serialization-related code is `emit' ted."))
 used for generating serialization-related code. It provides a slot for
 storing the mechanism for which the serialization code is `emit'
 ted."))
+
+(defmethod make-target-like ((target mechanism-target-mixin)
+			     (key    symbol)
+			     &rest args)
+  (let ((spec (format-symbol
+	       :keyword "~@[~A-~]~A"
+	       (when-let* ((mechanism (mechanism target))
+			   (name      (string
+				       (class-name (class-of mechanism)))))
+		 (if (starts-with-subseq "MECHANISM-" name)
+		     (subseq name 10)
+		     name))
+	       key)))
+    (apply #'make-instance (find-target-class spec) args)))

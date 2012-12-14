@@ -28,6 +28,10 @@
 ;;; Target protocol and class family
 ;;
 
+(defgeneric make-target-like (target key &rest args &key)
+  (:documentation
+   "Return a new target object based on TARGET and KEY."))
+
 (dynamic-classes:define-findable-class-family target
   "This family consists of target classes. Each target class is used
 to control the emission of one kind of thing based on an abstract

@@ -97,6 +97,10 @@
    :context-environment/alist
    :context-get)
 
+  ;; Target protocol
+  (:export
+   :make-target-like)
+
   ;; Target class family
   (:export
    :no-such-target-class
