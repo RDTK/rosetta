@@ -293,7 +293,8 @@ See `version/list' for details on keyword parameters."
 			      (:file       "locations")
 			      (:file       "builder-mixins")
 			      (:file       "format-mixins")
-			      (:file       "model-builder")))
+			      (:file       "model-builder")
+			      (:file       "list-builder")))
 
 		(:module     "backend"
 		 :pathname   "test/backend"

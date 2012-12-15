@@ -51,9 +51,6 @@ representing fundamental data types."))
 (defmethod qname ((type fundamental-type-mixin))
   (list :absolute (name type)))
 
-(defmethod fundamental? ((type fundamental-type-mixin))
-  t)
-
 
 ;;; `fixed-width-mixin' mixin class
 ;;

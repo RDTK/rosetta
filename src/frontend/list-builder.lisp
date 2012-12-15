@@ -69,6 +69,13 @@
   (define-fundamental-accessor element-type)
   (define-fundamental-accessor index-type))
 
+(defmethod lookup ((container list) (kind t) (key t)
+		   &key &allow-other-keys)
+  (find-if #'(lambda (element)
+	       (and (or (eq kind t) (eq kind (kind element)))
+		    (equal key (name element))))
+	   (second container)))
+
 (defmethod validate-value ((type list) (value t)
 			   &key &allow-other-keys)
   ;; This method exists mainly for the sake of unit tests.

@@ -317,8 +317,7 @@ allows negative values."))
    "Return of string data type TYPE."))
 
 (defmethod fundamental? ((type t))
-  "Arbitrary types are non-fundamental be default."
-  nil)
+  (eq (kind type) :fundamental))
 
 
 ;;; Field protocol for structure-like data types
