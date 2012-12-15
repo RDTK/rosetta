@@ -111,7 +111,7 @@
        ,@(when destination-var
 	   `((setf ,destination-var ,value)))
        ,(let+ (((&env (:destination-var nil))))
-	  (emit type target language)))))
+	  (generate type target language)))))
 
 
 ;;; Enum types
@@ -337,7 +337,7 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 		    element-size))) ;;; TODO(jmoringe, 2012-04-24):
        (let ((length (if source-var (value index-type) 0)))
 	 `(progn
-	    (incf ,offset-var ,(let+ (((&env (source-var length))))
+	    (incf ,offset-var ,(let+ (((&env (:source-var length))))
 				 (generate index-type :pack language)))
 	    ,@(iter (for i :from 0 :below length)
 		    (collect

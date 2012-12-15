@@ -129,7 +129,7 @@ integer and ~:[un~;~]signed integer~:>"
 ;;
 
 (defemit/conversion (singleton t)
-  (let+ (((&env (source-var (value from)))))
+  (let+ (((&env (:source-var (value from)))))
     (call-next-method)))
 
 (defemit/conversion (t singleton)
@@ -156,9 +156,9 @@ integer and ~:[un~;~]signed integer~:>"
 ;;
 
 (defemit/conversion (enum t)
-  (let+ (((&env (source-var (generate from :value->code :lisp)))))
+  (let+ (((&env (:source-var (generate from :value->code :lisp)))))
     (call-next-method)))
 
 (defemit/conversion (t enum)
-  (let+ (((&env (source-var (call-next-method)))))
+  (let+ (((&env (:source-var (call-next-method)))))
     (generate to :code->value :lisp)))

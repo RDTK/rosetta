@@ -256,14 +256,12 @@ No methods must not be installed on `emit/setup'."))
   (generate node target (list language)))
 
 
-;;; Default behavior for `emit/steup'
+;;; Default behavior for `emit/setup'
 ;;
 ;; Establish context, restarts and condition translation, then
 ;; dispatch to `emit/context'.
 
-(defmethod emit/setup :around ((node     t)
-			       (target   t)
-			       (language t))
+(defmethod emit/setup :around ((node t) (target t) (language t))
   (with-emit-restarts (node target)
     (with-updated-context (node target language)
       (with-condition-translation
@@ -274,14 +272,10 @@ No methods must not be installed on `emit/setup'."))
 	    :context (copy-context *context*)))
 	(call-next-method)))))
 
-(defmethod emit/setup ((node     t)
-		       (target   t)
-		       (language t))
+(defmethod emit/setup ((node t) (target t) (language t))
   (emit/context node target language))
 
-(defmethod emit/context ((node     t)
-			 (target   t)
-			 (language t))
+(defmethod emit/context ((node t) (target t) (language t))
   (emit node target language))
 
 (macrolet

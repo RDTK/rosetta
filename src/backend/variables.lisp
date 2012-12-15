@@ -39,7 +39,7 @@ calls which describe what is being emitted. Analogue to
 
 (defvar *emit-print* nil
   "When non-nil, print concise messages to `*standard-output*' during
-`emit' calls. Analogue to `*load-print*'.")
+`emit' calls. Analogue to `cl:*compile-print*'.")
 
 
 ;;; Emission context

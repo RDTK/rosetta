@@ -53,13 +53,12 @@
 		(go :retry))
 
 	      ;; Skip the emit method.
-	      (continue ()
-		:report
-		(lambda (stream)
-		  (format stream
-			  "~@<Skip the emit method for node ~S and ~
-target ~S.~@:>"
-			  ,node ,target)))
+	      (continue (&optional condition)
+		:report (lambda (stream)
+			  (format stream "~@<Skip the emit method for ~
+node ~S and target ~S.~@:>"
+				  ,node ,target))
+		(declare (ignore condition)))
 
 	      ;; Use a replacement value.
 	      (use-value (value)

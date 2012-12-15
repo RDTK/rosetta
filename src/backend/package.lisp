@@ -107,12 +107,6 @@
    :find-target-class
    :target-classes)
 
-  ;; Languages
-  (:export
-   :no-such-language
-   :find-language-class
-   :language-classes)
-
   (:export
    :code-generating-target-mixin)
 
@@ -127,8 +121,8 @@
 
   ;; Serialization-related target classes
   (:export
-   :serialization-mixin
-   :target-mechanism
+   :mechanism-target-mixin
+   :mechanism
 
    :target-packed-size :target-packed-size/method
    :target-pack        :target-pack/method

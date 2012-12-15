@@ -34,13 +34,15 @@
 		 :reader   target-metaclass
 		 :initform nil
 		 :documentation
-		 "")
+		 "Stores the desired metaclass of the to-be-generated
+class.")
    (superclasses :initarg  :superclasses
 		 :type     list
 		 :reader   target-superclasses
 		 :initform nil
 		 :documentation
-		 ""))
+		 "Stores the list of desired superclasses of the
+to-be-generated class."))
   (:documentation
    "Define Lisp classes based on data type definitions. The generated
 classes will not automatically have associated `pack' and `unpack'
