@@ -95,15 +95,29 @@ there is no such information."))
 NEW-VALUE."))
 
 
-;;; Parse protocol
+;;; Processing protocol
 ;;
+;; The protocol consists of the following cascade of method calls:
+;; 1. client calls `process'
+;;    a) `process' performs target and language lookup and
+;;       instantiation
+;; 2. `process' calls `parse'
+
+(defgeneric process (format source builder
+		     &key &allow-other-keys)
+  (:documentation
+   "Parse content of SOURCE assuming it uses the format or syntax
+described by FORMAT. Return an object that representing the parsed
+content which is constructed using BUILDER.
+
+FORMAT and BUILDER can be designators or FORMAT and BUILDER
+classes."))
 
 (defgeneric parse (format source builder
 		   &key &allow-other-keys)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
-described by FORMAT. Return an object that represents the parsed
-content."))
+described by FORMAT."))
 
 ;; error handling
 
@@ -120,19 +134,40 @@ content."))
 			    :source source)
    :builder  builder))
 
-;; Format class lookup
+
+;;; Default behavior for `process'
+;;
+;; 1. Maybe resolve format class
+;; 2. Maybe resolve builder class
+;; 3. Dispatch to `parse'
 
-(defmethod parse ((format list) (source t) (builder t)
-		  &rest args &key &allow-other-keys)
-  (let+ (((format-name &rest format-args) format)
-	 (format-class    (find-format-class format-name))
-	 (format-instance (apply #'make-instance
-				 format-class format-args)))
-	(apply #'parse format-instance source builder args)))
+(defmethod process ((format t) (source t) (builder t)
+		    &key &allow-other-keys)
+  (parse format source builder))
 
-(defmethod parse ((format symbol) (source t) (builder t)
-		  &rest args &key &allow-other-keys)
-  (apply #'parse (list format) source builder args))
+(defmethod process ((format list) (source t) (builder t)
+		    &rest args &key &allow-other-keys)
+  (let+ (((name &rest initargs) format)
+	 (class    (find-format-class name))
+	 (instance (apply #'make-instance class initargs)))
+    (apply #'process instance source builder args)))
+
+(defmethod process ((format symbol) (source t) (builder t)
+		    &rest args &key &allow-other-keys)
+  (apply #'process (list format) source builder args))
+
+(defmethod process ((format t) (source t) (builder list)
+		    &rest args &key &allow-other-keys)
+  (let+ (((name &rest initargs) builder)
+	 (class    (find-builder-class name))
+	 (instance (apply #'make-instance class initargs)))
+    (apply #'process format source instance args)))
+
+(defmethod process ((format t) (source t) (builder symbol)
+		    &rest args &key &allow-other-keys)
+  (if (keywordp builder)
+      (apply #'process format source (list builder) args)
+      (call-next-method)))
 
 
 ;;; Formats

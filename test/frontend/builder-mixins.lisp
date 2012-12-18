@@ -80,18 +80,11 @@ object which is then used in BODY."
 	      (formats (mapcar #'first formats-and-sources))
 	      (sources (mapcar #'second formats-and-sources))
 	      ((&flet do-it ()
-		 (lastcar (mapcar (rcurry #'parse builder)
-				  formats sources)))))
-	 (cond
-	   ((eq expected 'parse-error1)
-	    (ensure-condition 'parse-error1
-	      (do-it)))
-	   ((eq expected 'processing-error)
-	    (ensure-condition 'processing-error
-	      (do-it)))
-	   (t
-	    (let ((,result-var (do-it)))
-	      ,@body)))))))
+		 (lastcar (mapcar (rcurry #'process builder) formats sources)))))
+	 (case expected
+	   (parse-error1     (ensure-condition 'parse-error1 (do-it)))
+	   (processing-error (ensure-condition 'processing-error (do-it)))
+	   (t                (let ((,result-var (do-it))) ,@body)))))))
 
 
 ;;; `location-attaching-mixin' mixin class

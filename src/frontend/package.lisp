@@ -94,8 +94,9 @@
 ;;; Parsing- and format-related stuff
 ;;
 
-  ;; Parse protocol
+  ;; Processing protocol
   (:export
+   :process
    :parse)
 
   ;; Format class family
@@ -166,6 +167,7 @@
    "This package contains frontend-related protocols and
 infrastructure of the rosetta compiler.
 
+* `process'                         [generic function]
 * `parse'                           [generic function]
 
 There is a class family of format classes which can be manipulated

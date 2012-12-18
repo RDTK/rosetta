@@ -289,6 +289,7 @@ See `version/list' for details on keyword parameters."
 		 :depends-on ("package" "model")
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "protocol")
 			      (:file       "util")
 			      (:file       "locations")
 			      (:file       "builder-mixins")

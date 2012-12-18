@@ -363,7 +363,7 @@ to resolve dependencies."))
 
   (let+ (((&values format location)
           (resolve (resolver builder) format pathname)))
-    (parse format location builder)))
+    (process format location builder)))
 
 
 ;;; `source-level-caching-mixin' mixin class
@@ -380,15 +380,15 @@ respectively produced results."))
    "This class is intended to be mixed into builder classes which
 cache parsing results."))
 
-(defmethod parse :around ((format  t)
-			  (source  t)
-			  (builder source-level-caching-mixin)
-			  &key &allow-other-keys)
+(defmethod process :around ((format  t)
+			    (source  t)
+			    (builder source-level-caching-mixin)
+			    &key &allow-other-keys)
   ;; Construct a key based on FORMAT and a normalized version of
   ;; SOURCE and retrieve the parsing result from the cache or delegate
   ;; to the next method to perform a parse.
   (let ((key (typecase source
-	       (pathname (cons format (truename source) ))
+	       (pathname (cons format (truename source)))
 	       (stream   nil)
 	       (t        (cons format source)))))
     (if key
