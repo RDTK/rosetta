@@ -45,7 +45,9 @@
   (:export
    :+enum/uint8/simple+
    :+enum/uint8/one+
-   :+enum/uint32/simple+)
+   :+enum/uint32/simple+
+
+   :+struct/simple+)
 
   (:documentation
    "This package contains unit tests for the model.data module."))
@@ -76,14 +78,27 @@
 (defparameter +enum/uint8/simple+
   (make-instance 'enum :name   "simple/uint8"
 		       :type   (make-instance 'type-uint8)
-		       :values '(:a 1 :b 2)))
+		       :values '(:a 1 :b 2))
+  "A simple uint8 enum with two values.")
 
 (defparameter +enum/uint8/one+
   (make-instance 'enum :name   "one/uint8"
 		       :type   (make-instance 'type-uint8)
-		       :values '(:a 1)))
+		       :values '(:a 1))
+  "A simple uint8 enum with a single value.")
 
 (defparameter +enum/uint32/simple+
   (make-instance 'enum :name   "simple/uint32"
 		       :type   (make-instance 'type-uint32)
-		       :values '(:a 1 :b 2)))
+		       :values '(:a 1 :b 2))
+  "A simple uint32 enum with two values.")
+
+(defparameter +struct/simple+
+  (make-instance
+   'base-structure
+   :name   "simple"
+   :fields (list (make-instance
+		  'base-field
+		  :name "a"
+		  :type (make-instance 'type-utf-8-string))))
+  "A simple structure with a single field.")

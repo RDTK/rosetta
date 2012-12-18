@@ -293,7 +293,7 @@ concepts similar to fields in a structure."))
 ;;
 
 (define-composite-mixin fields
-    :kind :field)
+  :kind :field)
 
 (defclass structure-mixin (nesting-mixin
 			   fields-mixin)
@@ -305,39 +305,22 @@ consist of a collection of named fields."))
 (defmethod shared-initialize :after ((instance   structure-mixin)
                                      (slot-names t)
                                      &key
+				     (field-class 'base-field)
 				     fields)
-  (check-type fields (or sequence hash-table)
-	      "a plist of names and types, a list of named types or a hash-table.")
-
-  (setf (%fields instance)
-	(cond
-	  ;; No fields.
-	  ((or (null fields)
-	       (and (typep fields 'sequence) (emptyp fields)))
-	   (make-hash-table :test #'equal))
-
-	  ;; plist.
-	  ((and (listp fields) (stringp (first fields)))
-	   (plist-hash-table fields :test #'equal))
-
-	  ;; sequence of named child instances.
-	  ((and (typep fields 'sequence)
-		(not (emptyp fields))
-		(compute-applicable-methods
-		 #'name (list (elt fields 0))))
-	   (alist-hash-table (map 'list #'cons
-				  (map 'list #'name fields)
-				  fields)
-			     :test #'equal))
-
-	  ;; hash-table of child instances.
-	  ((hash-table-p fields)
-	   fields)
-
-	  (t
-	   (error 'type-error
-		  :datum         fields
-		  :expected-type '(or sequence hash-table))))))
+  (etypecase fields
+    ;; Fields are provided as a "plist" with (or string keyword) keys
+    ;; and type values.
+    ((cons (or string keyword) cons)
+     (iter (for (name type-and-initargs) on fields :by #'cddr)
+	   (setf (lookup instance :field (string name))
+		 (apply #'make-instance field-class
+			:name  (string name)
+			:type  (ensure-list type-and-initargs)))))
+    ;; Fields are provided as a sequence of `field-mixin' objects.
+    (sequence
+     (iter (for field each fields)
+	   (check-type field field-mixin)
+	   (setf (lookup instance :field (name field)) field)))))
 
 (defmethod kind ((type structure-mixin))
   :structure)

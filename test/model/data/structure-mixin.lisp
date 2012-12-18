@@ -25,13 +25,7 @@
 (cl:in-package :rosetta.model.data.test)
 
 (deftestsuite structure-mixin-root (model-data-root)
-  ((simple-child (make-instance 'field-mixin
-				:name "a"
-				:type 'string))
-   (simple-type))
-  (:setup
-   (setf simple-type (make-instance 'structure-mixin
-				    :fields `("a" ,simple-child))))
+  ()
   (:documentation
    "Test suite for the `structure-mixin' class."))
 
@@ -40,26 +34,21 @@
 	  "Test constructing `structure-mixin' instances.")
   construction
 
-  (ensure-cases ((args expected-children))
-      `(((:fields 5)
-	 :error)
-	((:fields #("bla"))
-	 :error)
-	((:fields ("a" ,simple-child))
-	 ("a"))
-	((:fields (,(make-instance 'field-mixin
+  (ensure-cases ((args expected))
+      `(((:fields 5)                                         type-error)
+	((:fields #("bla"))                                  type-error)
+	((:fields ("a" ,(make-instance 'type-utf-8-string))) ("a"))
+	((:fields (,(make-instance 'base-field
 				   :name "g"
-				   :type 'string)))
-	 ("g")))
-
-    (if (eq expected-children :error)
-	(ensure-condition 'type-error
-	  (apply #'make-instance 'structure-mixin args))
-
-	(let ((composite (apply #'make-instance 'structure-mixin args)))
-	  (ensure-same (map 'list #'name (contents composite :field))
-		       expected-children
-		       :test (rcurry #'set-equal :test #'string=))))))
+				   :type 'string)))          ("g")))
+    (let+ (((&flet do-it ()
+	      (apply #'make-instance 'structure-mixin args))))
+      (case expected
+	(type-error (ensure-condition 'type-error (do-it)))
+	(t          (ensure-same
+		     (map 'list #'name (contents (do-it) :field))
+		     expected
+		     :test (rcurry #'set-equal :test #'string=)))))))
 
 (addtest (structure-mixin-root
           :documentation
@@ -67,15 +56,12 @@
 `structure-mixin'")
   lookup
 
-  (ensure-cases (args expected)
-      `((("a")                                    ,simple-child)
-	(("a" :if-does-not-exist nil)             ,simple-child)
-	(("no-such-child")                        :error)
-	(("no-such-child" :if-does-not-exist nil) nil))
-
-    (if (eq expected :error)
-	(ensure-condition 'no-such-child
-	  (apply #'lookup simple-type :field args))
-	(ensure-same (apply #'lookup simple-type :field args)
-		     expected
-		     :test #'eq))))
+  (ensure-cases (struct args expected)
+      `((,+struct/simple+ ("a")                                    ,(first (contents +struct/simple+ :field)))
+	(,+struct/simple+ ("a" :if-does-not-exist nil)             ,(first (contents +struct/simple+ :field)))
+	(,+struct/simple+ ("no-such-child")                        no-such-child)
+	(,+struct/simple+ ("no-such-child" :if-does-not-exist nil) nil))
+    (let+ (((&flet do-it () (apply #'lookup struct :field args))))
+      (case expected
+	(no-such-child (ensure-condition 'no-such-child (do-it)))
+	(t             (ensure-same (do-it) expected :test #'eq))))))

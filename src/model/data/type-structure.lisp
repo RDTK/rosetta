@@ -28,8 +28,7 @@
 ;;; `base-field' class
 ;;
 
-
-(defclass base-field (named-component-mixin
+(defclass base-field (field-mixin
 		      documentation-mixin
 		      print-items-mixin)
   ()
@@ -52,29 +51,3 @@ a type, of structure types."))
   (:documentation
    "Instances of this class represent simple structures, that is,
 named objects containing ordered sets of named, typed fields."))
-
-(defmethod shared-initialize :after ((instance   base-structure)
-                                     (slot-names t)
-                                     &key
-				     (fields nil fields-supplied?))
-  ;; etypecase?
-  (cond
-    ;; nil
-    ((not fields-supplied?))
-
-    ;; plist
-    ((and (listp fields) (stringp (first fields)))
-     (setf (%children instance)
-	   (iter (for (name field) on fields :by #'cddr)
-		 (collect field))))
-
-    ;; sequence of named child instances
-    ((and (typep fields 'sequence)
-	  (or (emptyp fields)
-	      (typep (elt fields 0) 'field-mixin))) ;;; TODO(jmoringe, 2012-04-12):
-     (setf (%children instance) (coerce fields 'list)))
-
-    (t
-     (error 'type-error
-	    :datum         fields
-	    :expected-type 'sequence))))
