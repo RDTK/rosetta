@@ -69,10 +69,11 @@
   (define-fundamental-accessor element-type)
   (define-fundamental-accessor index-type))
 
-(defmethod lookup ((container list) (kind t) (key t)
+(defmethod lookup ((container list) (kind t) (key string)
 		   &key &allow-other-keys)
   (find-if #'(lambda (element)
-	       (and (or (eq kind t) (eq kind (kind element)))
+	       (and (listp element)
+		    (or (eq kind t) (eq kind (kind element)))
 		    (equal key (name element))))
 	   (second container)))
 

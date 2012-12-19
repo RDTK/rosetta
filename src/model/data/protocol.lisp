@@ -113,6 +113,32 @@ allowed:
 		   &key &allow-other-keys)
   nil)
 
+(defmethod lookup ((container t)
+		   (kind      t)
+		   (key       list)
+		   &key &allow-other-keys)
+  (cond
+    ;; If KEY is not a relative name, we cannot do anything with it =>
+    ;; call next method (which is probably the default behavior of
+    ;; just returning nil).
+    ((not (typep key 'name/relative))
+     (call-next-method))
+
+    ;; A relative name with a single component => we can perform a
+    ;; direct lookup in CONTAINER.
+    ((length= 2 key)
+     (lookup container kind (second key)
+	     :if-does-not-exist nil))
+
+    ;; A relative name with more than one component => lookup first
+    ;; name component and recur on the result and remaining
+    ;; components.
+    (t
+     (when-let ((parent (lookup container t (second key)
+				:if-does-not-exist nil)))
+       (lookup parent kind (cons :relative (nthcdr 2 key))
+	       :if-does-not-exist nil)))))
+
 (defmethod lookup :around ((container t)
 			   (kind      t)
 			   (key       t)
