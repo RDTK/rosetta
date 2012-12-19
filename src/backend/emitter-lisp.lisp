@@ -43,9 +43,9 @@
 ;;; Generic stuff
 ;;
 
-(defmethod emit/context ((node     named-mixin)
-			 (target   code-generating-target-mixin)
-			 (language language-lisp))
+(defmethod emit/context :around ((node     named-mixin)
+				 (target   t)
+				 (language language-lisp))
   (let+ (((&env (package (find-package :cl-user)) ;;; TODO(jmoringe, 2012-12-07): package
 		(:name (intern (name node) package))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
     (call-next-method)))
