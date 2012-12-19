@@ -142,12 +142,10 @@
 			     :values '("a" 1 "b" 255))))
     (ensure-cases (value expected)
 	'(;; These are not valid.
-	  (-1   nil)
-	  ( 0   nil)
-	  ( 2   nil)
+	  (:|c| nil)
 
 	  ;; These are valid.
-	  ( 1   t)
-	  ( 255 t))
+	  (:|a| t)
+	  (:|b| t))
 
       (validate-value enum value :if-invalid nil))))

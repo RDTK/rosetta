@@ -65,17 +65,21 @@ One example of a class representing such values is `enum-value'."))
 (defmethod shared-initialize :after ((instance   enum)
                                      (slot-names t)
                                      &key
+				     (value-class 'enum-value)
 				     values)
   (etypecase values
-    ((cons (or string keyword))
-     (iter (for (name value) on values :by #'cddr)
+    ;; Values are provided as a "plist" with (or string keyword) keys
+    ;; and values.
+    ((cons (or string keyword) cons)
+     (iter (for (name value-and-initargs) on values :by #'cddr)
 	   (setf (lookup instance :value (string name))
-		 (make-instance 'enum-value
-				:name  (string name)
-				:type  (type1 instance)
-				:value value))))
-    (list
-     (iter (for value in values)
+		 (apply #'make-instance value-class
+			:name  (string name)
+			:type  (type1 instance)
+			:value (ensure-list value-and-initargs)))))
+    ;; Values are provided as a sequence of `enum-value' objects.
+    (sequence
+     (iter (for value each values)
 	   (setf (lookup instance :value (name value)) value)))))
 
 (defmethod kind ((type enum))
@@ -118,13 +122,10 @@ specialize the ~S method.~@:>"
 
 (defmethod validate-value ((type enum) (value t)
 			   &key &allow-other-keys)
-  (unless (find value (contents type :value)
-		:key #'value)
-    (let ((values (mapcar #'value (contents type :value))))
-     (error "~@<~S is not one of the valid values of ~A. ~[There are ~
+  (unless (lookup type :value (string value) :if-does-not-exist nil)
+    (let ((values (mapcar #'name (contents type :value))))
+      (error "~@<~S is not one of the valid values of ~A. ~[There are ~
 no valid values~;The only valid value is ~:;Valid values are ~]~{~S~^, ~
 ~}.~@:>"
-	    value type (length values) values)))
-
-  (when (next-method-p)
-    (call-next-method)))
+	     value type (length values) values)))
+  t)
