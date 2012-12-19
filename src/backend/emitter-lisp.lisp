@@ -189,6 +189,15 @@
   (let+ (((&env-r/o source-var name-name)))
     `(,name-name ,source-var)))
 
+(defmethod emit ((node     enum)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  (let+ (((&plist-r/o (value :value)) (target-initargs target))
+	 (value (if value
+		    (lookup node :value (string value))
+		    (first (contents node :value)))))
+    (generate value target language)))
+
 (defmethod emit ((node     enum-value)
 		 (target   target-instantiate)
 		 (language language-lisp))

@@ -113,10 +113,15 @@
   ;; General-purpose target classes
   (:export
    :target-class
+
    :target-reference
+
    :target-instantiate
+   :target-initargs
+
    :target-value->code
    :target-code->value
+
    :target-convert)
 
   ;; Serialization-related target classes

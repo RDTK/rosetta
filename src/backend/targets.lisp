@@ -55,7 +55,13 @@ methods. These have to be generated separately."))
 to the name of the data type."))
 
 (define-target instantiate (code-generating-target-mixin)
-  ()
+  ((initargs :initarg  :initargs
+	     :type     list
+	     :reader   target-initargs
+	     :initform nil
+	     :documentation
+	     "Stores initargs describing the instance that should be
+emitted."))
   (:documentation
    "Emit code for creating an instance of a data type."))
 

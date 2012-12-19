@@ -29,6 +29,7 @@
    :iterate
    :let-plus
    :iterate
+   :nibbles
    :lift
 
    :rosetta.model.data

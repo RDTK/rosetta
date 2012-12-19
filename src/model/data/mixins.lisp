@@ -248,9 +248,10 @@ types. "))
 maintain an ordered set of references to \"child\" data types such as
 structures or tuples."))
 
-(defmethod contents ((container ordered-mixin)
-		     (kind      (eql :nested)))
-  (%children container))
+(defmethod contents :around ((container ordered-mixin)
+			     (kind      t))
+  (sort (copy-seq (call-next-method)) #'<
+	:key (rcurry #'position (%children container))))
 
 (defmethod (setf lookup) :after ((new-value t)
 				 (type      ordered-mixin)
