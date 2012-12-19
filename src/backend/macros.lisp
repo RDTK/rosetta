@@ -171,17 +171,14 @@ component instances."
 (defmacro define-mechanism-target ((mechanism target)
 				   (&rest mixins))
   "Define a target for the combination of MECHANISM and TARGET which
-have to be symbols. The name of the defined target class is
-target-MECHANISM-TARGET. Its superclasses are target-TARGET (the
-generic, mechanism-independent target class for TARGET) and,
-optionally, MIXINS."
+have to be symbols."
   (check-type mechanism symbol)
   (check-type target    symbol)
   (check-type mixins    list)
 
   (let ((name       (symbolicate mechanism "-" target))
 	(superclass (symbolicate "TARGET-" target)))
-    `(define-target ,name (,superclass ,@mixins)
+    `(define-target ,name (,@mixins ,superclass)
 	 ()
        (:default-initargs
 	:mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
@@ -203,7 +200,7 @@ which have to be symbols."
 
     (let ((name       (format-symbol *package* "~A-~A" mechanism method))
 	  (superclass (format-symbol *package* "TARGET-~A/METHOD" method)))
-      `(define-target/method ,name (,superclass ,@mixins)
+      `(define-target/method ,name (,@mixins ,superclass)
 	 ()
 	 (:documentation
 	  ,(format nil "The ~S/METHOD target is a specialization of ~
