@@ -101,10 +101,19 @@
 		 (language language-lisp))
   (generate node :class language))
 
-(defmethod emit ((node     type-octet-vector)
-		 (target   target-instantiate)
-		 (language t))
-  `(nibbles:octet-vector))
+(macrolet
+    ((define-instantiate-method (type value)
+       `(defmethod emit ((node     ,type)
+			 (target   target-instantiate)
+			 (language t))
+	  ,value)))
+
+  (define-instantiate-method type-bool         nil)
+  (define-instantiate-method type-integer*     0)
+  (define-instantiate-method type-float32      0.0f0)
+  (define-instantiate-method type-float64      0.0d0)
+  (define-instantiate-method type-string*      "")
+  (define-instantiate-method type-octet-vector `(nibbles:octet-vector)))
 
 
 ;;; Singleton type

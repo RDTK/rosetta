@@ -162,6 +162,7 @@
   (:export
    :type-bool
 
+   :type-integer*
    :type-uint8 :type-uint16 :type-uint32  :type-uint64
    :type-int8  :type-int16  :type-int32   :type-int64
 

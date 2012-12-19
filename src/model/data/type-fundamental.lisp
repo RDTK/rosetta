@@ -102,20 +102,22 @@ storage."))
 			   &key &allow-other-keys)
   (typep value 'boolean))
 
-(defclass integer-mixin ()
+(defclass sign-mixin ()
   ((signed? :initarg  :signed?
 	    :type     boolean
 	    :reader   signed?
 	    :documentation
-	    "Stores either nil or t to indicate whether the integer
-data type represents signed or unsigned integers."))
+	    "Stores either nil or t to indicate whether the numeric
+data type represents signed or unsigned numbers."))
   (:default-initargs
    :signed? (missing-required-initarg 'integer-mixin :signed?))
   (:documentation
-   "This mixin class adds a signed? slot to integer data type
-classes."))
+   "This mixin class adds a signed? slot to data type classes."))
 
-(defmethod validate-value ((type integer-mixin) (value integer)
+(define-fundamental-type (integer* (fixed-width-mixin
+				    sign-mixin) :integer))
+
+(defmethod validate-value ((type type-integer*) (value integer)
 			   &key &allow-other-keys)
   (typep value `(,(if (signed? type) 'signed-byte 'unsigned-byte)
 		 ,(width type))))
@@ -124,10 +126,9 @@ classes."))
     ((define-fundamental-integer-type (signed? width)
        (let ((name (format-symbol *package* "~:[U~;~]INT~D"
 				  signed? width)))
-	 `(define-fundamental-type
-	      (,name (fixed-width-mixin integer-mixin) :integer)
-	      :signed? ,signed?
-	      :width   ,width))))
+	 `(define-fundamental-type (,name (type-integer*) :integer)
+	    :signed? ,signed?
+	    :width   ,width))))
 
   (define-fundamental-integer-type t    8)
   (define-fundamental-integer-type nil  8)

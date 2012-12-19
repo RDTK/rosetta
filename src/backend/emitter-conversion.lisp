@@ -66,7 +66,7 @@ variable `source-form' to FORM around BODY. BODY can call
 ;;; Float and integer types
 ;;
 
-(defemit/conversion (rs.m.d::integer-mixin rs.m.d::integer-mixin)
+(defemit/conversion (type-integer* type-integer*)
   ;; Reject signed/unsigned conversions.
   (when (xor (signed? from) (signed? to))
     (cerror "Force the conversion."
@@ -92,10 +92,10 @@ integer and ~:[un~;~]signed integer~:>"
     (t
      source-var)))
 
-(defemit/conversion (rs.m.d::integer-mixin type-float*)
+(defemit/conversion (type-integer* type-float*)
   (convert-using-coerce))
 
-(defemit/conversion (type-float* rs.m.d::integer-mixin)
+(defemit/conversion (type-float* type-integer*)
   (warn 'loss-of-precision :from from :to to)
   `(floor ,source-var))
 
