@@ -130,8 +130,8 @@ signaled."))
      (let+ (((&accessors-r/o (name    missing-environment-entry-name)
 			     (context context-condition-context)) condition))
        (format stream "~@<The requested entry ~S could not be found in ~
-~:[empty environment ~;~:*environment~2%~2@T~<~@;~{~24S ~
-~A~^~&~}~:>~2%~]of context ~A.~@:>"
+~:[empty environment ~;~:*environment~2%~2@T~<~@;~{~32S ~
+~S~^~&~}~:>~2%~]of context ~A.~@:>"
 	       name
 	       (list (alist-plist (context-environment/alist context)))
 	       context))))
@@ -186,7 +186,7 @@ process."))
 ~~2@T~~11A~~A
 
 Environment:
-~~{~~&~~2@T~~32A:~~S~~}
+~~{~~&~~2@T~~32S~~S~~}
 
 Stack:
 ~~{~~&~~2@T]~~{~~A~~_~~4@T~~A~~_~~4@T~~A~~}~~}~~&~~/more-conditions::maybe-print-cause/~~@:>"

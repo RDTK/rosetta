@@ -289,6 +289,10 @@ No methods must not be installed on `emit/setup'."))
   (define-delegating-method no-applicable-method)
   (define-delegating-method no-next-method t))
 
+(defmethod emit ((node t) (target t) (language t))
+  (error "~@<No emitter for ~{~A~^, ~}.~@:>"
+	 (list node target language)))
+
 
 ;;; Conversion protocol
 ;;
