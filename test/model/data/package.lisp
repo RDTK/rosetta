@@ -43,6 +43,9 @@
 
   ;; Some simple types
   (:export
+   :+singleton/uint32+
+   :+singleton/float64+
+
    :+enum/uint8/simple+
    :+enum/uint8/one+
    :+enum/uint32/simple+
@@ -74,6 +77,16 @@
 
 ;;; Simple data types
 ;;
+
+(defparameter +singleton/uint32+
+  (make-instance 'singleton :type  (make-instance 'type-uint32)
+			    :value 1)
+  "An uint32 singleton.")
+
+(defparameter +singleton/float64+
+  (make-instance 'singleton :type  (make-instance 'type-float64)
+			    :value 1.0d0)
+  "A float64 singleton.")
 
 (defparameter +enum/uint8/simple+
   (make-instance 'enum :name   "simple/uint8"

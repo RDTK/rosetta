@@ -36,20 +36,51 @@ target.")
   emit-instantiate/smoke
 
   (ensure-cases (node args expected)
-      `((,(make-instance 'type-bool)         ()          nil)
-	(,(make-instance 'type-uint8)        ()          0)
-	(,(make-instance 'type-int16)        ()          0)
-	(,(make-instance 'type-float32)      ()          0.0f0)
-	(,(make-instance 'type-float64)      ()          0.0d0)
-	(,(make-instance 'type-utf-8-string) ()          "")
-	(,(make-instance 'type-octet-vector) ()          (octet-vector))
-	(,+enum/uint32/simple+               ()          :a)
-	(,+enum/uint32/simple+               (:value :b) :b)
-	(,+enum/uint32/simple+               (:value :c) error))
+      `(;; Fundamental types.
+	(,(make-instance 'type-bool)         ()              nil)
+	(,(make-instance 'type-bool)         (:value t)      t)
+	(,(make-instance 'type-bool)         (:value 5)      error)
+
+	(,(make-instance 'type-uint8)        ()              0)
+	(,(make-instance 'type-uint8)        (:value 255)    255)
+	(,(make-instance 'type-uint8)        (:value 256)    error)
+	(,(make-instance 'type-int16)        ()              0)
+
+	(,(make-instance 'type-float32)      ()              0.0f0)
+	(,(make-instance 'type-float32)      (:value -2.5f0) -2.5f0)
+	(,(make-instance 'type-float32)      (:value "a")    error)
+	(,(make-instance 'type-float64)      ()              0.0d0)
+
+	(,(make-instance 'type-utf-8-string) ()              "")
+	(,(make-instance 'type-utf-8-string) (:value "foo")  "foo")
+	(,(make-instance 'type-utf-8-string) (:value 5)      error)
+
+	(,(make-instance 'type-octet-vector) ()              (octet-vector))
+
+	;; Singleton types.
+	(,+singleton/uint32+                 ()              1)
+	(,+singleton/uint32+                 (:value 2)      error)
+	(,+singleton/uint32+                 (:value "foo")  error)
+	(,+singleton/float64+                ()              1.0d0)
+	(,+singleton/float64+                (:value 1)      1.0d0)
+	(,+singleton/float64+                (:value 2)      error)
+	(,+singleton/float64+                (:value 2.0d0)  error)
+	(,+singleton/uint32+                 (:value "foo")  error)
+
+	;; Enum type.
+	(,+enum/uint32/simple+               ()              :a)
+	(,+enum/uint32/simple+               (:value :b)     :b)
+	(,+enum/uint32/simple+               (:value :c)     error)
+
+	;; Structure type.
+	(,+struct/simple+                    (:|a| "foo")    :no-error) ;;; TODO(jmoringe, 2012-12-20): proper check
+	(,+struct/simple+                    (:|b| "foo")    error)  ; no such field
+	(,+struct/simple+                    (:|a| 5)        error)) ; type
     (let+ ((initargs (if args
 			`(:instantiate :initargs ,args)
 			:instantiate))
 	   ((&flet do-it () (generate node initargs :lisp))))
       (case expected
-	(error (ensure-condition 'error (do-it)))
-	(t     (ensure-same (do-it) expected))))))
+	(error     (ensure-condition 'error (do-it)))
+	(:no-error (do-it))
+	(t         (ensure-same (do-it) expected))))))

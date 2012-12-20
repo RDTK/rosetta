@@ -85,6 +85,8 @@
 		 (target   target-class)
 		 (language language-lisp))
   (ecase (category node)
+    (:bool
+     'boolean)
     (:integer
      `(,(if (signed? node) 'signed-byte 'unsigned-byte) ,(width node)))
     (:float
@@ -106,14 +108,22 @@
        `(defmethod emit ((node     ,type)
 			 (target   target-instantiate)
 			 (language t))
-	  ,value)))
+	  (let+ (((&plist-r/o (value :value ,value))
+		  (target-initargs target))
+		 (value (coerce value (generate node :reference language))))
+	    (validate-value node value)
+	    value))))
 
-  (define-instantiate-method type-bool         nil)
-  (define-instantiate-method type-integer*     0)
-  (define-instantiate-method type-float32      0.0f0)
-  (define-instantiate-method type-float64      0.0d0)
-  (define-instantiate-method type-string*      "")
-  (define-instantiate-method type-octet-vector `(nibbles:octet-vector)))
+  (define-instantiate-method type-bool     nil)
+  (define-instantiate-method type-integer* 0)
+  (define-instantiate-method type-float32  0.0f0)
+  (define-instantiate-method type-float64  0.0d0)
+  (define-instantiate-method type-string*  ""))
+
+(defmethod emit ((node     type-octet-vector)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  (getf (target-initargs target) :value `(nibbles:octet-vector)))
 
 
 ;;; Singleton type
@@ -128,6 +138,16 @@
 		 (target   target-reference)
 		 (language language-lisp))
   (generate node :class language))
+
+(defmethod emit ((node     singleton)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  (let+ (((&plist-r/o (value :value (value node))) (target-initargs target))
+	 (value (generate (type1 node)
+			  `(:instantiate :initargs (:value ,value))
+			  language)))
+    (validate-value node value)
+    value))
 
 
 ;;; Enum types
@@ -245,3 +265,31 @@
 	   ,(map 'list #'recur (contents node :field))
 	   ,@(when metaclass
 	       `((:metaclass ,metaclass))))))))
+
+(defmethod emit ((node     structure-mixin)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  (let+ (((&env-r/o name))
+	 ((&accessors-r/o (initargs target-initargs)) target))
+    ;; Make sure that all initargs in INITARGS refer to slots of NODE
+    ;; and the supplied values are valid for the respective field
+    ;; types.
+    (iter (for (key value) on initargs :by #'cddr)
+	  (if-let ((field (lookup node :field (string key)
+				       :if-does-not-exist nil)))
+	    ;; The initarg names a field => validate value against
+	    ;; field type.
+	    (let+ (((&values valid? cause) (validate-value field value
+							   :if-invalid nil)))
+	      (unless valid?
+		(value-invalid-for-type node initargs cause)))
+	    ;; The initarg does not name a field => signal error.
+	    (value-invalid-for-type
+	     node initargs
+	     (make-condition 'simple-error
+			     :format-control   "~@<The supplied initarg ~
+~S does not name a field of ~A.~@:>"
+			     :format-arguments (list key node)))))
+
+    ;; Emit instantiation code.
+    `(make-instance ',name ,@initargs)))
