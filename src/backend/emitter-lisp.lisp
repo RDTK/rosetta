@@ -46,8 +46,9 @@
 (defmethod emit/context :around ((node     named-mixin)
 				 (target   t)
 				 (language language-lisp))
-  (let+ (((&env (package (find-package :cl-user)) ;;; TODO(jmoringe, 2012-12-07): package
-		(:name (intern (name node) package))))) ;;; TODO(jmoringe, 2012-05-04): lispify name
+  (let+ ((name (normalize-name (name node) :transform #'string-upcase))
+	 ((&env (package (find-package :cl-user)) ;;; TODO(jmoringe, 2012-12-07): package
+		(:name (intern name package)))))
     (call-next-method)))
 
 (defmethod emit :after ((node     documentation-mixin)

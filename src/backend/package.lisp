@@ -34,6 +34,7 @@
    :iterate
    :more-conditions
 
+   :rosetta
    :rosetta.model
    :rosetta.model.data
    :rosetta.model.language
