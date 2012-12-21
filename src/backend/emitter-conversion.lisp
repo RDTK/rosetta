@@ -74,7 +74,7 @@ variable `source-form' to FORM around BODY. BODY can call
 	    :from             from
 	    :to               to
 	    :format-control   "~@<Cannot convert between ~:[un~;~]signed ~
-integer and ~:[un~;~]signed integer~:>"
+integer and ~:[un~;~]signed integer.~:>"
 	    :format-arguments (list (signed? from) (signed? to))))
 
   (cond
@@ -96,6 +96,14 @@ integer and ~:[un~;~]signed integer~:>"
   (convert-using-coerce))
 
 (defemit/conversion (type-float* type-integer*)
+  (unless (signed? to)
+    (cerror "Force the conversion"
+	    'simple-conversion-error
+	    :from             from
+	    :to               to
+	    :format-control   "~@<Cannot convert between float type and ~
+unsigned integer type.~:>"
+	    :format-arguments '()))
   (warn 'loss-of-precision :from from :to to)
   `(floor ,source-var))
 

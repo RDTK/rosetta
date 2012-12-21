@@ -49,6 +49,7 @@
    :+enum/uint8/simple+
    :+enum/uint8/one+
    :+enum/uint32/simple+
+   :+enum/int32/simple+
 
    :+struct/simple+)
 
@@ -105,6 +106,12 @@
 		       :type   (make-instance 'type-uint32)
 		       :values '(:a 1 :b 2))
   "A simple uint32 enum with two values.")
+
+(defparameter +enum/int32/simple+
+  (make-instance 'enum :name   "simple/int32"
+		       :type   (make-instance 'type-int32)
+		       :values '(:a 1 :b 2))
+  "A simple int32 enum with two values.")
 
 (defparameter +struct/simple+
   (make-instance

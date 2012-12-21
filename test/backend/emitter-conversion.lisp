@@ -28,8 +28,9 @@
   ()
   (:setup
   ;; Generate enums
-   (generate +enum/uint8/simple+ :class :lisp/compiled)
-   (generate +enum/uint32/simple+ :class :lisp/compiled))
+   (generate +enum/uint8/simple+  :class :lisp/compiled)
+   (generate +enum/uint32/simple+ :class :lisp/compiled)
+   (generate +enum/int32/simple+  :class :lisp/compiled))
   (:documentation
    "Unit tests suite for conversion emitter methods."))
 
@@ -51,18 +52,23 @@
 	;; uint32 <-> uint64 => can widen, cannot narrow
 	((type-uint32)  (type-uint64)  nil   ((1 . 1)) error   ((1 . 1)))
 
-	;; uint32    <-> float64 => loss of precision
-	((type-uint32)  (type-float64)
-	 nil     ((1 . 1.0d0)
-		  (5 . 5.0d0))
+	;; uint32 <-> float64 => ok, different signedness
+	((type-uint32) (type-float64)
+	 nil     ((1     . 1.0d0))
+	 error   ((1.0d0 . 1)))
+
+	;; int32    <-> float64 => loss of precision
+	((type-int32)  (type-float64)
+	 nil     ((1     . 1.0d0)
+		  (5     . 5.0d0))
 	 warning ((1.0d0 . 1)
 		  (1.1d0 . 1)
 		  (5.0d0 . 5)))
 
 	;; float32    <-> float64 => loss of precision
 	((type-float32) (type-float64)
-	 nil     ((1 . 1.0d0)
-		  (5 . 5.0d0))
+	 nil     ((1     . 1.0d0)
+		  (5     . 5.0d0))
 	 warning ((1.0d0 . 1.0f0)
 		  (1.1d0 . 1.1f0)
 		  (5.0d0 . 5.0f0)))
@@ -70,11 +76,11 @@
 	;; uint32 <-> uint32 => no problem
 	((type-uint32)  (type-uint32)  nil   ((1 . 1)) nil     ((1 . 1)))
 
-	;; singleton/uint32 <-> float64
-	((singleton :type  ,(make-instance 'type-uint32)
+	;; singleton/int32 <-> float64
+	((singleton :type  ,(make-instance 'type-int32)
 		    :value 1)
 	 (type-float64)
-	 nil     ((1 . 1.0d0))
+	 nil     ((1     . 1.0d0))
 	 warning ((1.0d0 . 1)
 		  (1.1d0 . 1)
 		  (5.0d0 . error))) ; 1 is the only acceptable value
@@ -89,14 +95,14 @@
 	(,+enum/uint32/simple+ (type-uint32)
 	 nil     ((:a . 1)
 		  (:b . 2))
-	 nil     ((1 . :a)
-		  (2 . :b)
-		  (3 . error))) ; 3 is not a value of the enum
+	 nil     ((1  . :a)
+		  (2  . :b)
+		  (3  . error))) ; 3 is not a value of the enum
 
-	;; enum/uint32 <-> float32 => loss of precision
-	(,+enum/uint32/simple+ (type-float32)
-	 nil     ((:a . 1.0f0)
-		  (:b . 2.0f0))
+	;; enum/int32 <-> float32 => loss of precision
+	(,+enum/int32/simple+ (type-float32)
+	 nil     ((:a    . 1.0f0)
+		  (:b    . 2.0f0))
 	 warning ((1.0f0 . :a)
 		  (2.0f0 . :b)
 		  (3.0f0 . error))))
