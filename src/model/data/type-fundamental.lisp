@@ -1,6 +1,6 @@
 ;;; type-fundamental.lisp --- Fundamental data types.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -110,7 +110,7 @@ storage."))
 	    "Stores either nil or t to indicate whether the numeric
 data type represents signed or unsigned numbers."))
   (:default-initargs
-   :signed? (missing-required-initarg 'integer-mixin :signed?))
+   :signed? (missing-required-initarg 'sign-mixin :signed?))
   (:documentation
    "This mixin class adds a signed? slot to data type classes."))
 
