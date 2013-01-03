@@ -1,6 +1,6 @@
 ;;; emitter-serializer-base-lisp.lisp --- Emitter for lisp serialization code.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -143,6 +143,9 @@
 			((:end   ,end-var)   (length ,destination-var)))
 	 (declare (ignorable ,end-var)
 		  (type ,(generate offset-type :reference language) ,start-var ,end-var))
+	 ,@(optimization-case (target)
+	     ((> safety speed)
+	      `((check-type ,source-var ,(generate wire-type :reference language)))))
 
 	 (values ,(call-next-method) ,destination-var))))
 
@@ -156,6 +159,9 @@
 			  ((:end   ,end-var)   (length ,source-var)))
 	 (declare (ignorable ,end-var)
 		  (type ,(generate offset-type :reference language) ,start-var ,end-var))
+	 ,@(optimization-case (target)
+	     ((> safety speed)
+	      `((check-type ,destination-var ,(generate wire-type :reference language)))))
 
 	 (values ,destination-var ,(call-next-method))))))
 
