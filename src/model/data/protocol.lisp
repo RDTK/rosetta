@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocol for data types.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -124,6 +124,11 @@ allowed:
     ((not (typep key 'name/relative))
      (call-next-method))
 
+    ;; A relative name without components refers to the context object
+    ;; itself => return CONTAINER.
+    ((length= 1 key)
+     container)
+
     ;; A relative name with a single component => we can perform a
     ;; direct lookup in CONTAINER.
     ((length= 2 key)
@@ -145,24 +150,33 @@ allowed:
 			   &key
 			   (if-does-not-exist #'error)
 			   &allow-other-keys)
-  (or (call-next-method)
-      (etypecase if-does-not-exist
-	(null
-	 nil)
-	(function
-	 (restart-case
-	     (funcall if-does-not-exist
-		      (make-condition 'no-such-child
-				      :type container
-				      :key  (list kind key)))
-	   (use-value (value)
-	     value)
-	   (store-value (value)
-	     :interactive (lambda ()
-			    (format *query-io* "Replacement value (evaluated): ")
-			    (finish-output *query-io*)
-			    (list (eval (read *query-io*))))
-	     (setf (lookup container kind key) value)))))))
+  (let+ (((&flet handle-does-not-exist (&optional condition)
+	    (declare (ignore condition))
+	    (etypecase if-does-not-exist
+	      (null
+	       (return-from lookup nil))
+	      (function
+	       (restart-case
+		   (funcall if-does-not-exist
+			    (make-condition 'no-such-child
+					    :type container
+					    :key  (list kind key)))
+		 (use-value (value)
+		   :interactive (lambda ()
+				  (format *query-io* "Value (evaluated): ")
+				  (finish-output *query-io*)
+				  (list (eval (read *query-io*))))
+		   value)
+		 (store-value (value)
+		   :interactive (lambda ()
+				  (format *query-io* "Replacement value (evaluated): ")
+				  (finish-output *query-io*)
+				  (list (eval (read *query-io*))))
+		   (setf (lookup container kind key) value))))))))
+    (or (handler-bind
+	    (((or simple-error no-such-child) #'handle-does-not-exist))
+	  (call-next-method))
+	(handle-does-not-exist))))
 
 (defmethod (setf lookup) :around ((new-value  t)
 				  (container  t)

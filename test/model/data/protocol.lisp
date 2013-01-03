@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Tests for the protocol provided by the model.data module.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -28,6 +28,41 @@
   ()
   (:documentation
    "Unit tests for the protocol of the model.data module."))
+
+(deftestsuite lookup (model-data-protocol-root)
+  ()
+  (:documentation
+   "Tests for the `lookup' generic function."))
+
+(addtest (lookup
+          :documentation
+	  "Test default behavior of the `lookup' generic function.")
+  default-behavior
+
+  ;; A relative name with no components should refer to the object
+  ;; itself.
+  (let ((container :does-not-matter))
+    (ensure-same (lookup container :does-not-matter '(:relative))
+		 container))
+
+  ;; The following cases should all lead to unsuccessful lookup.
+  (ensure-cases (key)
+      '("does-not-matter"
+	(:relative "does-not-matter")
+	(:relative "does-not-matter" "does-not-matter"))
+
+    ;; Default behavior consists in not finding the requested object.
+    (ensure-condition 'no-such-child
+      (lookup :does-not-matter :does-not-matter key))
+
+    ;; Test returning nil instead of signaling an error.
+    (ensure-null (lookup :does-not-matter :does-not-matter key
+			 :if-does-not-exist nil))
+
+    ;; Test returning a particular value instead of signaling an error.
+    (ensure-same (lookup :does-not-matter :does-not-matter key
+			 :if-does-not-exist (curry #'use-value :replacement))
+		 :replacement)))
 
 (deftestsuite validate-value-root (model-data-protocol-root)
   ()
