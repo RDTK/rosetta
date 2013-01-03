@@ -1,6 +1,6 @@
 ;;; target-class.lisp --- Generate Lisp classes data type definitions.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -31,7 +31,11 @@
 (defmethod emit/context ((node     t)
 			 (target   code-generating-target-mixin)
 			 (language language-lisp/compiled))
-  (let ((code (generate node target :lisp)))
+  (let+ (((&accessors-r/o optimization-settings) target)
+	 (code `(locally
+		    ,@(when optimization-settings
+			`((declare (optimize ,@optimization-settings))))
+		  ,(generate node target :lisp))))
     (handler-bind
 	(#+sbcl (sb-c::redefinition-warning #'muffle-warning)
 	 (error #'(lambda (condition)
