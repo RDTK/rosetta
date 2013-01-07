@@ -1,6 +1,6 @@
 ;;; mixins.lisp --- Mixins class for the model.data module.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -326,12 +326,22 @@ consist of a collection of named fields."))
 (defmethod kind ((type structure-mixin))
   :structure)
 
-;; Hint for generic builders
+;; Hints for generic builders
 
 (defmethod add-child ((builder t)
 		      (parent  structure-mixin)
 		      (child   field-mixin))
   (setf (lookup parent :field (name child)) child)
+  (if (next-method-p)
+      (call-next-method)
+      parent))
+
+(defclass toplevel-mixin () ()) ;; forward
+
+(defmethod add-child ((builder t)
+		      (parent  structure-mixin)
+		      (child   toplevel-mixin))
+  (setf (lookup parent :nested (name child)) child)
   (if (next-method-p)
       (call-next-method)
       parent))

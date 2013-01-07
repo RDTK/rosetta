@@ -1,6 +1,6 @@
 ;;; type-enum.lisp --- Representation of basic enum types.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -30,6 +30,7 @@
 
 (defclass enum-value (named-mixin ;; named-component-mixin
 		      singleton ;;; TODO(jmoringe, 2012-05-03): singleton-mixin
+		      parented-mixin
 		      documentation-mixin
 		      print-items-mixin)
   ()
@@ -129,3 +130,13 @@ no valid values~;The only valid value is ~:;Valid values are ~]~{~S~^, ~
 ~}.~@:>"
 	     value type (length values) values)))
   t)
+
+;; Hint for generic builders
+
+(defmethod add-child ((builder t)
+		      (parent  enum)
+		      (child   named-mixin))
+  (setf (lookup parent :value (name child)) child)
+  (if (next-method-p)
+      (call-next-method)
+      parent))

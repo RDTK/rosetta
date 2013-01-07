@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the model.data module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -154,7 +154,7 @@ within the specified container type."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The child key ~S is already in use~@[ by child ~
-~A ~]within type ~S.~@:>"
+~A~] within type ~S.~@:>"
 	     (data-type-error-key      condition)
 	     (data-type-error-existing condition)
 	     (data-type-error-type     condition))))
