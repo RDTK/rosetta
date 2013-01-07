@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the frontend module.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -32,6 +32,7 @@
    :lift
 
    :rosetta
+   :rosetta.model
    :rosetta.model.data
    :rosetta.frontend)
 

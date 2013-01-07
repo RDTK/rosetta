@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocol definitions of the rosetta compiler frontend.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -279,9 +279,10 @@ parents, if necessary. Return the created package."))
 			   &key
 			   name
 			   (qname (missing-required-argument :qname)))
-  (let+ ((name/from-qname (if (length= 1 qname)
-			      ""
-			      (lastcar qname)))
+  (let+ (((&flet qname->name (qname)
+	    (if (length= 1 qname)
+		""
+		(lastcar qname))))
 	 ((&labels ensure-one-name (qname)
 	    (let* ((parent   (when (rest qname)
 			       (ensure-one-name (butlast qname))))
@@ -292,7 +293,7 @@ parents, if necessary. Return the created package."))
 		   (created? nil))
 	      (unless package
 		(setf package  (apply #'make-node builder :package
-				      :name  name/from-qname
+				      :name  (qname->name qname)
 				      :qname qname
 				      (remove-from-plist args :name :qname))
 		      created? t)
@@ -302,7 +303,7 @@ parents, if necessary. Return the created package."))
 
     ;; If NAME is supplied, make sure it matches the final component
     ;; of QNAME.
-    (when (and name (not (string= name name/from-qname)))
+    (when (and name (not (string= name (qname->name qname))))
       (incompatible-arguments :name  name
 			      :qname qname))
 

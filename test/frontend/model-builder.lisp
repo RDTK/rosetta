@@ -1,6 +1,6 @@
 ;;; model-builder.lisp --- Unit tests for the model-builder class.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -45,16 +45,16 @@
 	  ((:qname (:absolute) :name "foo")             incompatible-arguments)
 	  ((:qname (:absolute "bar" "baz") :name "foo") incompatible-arguments)
 
-	  ;; These are OK.
-	  ((:qname (:absolute))                         nil)
-	  ((:qname (:absolute) :name "")                nil)
-	  ((:qname (:absolute))                         nil)
-	  ((:qname (:absolute "bar" "baz"))             nil)
-	  ((:qname (:absolute "bar" "baz") :name "baz") nil)
-	  ((:qname (:absolute "bar" "baz"))             nil))
+	  ;; These are OK. Note: repetitions are on purpose.
+	  ((:qname (:absolute))                         (:absolute))
+	  ((:qname (:absolute) :name "")                (:absolute))
+	  ((:qname (:absolute))                         (:absolute))
+	  ((:qname (:absolute "bar" "baz"))             (:absolute "bar" "baz"))
+	  ((:qname (:absolute "bar" "baz") :name "baz") (:absolute "bar" "baz"))
+	  ((:qname (:absolute "bar" "baz"))             (:absolute "bar" "baz")))
 
 	(case expected
 	  (incompatible-arguments
 	   (ensure-condition 'incompatible-arguments (do-it args)))
 	  (t
-	   (do-it args))))))
+	   (ensure-same (qname (do-it args)) expected :test #'equal))))))
