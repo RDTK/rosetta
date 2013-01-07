@@ -122,6 +122,9 @@
 ;;; `mock-builder' mock class
 ;;
 
+(defmethod find-builder-class ((spec (eql :mock)))
+  (find-class 'mock-builder))
+
 (defclass mock-builder ()
   ((calls :initarg  :calls
 	  :type     list
@@ -158,6 +161,24 @@
 
 (defmethod add-child ((builder mock-builder) (parent t) (child t))
   (add-child 'list parent child))
+
+
+;;; `error-builder' mock class
+;;
+
+(defmethod find-builder-class ((spec (eql :error)))
+  (find-class 'error-builder))
+
+(defclass error-builder ()
+  ()
+  (:documentation
+   "Mock builder for unit tests. Signals an error in `parse'."))
+
+(defmethod parse ((format  format-mock)
+		  (source  t)
+		  (builder error-builder)
+		  &key &allow-other-keys)
+  (error "Intentional error."))
 
 
 ;;; `mock-resolver' mock class

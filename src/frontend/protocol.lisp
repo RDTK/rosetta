@@ -99,12 +99,25 @@ NEW-VALUE."))
 ;;
 ;; The protocol consists of the following cascade of method calls:
 ;; 1. client calls `process'
-;;    a) `process' performs target and language lookup and
-;;       instantiation
-;; 2. `process' calls `parse'
+;;    a) `process' performs builder lookup and instantiation, if
+;;       necessary (the constructed builder instance is used in all
+;;       subsequent operations)
+;;    b) `process' iterates over sequences of sources
+;;    c) `process' performs format guessing, if requested
+;;    d) `process' performs format lookup and instantiation, if
+;;       necessary
+;; 2. `process' establishes restarts and calls `parse'
+;; 3. Methods `parse' on do the actual work
+;; 4. And :around method on `parse' performs condition translation, if
+;;    necessary
+;;
+;; Methods on `process' should be added very carefully since the
+;; behavior described above can easily be disturbed by additional
+;; methods.
 
 (defgeneric process (format source builder
 		     &key &allow-other-keys)
+  (:argument-precedence-order builder source format)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
 described by FORMAT. Return an object that representing the parsed
@@ -122,8 +135,8 @@ described by FORMAT."))
 ;; error handling
 
 (define-condition-translating-method
-    parse ((format standard-object) (source t) (builder t)
-				    &key &allow-other-keys)
+    parse ((format t) (source t) (builder t)
+	   &key &allow-other-keys)
   (((and error (not processing-error)) parse-error1)
    :location (make-instance 'location-info
 			    :source source)
@@ -137,13 +150,54 @@ described by FORMAT."))
 
 ;;; Default behavior for `process'
 ;;
-;; 1. Maybe resolve format class
-;; 2. Maybe resolve builder class
-;; 3. Dispatch to `parse'
+;; 1. Maybe resolve builder class
+;; 2. Iterate over sources
+;; 3. Maybe guess format
+;; 4. Maybe resolve format class
+;; 5. Dispatch to `parse'
 
 (defmethod process ((format t) (source t) (builder t)
 		    &key &allow-other-keys)
-  (parse format source builder))
+  (iter
+    (restart-case
+	(return (parse format source builder))
+      (retry ()
+	:report (lambda (stream)
+		  (format stream "~@<Retry processing ~S in format ~S with builder ~A.~@:>"
+			  source format builder)))
+      (use-value (value)
+	:report (lambda (stream)
+		  (format stream "~@<Use specified value instead of processing ~S in format ~S with builder ~A.~@:>"
+			  source format builder))
+	:interactive (lambda ()
+		       (format *query-io* "Value (evaluated): ")
+		       (finish-output *query-io*)
+		       (list (eval (read *query-io*))))
+	(return value)))))
+
+(defmethod process ((format t) (source sequence) (builder t)
+		    &rest args &key &allow-other-keys)
+  (typecase source
+    (string
+     (call-next-method))
+    (t
+     (iter (for source1 each source)
+	   (when-let ((result
+		       (restart-case
+			   (apply #'process format source1 builder args)
+			 (continue (&optional condition)
+			   :report (lambda (stream)
+				     (format stream "~@<Skip ~S and ~
+continue with the next source.~@:>"
+					     source1))
+			   (declare (ignore condition))))))
+	     (collect result))))))
+
+(defmethod process ((format t) (source pathname) (builder t)
+		    &rest args &key &allow-other-keys)
+  (if (wild-pathname-p source)
+      (apply #'process format (directory source) builder args)
+      (call-next-method)))
 
 (defmethod process ((format list) (source t) (builder t)
 		    &rest args &key &allow-other-keys)
@@ -155,6 +209,10 @@ described by FORMAT."))
 (defmethod process ((format symbol) (source t) (builder t)
 		    &rest args &key &allow-other-keys)
   (apply #'process (list format) source builder args))
+
+(defmethod process ((format (eql :guess)) (source pathname) (builder t)
+		    &rest args &key &allow-other-keys)
+  (apply #'process (guess-format source) source builder args))
 
 (defmethod process ((format t) (source t) (builder list)
 		    &rest args &key &allow-other-keys)

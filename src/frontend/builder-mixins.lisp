@@ -1,6 +1,6 @@
 ;;; builder-mixins.lisp --- Mixin classes for builder classes.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -388,7 +388,8 @@ cache parsing results."))
   ;; SOURCE and retrieve the parsing result from the cache or delegate
   ;; to the next method to perform a parse.
   (let ((key (typecase source
-	       (pathname (cons format (truename source)))
+	       (pathname (unless (wild-pathname-p source)
+			   (cons format (truename source))))
 	       (stream   nil)
 	       (t        (cons format source)))))
     (if key
