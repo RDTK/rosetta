@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for model.language module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -28,13 +28,36 @@
 
   (:use
    :cl
-   :alexandria)
+   :alexandria
+   :more-conditions)
+
+  ;; Language protocol
+  (:export
+   :legal-name?
+   :legalize-name)
 
   ;; Language class family
   (:export
    :no-such-language-class
    :find-language-class
    :language-classes)
+
+  ;; Reserved words protocol and `reserved-words-mixin'
+  (:export
+   :reserved-word?
+
+   :language-reserved-words
+   :language-name-legalizer
+
+   :reserved-words-mixin)
+
+  ;; Identifier character protocol and `constrained-identifiers-mixin'
+  (:export
+   :legal-identifier-char?
+
+   :language-char-legalizer
+
+   :constrained-identifiers-mixin)
 
   ;; Languages
   (:export

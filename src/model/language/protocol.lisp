@@ -1,6 +1,6 @@
 ;;; protocol.lisp --- Protocol for the model.language module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -23,6 +23,36 @@
 ;;     Bielefeld University
 
 (cl:in-package :rosetta.model.language)
+
+
+;;; Language Protocol
+;;
+
+(defgeneric legal-name? (language name)
+  (:documentation
+   "Return non-nil if NAME is a legal name in LANGUAGE."))
+
+(defgeneric legalize-name (language name)
+  (:documentation
+   "Return a string which is similar to NAME but a legal name in
+LANGUAGE."))
+
+
+;;; Identifier character protocol
+;;
+
+(defgeneric legal-identifier-char? (language character position)
+  (:documentation
+   "Return non-nil if CHAR is legal at POSITION in an identifier in
+LANGUAGE."))
+
+
+;;; Reserved word protocol
+;;
+
+(defgeneric reserved-word? (language word)
+  (:documentation
+   "Return non-nil if WORD is a reserved word in LANGUAGE."))
 
 
 ;;; Languages
