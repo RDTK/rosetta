@@ -164,7 +164,7 @@ comment elements to the elements to which they refer."))
 	 ((&labels trim (lines)
 	    "Strip common leading whitespace from LINES."
 	    (cond
-	      ((not lines) ; terminate recursion
+	      ((every #'emptyp lines) ; terminate recursion
 	       nil)
 	      ((or (every (starts-with-or-harmless #\Space) lines)
 		   (every (starts-with-or-harmless #\Tab) lines))
@@ -174,7 +174,7 @@ comment elements to the elements to which they refer."))
 	 ;; Note that `comment?' returns a string representation of
 	 ;; comment nodes.
 	 (lines (trim (mapcar (curry #'comment? builder) comment))))
-    (string-trim '(#\Newline) (format nil "~{~A~%~}" lines))))
+    (string-trim '(#\Newline) (format nil "~{~A~^~%~}" lines))))
 
 (defmethod prettify ((builder comment-attaching-mixin)
 		     (comment string))

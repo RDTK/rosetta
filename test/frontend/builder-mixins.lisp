@@ -173,6 +173,30 @@ comment2")))
 
 (addtest (comment-attaching-mixin-root
           :documentation
+	  "Test `prettify' methods.")
+  prettify/smoke
+
+  (let ((builder (make-instance 'comment-attaching-mixin-mock-builder)))
+    (ensure-cases (input-lines expected)
+        '(;; Different kind of empty comments.
+	  (nil                  "")
+	  (("")                 "")
+	  (("" "")              "")
+
+	  ;; Newline stripping.
+	  (("" "foo" "")        "foo")
+
+	  ;; Stripping of common whitespace prefix.
+	  (("  " "foo")         "foo")
+	  (("  foo" "  bar")    "foo
+bar")
+	  (("    foo" "  bar")  "  foo
+bar"))
+      (ensure-same (prettify builder input-lines) expected
+		   :test #'string=))))
+
+(addtest (comment-attaching-mixin-root
+          :documentation
 	  "Test interaction of comment attaching and
 `ensure-package'.")
   ensure-package
