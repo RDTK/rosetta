@@ -284,17 +284,80 @@ and return the result."))
 ;;; Dependency resolution protocol
 ;;
 
-(defgeneric resolve (resolver format location)
+(defgeneric resolve (resolver format location
+		     &key
+		     if-does-not-exist)
   (:documentation
    "Use RESOLVER to resolve the dependency described by FORMAT,
 and LOCATION.
 
 FORMAT can be nil to indicate that the format is not known and should
-be derived from LOCATION, if possible."))
+be derived from LOCATION, if possible.
 
-(defmethod no-applicable-method  ((generic-function (eql #'resolve)) &rest args)
-  (let+ (((nil nil location) args))
-    (cannot-resolve-dependency location)))
+IF-DOES-NOT-EXIST controls the behavior in case RESOLVER cannot
+resolve the combination of FORMAT and LOCATION. The following values
+are allowed:
+
+  a function
+
+    Make a `cannot-resolve-dependency' error and call
+    IF-DOES-NOT-EXIST with it as the sole argument.
+
+  nil
+
+    Return nil."))
+
+(defmethod resolve ((resolver t) (format t) (location t)
+		    &key
+		    if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+  nil)
+
+(defmethod resolve :around ((resolver t) (format t) (location t)
+			    &key
+			    (if-does-not-exist #'error))
+  (let+ (((&flet handle-does-not-exist (&optional condition candidates)
+	    (etypecase if-does-not-exist
+	      (null
+	       (return-from resolve (values nil nil candidates)))
+	      (function
+	       (funcall if-does-not-exist
+			(make-condition
+			 'cannot-resolve-dependency
+			 :dependency location
+			 :locations  (if (typep condition 'cannot-resolve-dependency)
+					 (dependency-error-locations condition)
+					 candidates)))))))
+	 ((&values format location candidates)
+	  (handler-bind
+	      (((or simple-error cannot-resolve-dependency)
+		 #'handle-does-not-exist))
+	    (call-next-method))))
+    (if location
+	(values format location)
+	(handle-does-not-exist nil candidates))))
+
+(defmethod resolve ((resolver t) (format t) (location list)
+		    &key
+		    if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+
+  ;; Try multiple alternatives specified in LOCATION.
+  (etypecase location
+    ((cons (eql or))
+     (let ((candidates '()))
+       ;; Try each alternative in turn without signaling errors. When
+       ;; `resolve' fails, the second return value is the list of
+       ;; tried locations.
+       (iter (for alternative in (rest location))
+	     (let+ (((&values format location candidates1)
+		     (resolve resolver format alternative
+			      :if-does-not-exist nil)))
+	       (if location
+		   (return-from resolve (values format location))
+		   (appendf candidates candidates1))))
+       ;; If none worked, return nil and the tried locations.
+       (values nil nil candidates)))))
 
 
 ;;; Search path-based resolution protocol

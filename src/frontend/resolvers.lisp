@@ -1,6 +1,6 @@
 ;;; resolvers.lisp --- Dependency resolvers for use with builders.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -33,7 +33,7 @@
 		 "Stores a list of pathnames which are consulted when
 trying to resolve a pathname dependency.")
    (if-ambiguous :initarg  :if-ambiguous
-		 :type     (or (eql :first) function)
+		 :type     (or (eql :first) symbol function)
 		 :accessor if-ambiguous
 		 :initform #'error
 		 :documentation
@@ -46,7 +46,11 @@ be searched for."))
 
 (defmethod resolve ((resolver search-path-resolver)
 		    (format   t)
-		    (location pathname))
+		    (location pathname)
+		    &key
+		    if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+
   (let+ (((&accessors-r/o search-path if-ambiguous) resolver)
 	 ;; Produce initial candidate set from specified relative or
 	 ;; absolute pathname.
@@ -63,7 +67,7 @@ be searched for."))
 	    (cond
 	      ;; No candidate => signal an error.
 	      ((emptyp candidates)
-	       (cannot-resolve-dependency location locations))
+	       nil)
 
 	      ;; Exactly one candidate => just use it.
 	      ((length= 1 candidates)
@@ -75,7 +79,7 @@ be searched for."))
 	       (etypecase if-ambiguous
 		 ((eql :first)
 		  (first candidates))
-		 (function
+		 ((or symbol function)
 		  (restart-case
 		      (funcall if-ambiguous
 			       (make-condition 'ambiguous-dependency
@@ -87,14 +91,17 @@ be searched for."))
 		      :report (lambda (stream)
 				(format stream "~@<Use the first candidate.~@:>"))
 		      (declare (ignore condition))
-		      (first candidates)))))))))
-	 ;; If necessary, try to guess format from resolved location.
-	 (format (or (guess-format location/resolved))))
+		      (first candidates))))))))))
 
-    ;; PATHNAME/RESOLVED is the *truename* of the resolved
+    ;; LOCATION/RESOLVED is the *truename* of the resolved
     ;; dependency. The builder can use it to detect already processed
     ;; locations.
-    (values format location/resolved)))
+    ;;
+    ;; If necessary, try to guess format from resolved location.
+    (if location/resolved
+	(values (or format (guess-format location/resolved))
+		location/resolved)
+	(values nil nil locations))))
 
 (defmethod print-items append ((object search-path-resolver))
   `((:search-path ,(length (search-path object)) "(~D)")))

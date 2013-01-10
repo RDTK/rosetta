@@ -197,6 +197,10 @@ calls."))
 
 (defmethod resolve ((resolver mock-resolver)
 		    (format   t)
-		    (location t))
+		    (location t)
+		    &key
+		    if-does-not-exist)
+  (declare (ignore if-does-not-exist))
+
   (push (list format location) (calls resolver))
   (values format location))

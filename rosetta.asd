@@ -303,6 +303,7 @@ See `version/list' for details on keyword parameters."
 			      (:file       "protocol")
 			      (:file       "util")
 			      (:file       "locations")
+			      (:file       "resolvers")
 			      (:file       "builder-mixins")
 			      (:file       "format-mixins")
 			      (:file       "model-builder")

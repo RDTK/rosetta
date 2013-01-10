@@ -1,6 +1,6 @@
 ;;; builder-mixins.lisp --- Test for the builder mixins of the frontend module.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -241,7 +241,10 @@ comment2")))
 
   (ensure-builder-cases (dependency-delegating-mixin-mock-builder
 			 :resolver (make-instance 'mock-resolver))
-      ('(nil ((:mock "does-not-matter")) ((:mock #P"some-file.mock"))))
+      ('(nil ((:mock "does-not-matter")) ((:mock #P"some-file.mock")))
+       '(nil ((:mock (or "one" "two")))  ((:mock #P"some-file.mock")
+					  (:mock #P"some-file.mock")
+					  (:mock #P"some-file.mock"))))
 
     (ensure-same (calls (resolver builder)) expected)))
 

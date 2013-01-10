@@ -359,7 +359,7 @@ to resolve dependencies."))
 		      &key
 		      (pathname (required-argument :pathname))
 		      format)
-  (check-type pathname pathname)
+  (check-type pathname (or (cons (eql or)) pathname))
 
   (let+ (((&values format location)
           (resolve (resolver builder) format pathname)))
