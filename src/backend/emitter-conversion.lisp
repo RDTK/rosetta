@@ -1,6 +1,6 @@
 ;;; emitter-conversion.lisp --- Emitter for conversions between types.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -43,7 +43,7 @@
 BODY can use the macro (with-conversion (FORM) &body BODY) to bind the
 variable `source-form' to FORM around BODY. BODY can call
 `call-next-method' if FORM produces the result of the conversion."
-  (let+ (((&values body nil documentation)
+  (let+ (((&values body &ign documentation)
 	  (parse-body body :documentation t)))
     `(defmethod emit-conversion ((from     ,from)
 				 (to       ,to)

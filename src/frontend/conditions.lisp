@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used in the frontend module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -43,7 +43,7 @@ have an associated location in some source."))
 
 (macrolet ((define-delegation (name &optional args)
 	     (let ((value
-		    (mappend (lambda+ (((keyword variable) nil nil))
+		    (mappend (lambda+ (((keyword variable) &ign &ign))
 			      (list keyword variable))
 			     (nth-value
 			      3 (parse-ordinary-lambda-list args)))))

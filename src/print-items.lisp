@@ -1,6 +1,6 @@
 ;;; print-items.lisp --- Composable printing mechanism
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -62,7 +62,7 @@ ITEM   ::= (KEY VALUE [FORMAT])
 KEY    ::= any Lisp object
 VALUE  ::= any Lisp object
 FORMAT ::= a format string (Default is \"~A\")"
-  (mapc (lambda+ ((nil value &optional format))
+  (mapc (lambda+ ((&ign value &optional format))
 	  (format stream (or format "~A") value))
 	(remove-duplicates items
 			   :key      #'first

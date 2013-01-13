@@ -124,11 +124,11 @@ object which is then used in BODY."
 	       expected/package expected/import
 	       expected/comment1 expected/comment2
 	       expected/field expected/structure) expected)
-	     ((&whole package nil
+	     ((&whole package &ign
 		      (import
-		       (&whole structure nil (comment1 comment2 field) &rest nil)
+		       (&whole structure &ign (comment1 comment2 field) &rest &ign)
 		       resolved)
-		      &rest nil) result)
+		      &rest &ign) result)
 	     ((&flet remove-duplicates/plist (list)
 		(alist-plist (remove-duplicates (plist-alist list)
 						:key #'car :from-end t))))
@@ -165,9 +165,9 @@ object which is then used in BODY."
 comment2")))
 
     (let+ (((expected/structure expected/field) expected)
-	   ((&whole package nil
-	     (import (&whole structure nil (field) &rest nil) nil)
-	     &rest nil) result))
+	   ((&whole package &ign
+	     (import (&whole structure &ign (field) &rest &ign) &ign)
+	     &rest &ign) result))
       (ensure-same (comment builder structure) expected/structure)
       (ensure-same (comment builder field)     expected/field))))
 

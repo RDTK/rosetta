@@ -1,6 +1,6 @@
 ;;; list-builder.lisp --- Builder producing lists.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -96,7 +96,7 @@
 (defmethod find-node ((builder (eql 'list))
 		      (kind    t)
 		      &rest args &key &allow-other-keys)
-  (let+ (((kind nil &rest args)
+  (let+ (((kind &ign &rest args)
 	  (apply #'make-node builder kind
 		 (remove-from-plist args :if-does-not-exist))))
     (list* (list :find kind) nil args)))

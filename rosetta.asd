@@ -96,7 +96,7 @@ See `version/list' for details on keyword parameters."
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
 		:split-sequence
-		:let-plus
+		(:version :let-plus "0.2")
 		:more-conditions
 		:cl-dynamic-classes
 		:flexi-streams

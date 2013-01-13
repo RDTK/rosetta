@@ -1,6 +1,6 @@
 ;;; model-builder.lisp --- Builder for rosetta.model.data objects.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -45,7 +45,7 @@ the rosetta.model.data package."))
 	 (args (mapcar #'ensure-list args))
 	 ((&flet make-supplied-var (name)
 	    (symbolicate name '#:-supplied?)))
-	 ((&flet+ make-parameter ((name &optional nil (required? t)))
+	 ((&flet+ make-parameter ((name &optional &ign (required? t)))
 	    `(,name
 	      ,(when required?
 		 `(required-argument ,(make-keyword name)))
@@ -59,7 +59,7 @@ the rosetta.model.data package."))
 	      (t
 	       `(when ,(make-supplied-var name)
 		  (check-type ,name ,type) )))))
-	 ((&flet+ make-initarg ((name &optional nil nil))
+	 ((&flet+ make-initarg ((name &optional &ign &ign))
 	    `(when ,(make-supplied-var name)
 	       (list ,(make-keyword name) ,name)))))
    `(defmethod make-node ((builder model-builder)
