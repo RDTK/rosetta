@@ -107,10 +107,15 @@ allowed:
     Make a `duplicate-child-key' error and call IF-EXISTS with it as
     the sole argument."))
 
+(defmethod contents ((container t) (kind t))
+  "Default behavior is to not return any contents."
+  nil)
+
 (defmethod lookup ((container t)
 		   (kind      t)
 		   (key       t)
 		   &key &allow-other-keys)
+  "Default behavior is to not return a result."
   nil)
 
 (defmethod lookup ((container t)

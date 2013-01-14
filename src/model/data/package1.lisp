@@ -1,6 +1,6 @@
 ;;; package1.lisp ---
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -44,20 +44,3 @@ containers for data types."))
 
 (defmethod contents/plist ((package package1))
   (hash-table-plist (%nested package)))
-
-(defmethod lookup ((package package1)
-		   (kind    symbol)
-		   (name    list)
-		   &key &allow-other-keys)
-  (check-type name (or name/absolute name/relative))
-
-  (typecase name
-    ((and (cons (eql :relative) (cons string null)))
-     (lookup package kind (second name)))
-
-    ((and (cons (eql :relative) (cons string cons)))
-     (lookup (lookup package :package (second name))
-	     kind (cons :relative (nthcdr 2 name))))
-
-    (name/absolute
-     (lookup (root package) kind (cons :relative (rest name))))))

@@ -141,23 +141,34 @@ composite data types."))
 (defmacro define-composite-mixin
     (name
      &key
-     (class-name       (format-symbol *package* "~A-MIXIN" name))
-     (kind             (make-keyword name))
-     (kind-specializer (typecase kind
-			 (keyword `(eql ,kind))
-			 (t       kind)))
-     (slot-name        (format-symbol *package* "~A" name))
-     (accessor-name    (format-symbol *package* "%~A" slot-name))
-     (key-type         'string)
-     (key-class        key-type)
-     (key-form         (typecase kind
-			 (keyword (lambda (kind-var key-var)
-				    (declare (ignore kind-var))
-				    key-var))
-			 (t       (lambda (kind-var key-var)
-				    `(cons ,kind-var ,key-var))))))
+     (class-name        (format-symbol *package* "~A-MIXIN" name))
+     (kind              (make-keyword name))
+     (kind-specializer  (typecase kind
+			  (keyword `(eql ,kind))
+			  (t       kind)))
+     (slot-name         (format-symbol *package* "~A" name))
+     (accessor-name     (format-symbol *package* "%~A" slot-name))
+     (key-type          'string)
+     (key-class         key-type)
+     (make-key-form     (typecase kind
+			  (keyword (lambda (kind-var key-var)
+				     (declare (ignore kind-var))
+				     key-var))
+			  (t       (lambda (kind-var key-var)
+				     `(cons ,kind-var ,key-var)))))
+     (key-func/any-kind (typecase kind
+			  (keyword 'identity)
+			  (t       'rest))))
   "Define a class named NAME which implements to composite
-protocol (i.e `contents' and `lookup')."
+protocol (i.e `contents' and `lookup').
+
+MAKE-KEY-FORM is a function of two arguments, the name of the variable
+holding KIND and the name of the variable holding KEY, which returns a
+form which constructs a composite key using the two names.
+
+KEY-FUNC/ANY-KIND is applied to stored keys when `lookup' is called
+with KIND `t'. The returned value is compared to the KEY of the
+`lookup' call."
   `(progn
      (defclass ,class-name (composite-mixin)
        ((,slot-name :type     hash-table
@@ -196,8 +207,21 @@ which implement the composite protocol for kind ~A."
 
        (or (when (next-method-p)
 	     (call-next-method))
-	   (values (gethash ,(funcall key-form 'kind 'key)
+	   (values (gethash ,(funcall make-key-form 'kind 'key)
 			    (,accessor-name container)))))
+
+     (defmethod lookup ((container ,class-name)
+			(kind      (eql t))
+			(key       ,key-class)
+			&key &allow-other-keys)
+       ,@(when (and key-type (not (eq key-type key-class)))
+           `((check-type key ,key-type)))
+
+       (or (when (next-method-p)
+	     (call-next-method))
+	   (cdr (find key (hash-table-alist (,accessor-name container))
+		      :test #'equal
+		      :key  (compose #',key-func/any-kind #'car)))))
 
      (defmethod (setf lookup) ((new-value t)
 			       (container ,class-name)
@@ -207,7 +231,7 @@ which implement the composite protocol for kind ~A."
        ,@(when (and key-type (not (eq key-type key-class)))
 	   `((check-type key ,key-type)))
 
-       (setf (gethash ,(funcall key-form 'kind 'key)
+       (setf (gethash ,(funcall make-key-form 'kind 'key)
 		      (,accessor-name container))
 	     new-value))
 
