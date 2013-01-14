@@ -164,52 +164,30 @@ See `version/list' for details on keyword parameters."
 		(:module     "serialization"
 		 :pathname   "src/serialization"
 		 :depends-on ("src" "model-serialization")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "conditions"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package"))
-
-			      (:file       "textual-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "textual-stream-mixin"
-			       :depends-on ("package" "protocol"
-					    "textual-mixin"))
-			      (:file       "binary-mixin"
-			       :depends-on ("package" "protocol"))
-			      (:file       "data-holder-mixin"
-			       :depends-on ("package" "protocol"))))
+			      (:file       "conditions")
+			      (:file       "protocol")
+			      (:file       "textual-mixin")
+			      (:file       "textual-stream-mixin")
+			      (:file       "binary-mixin")
+			      (:file       "data-holder-mixin")))
 
 		(:module     "frontend"
 		 :pathname   "src/frontend"
 		 :depends-on ("src" "model-data")
+		 :serial     t
 		 :components ((:file       "package")
-			      (:file       "types"
-			       :depends-on ("package"))
-			      (:file       "protocol"
-			       :depends-on ("package" "types"))
-			      (:file       "locations"
-			       :depends-on ("package" "types"
-					    "protocol"))
-			      (:file       "conditions"
-			       :depends-on ("package" "types"
-					    "locations"))
-			      (:file       "util"
-			       :depends-on ("package"))
-
-			      (:file       "format-mixins"
-			       :depends-on ("package" "protocol"))
-
-			      (:file       "builder-mixins"
-			       :depends-on ("package" "protocol"))
-			      (:file       "resolvers"
-			       :depends-on ("package" "protocol"))
-
-			      (:file       "model-builder"
-			       :depends-on ("package" "protocol"
-					    "util" "builder-mixins"))
-			      (:file       "list-builder"
-			       :depends-on ("package" "protocol"))))
+			      (:file       "types")
+			      (:file       "protocol")
+			      (:file       "locations")
+			      (:file       "conditions")
+			      (:file       "util")
+			      (:file       "format-mixins")
+			      (:file       "builder-mixins")
+			      (:file       "resolvers")
+			      (:file       "model-builder")
+			      (:file       "list-builder")))
 
 		(:module     "backend-early"
 		 :pathname   "src/backend"
