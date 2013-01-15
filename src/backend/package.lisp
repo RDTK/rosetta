@@ -38,7 +38,9 @@
    :rosetta.model
    :rosetta.model.data
    :rosetta.model.language
-   :rosetta.model.serialization)
+   :rosetta.model.serialization
+
+   :rosetta.serialization)
 
   (:shadow
    :generate)
