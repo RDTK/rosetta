@@ -84,14 +84,14 @@ COMPARE-BOUNDS? controls whether bounds should be compared."))
 ;;; Location repository protocol
 ;;
 
-(defgeneric location-of (repository for)
+(defgeneric location-of (repository thing)
   (:documentation
-   "Return a `location-info' instance for FOR in REPOSITORY or nil if
-there is no such information."))
+   "Return a `location-info' instance for THING in REPOSITORY or nil
+if there is no such information."))
 
-(defgeneric (setf location-of) (new-value repository for)
+(defgeneric (setf location-of) (new-value repository thing)
   (:documentation
-   "Set the location information for FOR within REPOSITORY to
+   "Set the location information for THING within REPOSITORY to
 NEW-VALUE."))
 
 

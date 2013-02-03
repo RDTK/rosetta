@@ -1,6 +1,6 @@
 ;;; locations.lisp --- Representation and utilities for source locations.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -212,7 +212,7 @@ produce a parser-friendly representation."
 (defclass location-repository ()
   ((assoc :initarg  :assoc
 	  :type     hash-table
-	  :accessor %assoc
+	  :reader   %assoc
 	  :initform (make-hash-table :test #'eq)
 	  :documentation
 	  "Associates source locations to elements."))
@@ -221,13 +221,13 @@ produce a parser-friendly representation."
 instances to arbitrary objects."))
 
 (defmethod location-of ((repository location-repository)
-			(for        t))
-  (values (gethash for (%assoc repository))))
+			(thing      t))
+  (values (gethash thing (%assoc repository))))
 
 (defmethod (setf location-of) ((new-value  t)
 			       (repository location-repository)
-			       (for        t))
-  (setf (gethash for (%assoc repository)) new-value))
+			       (thing      t))
+  (setf (gethash thing (%assoc repository)) new-value))
 
 
 ;;; Utility functions
