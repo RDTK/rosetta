@@ -1,6 +1,6 @@
 ;;; conditions.lisp --- Conditions used by the backend module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -179,7 +179,8 @@ process."))
 			(stack       context-stack)
 			(environment context-environment/alist))
 		       (context-condition-context condition))
-		      (*package* #.*package*))
+		      (*package*      #.*package*)
+		      (*print-circle* nil))
 		 (format stream ,(format nil "~~@<Emit ~A for~~&
 ~~2@T~~11A~~A
 ~~2@T~~11A~~A
