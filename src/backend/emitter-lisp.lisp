@@ -241,7 +241,7 @@
     (let+ (((&accessors-r/o (type type1)) node)
 	   ((&env-r/o name))
 	   (initarg     (make-keyword name))
-	   (type        (if (typep type '(or fundamental-type-mixin singleton))
+	   (type1       (if (typep type '(or fundamental-type-mixin singleton))
 			    (recur type)
 			    (progn
 			      (let+ (((&env (:lisp-toplevel-emitted? nil))))
@@ -249,11 +249,12 @@
 			      t #+later (name type)))) ;;; TODO(jmoringe, 2012-05-09): dependency architecture
 	   (reader-name name)
 	   (writer-name `(setf ,name))
-	   (initform    nil))
-      `(,name :initarg ,initarg
-	      :type    ,type
-	      :reader  ,reader-name
-	      :writer  ,writer-name))))
+	   (initform    (generate type :instantiate language)))
+      `(,name :initarg  ,initarg
+	      :type     ,type1
+	      :reader   ,reader-name
+	      :writer   ,writer-name
+	      :initform ,initform))))
 
 (defmethod emit ((node     structure-mixin)
 		 (target   target-class)
@@ -284,8 +285,8 @@
 				       :if-does-not-exist nil)))
 	    ;; The initarg names a field => validate value against
 	    ;; field type.
-	    (let+ (((&values valid? cause) (validate-value field value
-							   :if-invalid nil)))
+	    (let+ (((&values valid? cause)
+		    (validate-value field value :if-invalid nil)))
 	      (unless valid?
 		(value-invalid-for-type node initargs cause)))
 	    ;; The initarg does not name a field => signal error.
@@ -298,3 +299,17 @@
 
     ;; Emit instantiation code.
     `(make-instance ',name ,@initargs)))
+
+
+;;; Array types
+;;
+
+(defmethod emit ((node     array-mixin)
+		 (target   target-class)
+		 (language language-lisp))
+  `(array t *))
+
+(defmethod emit ((node     array-mixin)
+		 (target   target-instantiate)
+		 (language language-lisp))
+  `(make-array 0 :adjustable t))
