@@ -1,6 +1,6 @@
 ;;; emitter-serializer.lisp --- Generic serialization-related emitter functions.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -376,7 +376,16 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 		 (target   target-unpack)
 		 (language t))
   (let+ (((&accessors-r/o element-type index-type) node)
-	 ((&env-r/o destination-var offset-var fixed-dimensions? element-size)))
+	 ((&env-r/o destination-var offset-var fixed-dimensions? element-size))
+	 ((&flet prepare (length-var)
+	    `((incf ,offset-var
+		    ,(let+ (((&env (:destination-var length-var))))
+		       (generate index-type :unpack language)))
+	      (adjust-array ,destination-var ,length-var)
+	      ,@(unless (fundamental? element-type)
+		  `((map-into ,destination-var
+			      (lambda ()
+				,(generate element-type :instantiate language)))))))))
     (cond
       ((and fixed-dimensions?
 	    (or (zerop (value index-type))
@@ -396,12 +405,9 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 
       (element-size
        (let+ (((&with-gensyms i length)))
-	 `(let ((,length))
+	 `(let ((,length 0))
 	    (declare (type ,(generate index-type :reference language) ,length))
-	    (incf ,offset-var
-		  ,(let+ (((&env (:destination-var length))))
-		     (generate index-type :unpack language)))
-	    (adjust-array ,destination-var (,length))
+	    ,@(prepare length)
 	    (dotimes (,i (length ,length))
 	      (declare (type ,(generate index-type :reference language) ,i))
 	      ,(let+ (((&env (:destination-var (when destination-var
@@ -412,18 +418,17 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
 
       (t
        (let+ (((&with-gensyms i length)))
-	 `(let ((,length))
+	 `(let ((,length 0))
 	    (declare (type ,(generate index-type :reference language) ,length))
-	    (incf ,offset-var
-		  ,(let+ (((&env (:destination-var length))))
-		     (generate index-type :unpack language)))
-	    (adjust-array ,destination-var (,length))
+	    ,@(prepare length)
 	    (dotimes (,i ,length)
 	      (declare (type ,(generate index-type :reference language) ,i))
 	      (incf ,offset-var
 		    ,(let+ (((&env (:destination-var (when destination-var
 						       `(aref ,destination-var ,i))))))
-		       (generate element-type target language))))))))))
+		       (generate element-type target language))))
+	    0 ;;; TODO(jmoringe, 2013-01-25): we do this hack, because offset-var has already been increased
+	    ))))))
 
 
 ;;; Offset computation
