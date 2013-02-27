@@ -41,12 +41,10 @@ processed (e.g. contents of a source file) around `parse' calls.")
 (defclass location-attaching-mixin ()
   ((locations :initarg  :locations
 	      :accessor locations
+	      :initform nil
 	      :documentation
 	      "Stores a location repository, for example an instance
 of the `location-repository' class."))
-  (:default-initargs
-   :locations (missing-required-initarg
-	       'location-attaching-mixin :locations))
   (:documentation
    "This mixin adds to builder classes the ability to associate source
 location information to elements."))
@@ -62,7 +60,8 @@ location information to elements."))
 		 (element (call-next-method)))
 	    ;;; TODO(jmoringe, 2012-11-13): if ELEMENT already has a
 	    ;;; location, attach a sequence of locations
-	    (when (and element (not (location-of locations element)))
+	    (when (and locations element
+		       (not (location-of locations element)))
 	      (setf (location-of locations element)
 		    (make-instance 'location-info
 				   :source         *source*

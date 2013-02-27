@@ -204,7 +204,6 @@ bar"))
   ;;; TODO(jmoringe, 2012-11-28): use simple builder
   (let* ((builder (make-instance (find-builder-class :model)
 				 :resolver   (make-instance 'search-path-resolver)
-				 :locations  (make-instance 'location-repository)
 				 :repository (make-instance 'rs.m.d::base-repository)))
 	 (root    (let ((package (ensure-package
 				  builder :qname '(:absolute))))
