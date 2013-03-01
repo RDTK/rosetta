@@ -343,12 +343,10 @@ reference and continue.~@:>")))))))
 (defclass dependency-delegating-mixin ()
   ((resolver :initarg  :resolver
 	     :accessor resolver
+	     :initform nil
 	     :documentation
 	     "Stores an object implementing the resolver protocol
 which is consulted when dependencies have to be resolved."))
-  (:default-initargs
-   :resolver (missing-required-initarg
-	      'dependency-delegating-mixin :resolver))
   (:documentation
    "This class is intended to be mixed into builder classes which have
 to resolve dependencies."))
@@ -360,6 +358,8 @@ to resolve dependencies."))
 		      format)
   (check-type pathname (or (cons (eql or)) pathname))
 
+  ;; (resolver builder) can be nil. The, the default method on
+  ;; `resolve' is applicable and returns nil.
   (let+ (((&values format location)
           (resolve (resolver builder) format pathname)))
     (process format location builder)))
