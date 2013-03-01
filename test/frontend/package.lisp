@@ -37,6 +37,7 @@
    :rosetta.frontend)
 
   (:import-from :rosetta.frontend
+   :maybe-shorten
    :guess-format
 
    :locations
