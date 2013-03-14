@@ -322,7 +322,8 @@ unresolved references as forward references and resolve them later."))
     (iter (for ((kind . qname) . object) in unresolved)
 	  (restart-case
 	      (error 'processing-error
-		     :location (if (compute-applicable-methods #'locations (list builder))
+		     :location (if (and (compute-applicable-methods #'locations (list builder))
+					(locations builder))
 				   (location-of (locations builder) object)
 				   (make-instance 'location-info))
 		     :builder  builder
