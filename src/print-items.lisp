@@ -49,19 +49,21 @@ representation of OBJECT."))
 
 (defmethod print-object ((object print-items-mixin) stream)
   (print-unreadable-object (object stream :type t :identity t)
-    (format-print-items (print-items object) stream)))
+    (format-print-items stream (print-items object))))
 
 
 ;;; Utility Functions
 ;;
 
-(defun format-print-items (items stream)
+(defun format-print-items (stream items &optional colon? at?)
   "Print ITEMS onto STREAM.
 ITEMS is a list of items of the form ITEM where
 ITEM   ::= (KEY VALUE [FORMAT])
 KEY    ::= any Lisp object
 VALUE  ::= any Lisp object
 FORMAT ::= a format string (Default is \"~A\")"
+  (declare (ignore colon? at?))
+
   (mapc (lambda+ ((&ign value &optional format))
 	  (format stream (or format "~A") value))
 	(remove-duplicates items

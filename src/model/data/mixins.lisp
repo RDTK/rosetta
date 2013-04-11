@@ -88,7 +88,7 @@ refer to another type such as a field of a structure."))
 (defmethod print-items append ((object typed-mixin))
   "Try to enforce a meaningful order of the name and type print
 items."
-  (list (list :type (name (type1 object)) " : ~A")))
+  (list (list :type (print-items (type1 object)) " : ~/rosetta::format-print-items/")))
 
 
 ;;; `parented-mixin' mixin class
