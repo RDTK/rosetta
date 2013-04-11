@@ -169,6 +169,16 @@
 ;;; Utility functions
 ;;
 
+(declaim (inline bool8ref (setf bool8ref) sb8ref (setf sb8ref)))
+
+(defun bool8ref (vector index)
+  (ecase (aref vector index)
+    (0 nil)
+    (1 t)))
+
+(defun (setf bool8ref) (new-value vector index)
+  (setf (aref vector index) (if new-value 1 0)))
+
 (defun sb8ref (vector index)
   (let ((value (aref vector index)))
     (+ (- (ash (ldb (byte 1 7) value) 7)) (ldb (byte 7 0) value))))
@@ -185,6 +195,8 @@ WIDTH."
 		  (:big-endian    '#:be)))
 	(width  (width node)))
     (ecase (category node)
+      (:bool
+       'bool8ref)
       (:integer
        (case width
 	 (8 (if (signed? node)

@@ -1,6 +1,6 @@
 ;;; emitter-lisp-serializer.lisp --- Unit tests for Lisp serialization emitter.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -41,7 +41,12 @@ We do not verify the emitted code, but its behavior.")
   emit-packed-size/smoke
 
   (ensure-serialization-cases ()
-      `(;; uint8, little and big endian
+      `(;; bool, little and big endian
+	(type-bool         :mock/little-endian-packed-size ((   nil . 1)
+							    (     t . 1)))
+	(type-bool         :mock/big-endian-packed-size    ((   nil . 1)
+							    (     t . 1)))
+	;; uint8, little and big endian
 	(type-uint8        :mock/little-endian-packed-size ((     1 . 1)
 							    (   255 . 1)))
 	(type-uint8        :mock/big-endian-packed-size    ((     1 . 1)
@@ -84,7 +89,12 @@ We do not verify the emitted code, but its behavior.")
 
   (ensure-serialization-cases
       (:destination-initform (nibbles:make-octet-vector 100))
-      `(;; uint8, little and big endian
+      `(;; bool, little and big endian
+	(type-bool         :mock/little-endian-pack ((   nil . (#x00))
+						     (     t . (#x01))))
+	(type-bool         :mock/big-endian-pack    ((   nil . (#x00))
+						     (     t . (#x01))))
+	;; uint8, little and big endian
 	(type-uint8        :mock/little-endian-pack ((     1 . (#x01))
 						     (   255 . (#xff))))
 	(type-uint8        :mock/big-endian-pack    ((     1 . (#x01))
@@ -131,7 +141,14 @@ We do not verify the emitted code, but its behavior.")
   emit-unpack/smoke
 
   (ensure-serialization-cases ()
-      `(;; uint8, little and big endian
+      `(;; bool, little and big endian
+	(type-bool         :mock/little-endian-unpack (((#x00)                . nil)
+						       ((#x01)                . t)
+						       ((#x02)                . error)))
+	(type-bool         :mock/big-endian-unpack    (((#x00)                . nil)
+						       ((#x01)                . t)
+						       ((#x02)                . error)))
+	;; uint8, little and big endian
 	(type-uint8        :mock/little-endian-unpack (((#x01)                . 1)
 						       ((#xff)                . 255)))
 	(type-uint8        :mock/big-endian-unpack    (((#x01)                . 1)
