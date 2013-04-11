@@ -174,10 +174,12 @@ content."
 
 (defun format-location (stream info &optional colon? at?)
   "Format the `location-info' object INFO onto STREAM.
-If COLON? is non-nil produce a human-readable description. Otherwise
-produce a parser-friendly representation."
-  (declare (ignore at?))
 
+If COLON? is non-nil, produce a human-readable description. Otherwise
+produce a parser-friendly representation.
+
+If AT? is non-nil, and the source of INFO is a string, print the
+abbreviated string. Otherwise print <string>."
   (let+ (((&accessors-r/o source) info)
 	 (start-line+1   (when-let ((line (line info :of :start)))
 			   (1+ line)))
@@ -187,10 +189,14 @@ produce a parser-friendly representation."
 			   (1+ line)))
 	 (end-column+1   (when-let ((column (column info :of :end)))
 			   (1+ column)))
-	 (source-label   (typecase source
-			   (null   "<unknown source>")
-			   (string "<string>")
-			   (t      source))))
+	 (source-label
+	  (typecase source
+	    (null   "<unknown source>")
+	    (string (if at?
+			(prin1-to-string
+			 (maybe-shorten source :max-length 16))
+			"<string>"))
+	    (t      source))))
     (if colon?
 	;; Textual format.
 	(cond

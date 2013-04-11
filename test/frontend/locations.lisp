@@ -1,6 +1,6 @@
 ;;; locations.lisp --- Unit tests for the location machinery.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -134,32 +134,34 @@ oo"
 instances.")
   format-location/smoke
 
-  (ensure-cases ((source content bounds) expected expected/colon)
-      ;;  source     content bounds   expected           expected/colon
-      `(((nil        nil     nil)     "<unknown source>" "<unknown source>")
-	((,#P"foo.c" nil     nil)     "foo.c"            "foo.c")
-	(("foo"      nil     nil)     "<string>"         "<string>")
-	(("foo"      "foo"   nil)     "<string>"         "<string>")
-	(("foo"      nil     (1))     "<string>"         "<string>")
-	(("foo"      nil     (1 . 2)) "<string>"         "<string>")
-	(("foo"      ""      (0 . 0)) "<string>:1:1"     "columns 1 to 1 of line 1 of <string>")
-	(("foo"      "foo"   (1))     "<string>:1:2"     "column 2 of line 1 of <string>")
-	(("foo"      "foo"   (1 . 2)) "<string>:1:2"     "columns 2 to 3 of line 1 of <string>")
+  (ensure-cases ((source content bounds) expected expected/colon expected/at)
+      ;;  source     content bounds   expected           expected/colon                         expected/at
+      `(((nil        nil     nil)     "<unknown source>" "<unknown source>"                     "<unknown source>")
+	((,#P"foo.c" nil     nil)     "foo.c"            "foo.c"                                "foo.c")
+	(("foo"      nil     nil)     "<string>"         "<string>"                             "\"foo\"")
+	(("foo"      "foo"   nil)     "<string>"         "<string>"                             "\"foo\"")
+	(("foo"      nil     (1))     "<string>"         "<string>"                             "\"foo\"")
+	(("foo"      nil     (1 . 2)) "<string>"         "<string>"                             "\"foo\"")
+	(("foo"      ""      (0 . 0)) "<string>:1:1"     "columns 1 to 1 of line 1 of <string>" "\"foo\":1:1")
+	(("foo"      "foo"   (1))     "<string>:1:2"     "column 2 of line 1 of <string>"       "\"foo\":1:2")
+	(("foo"      "foo"   (1 . 2)) "<string>:1:2"     "columns 2 to 3 of line 1 of <string>" "\"foo\":1:2")
 	(("foo"      "f
-oo"                          (2))     "<string>:2:1"     "column 1 of line 2 of <string>"))
+oo"                          (2))     "<string>:2:1"     "column 1 of line 2 of <string>"       "\"foo\":2:1"))
 
     (let+ ((info   (apply #'make-instance 'location-info
 			  (append
 			   (when source  (list :source         source))
 			   (when content (list :source-content content))
 			   (when bounds  (list :bounds         bounds)))))
-	   ((&flet do-it (colon?)
+	   ((&flet do-it (colon? at?)
 	      (with-output-to-string (stream)
-		(format-location stream info colon?)))))
-      (ensure-same (do-it nil) expected       :test #'string=
-		   :report "Without colon")
-      (ensure-same (do-it t)   expected/colon :test #'string=
-		   :report "With colon"))))
+		(format-location stream info colon? at?)))))
+      (ensure-same (do-it nil nil) expected       :test #'string=
+		   :report "Without colon or at")
+      (ensure-same (do-it t   nil) expected/colon :test #'string=
+		   :report "With colon")
+      (ensure-same (do-it nil t)   expected/at    :test #'string=
+		   :report "With at"))))
 
 (addtest (frontend-locations-root
           :documentation
