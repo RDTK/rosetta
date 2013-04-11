@@ -1,6 +1,6 @@
 ;;; format-mixins.lisp --- Test for format mixin classes of the frontend module.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -118,6 +118,7 @@ conditions signaled during `parse'.")
 	 (this-file-content (read-file-into-string this-file)))
     (ensure-format-cases (text-format-mixin-mock-format)
 	(`("source"   (,(make-instance 'location-info
+				       :source         "source"
 				       :source-content "source")))
 	 `(,this-file (,(make-instance 'location-info
 				       :source         this-file

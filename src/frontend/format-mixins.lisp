@@ -1,6 +1,6 @@
 ;;; format-mixins.lisp --- Mixin classes for format classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -41,11 +41,11 @@ formats."))
   "Open a binary input stream for the file designated by SOURCE and
 call a method specialized on streams."
   (handler-bind ((location-condition
-		   #'(lambda (condition)
-		       (let+ (((&accessors-r/o location) condition)
-			      ((&accessors (source1 source)) location))
-			 (unless (pathnamep source1)
-			   (setf source1 source))))))
+		   (lambda (condition)
+		     (let+ (((&accessors-r/o location) condition)
+			    ((&accessors (source1 source)) location))
+		       (unless (pathnamep source1)
+			 (setf source1 source))))))
     (with-input-from-file (stream source :element-type '(unsigned-byte 8))
       (apply #'parse format stream builder args))))
 
@@ -66,14 +66,14 @@ operate on textual input data."))
   "Open a character input stream for the file designated by SOURCE and
 call a method specialized on streams."
   (handler-bind ((location-condition
-		   #'(lambda (condition)
-		       (let+ (((&accessors-r/o location) condition)
-			      ((&accessors (source1 source) source-content) location))
-			 (unless (pathnamep source1)
-			   (setf source1 source))
-			 (unless source-content
-			   (setf source-content
-				 (read-file-into-string source)))))))
+		   (lambda (condition)
+		     (let+ (((&accessors-r/o location) condition)
+			    ((&accessors (source1 source) source-content) location))
+		       (unless (pathnamep source1)
+			 (setf source1 source))
+		       (unless source-content
+			 (setf source-content
+			       (read-file-into-string source)))))))
     (with-input-from-file (stream source)
       (apply #'parse format stream builder args))))
 
@@ -84,10 +84,12 @@ call a method specialized on streams."
   "Create an input stream for the content of SOURCE and call a method
 specialized on streams."
   (handler-bind ((location-condition
-		   #'(lambda (condition)
-		       (let+ (((&accessors-r/o location) condition)
-			      ((&accessors source-content) location))
-			 (unless source-content
-			   (setf source-content source))))))
+		   (lambda (condition)
+		     (let+ (((&accessors-r/o location) condition)
+			    ((&accessors (source1 source) source-content) location))
+		       (unless source1
+			 (setf source1 source))
+		       (unless source-content
+			 (setf source-content source))))))
     (with-input-from-string (stream source)
       (apply #'parse format stream builder args))))

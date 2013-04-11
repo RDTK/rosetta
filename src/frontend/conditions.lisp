@@ -90,7 +90,7 @@ parsing the contents of a source."))
    (lambda (condition stream)
      (let+ (((&accessors-r/o location source-content builder) condition))
        (format stream "~<When processing ~:/rosetta.frontend::format-location/~@:>~
-~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]
+~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
 ~@<~@[with builder ~A~].~/more-conditions::maybe-print-cause/~@:>"
 	       (list location)
 	       source-content location
