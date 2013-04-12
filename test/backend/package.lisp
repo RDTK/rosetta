@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the backend module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -137,8 +137,8 @@
 			       constant-endian-mixin)
 		()
 		(:default-initargs
-		 :offset-type (make-instance 'type-uint16)
-		 :length-type (make-instance 'type-uint8)
+		 :offset-type +uint16+
+		 :length-type +uint8+
 		 :endian      ,endian)))
 
 	    (defmethod validate-type ((mechanism ,name) (type t)

@@ -87,13 +87,18 @@ storage."))
 (eval-when (:compile-toplevel :load-toplevel)
   (defmacro define-fundamental-type ((name (&rest supertypes) category)
 				     &rest properties &key &allow-other-keys)
-    (let ((name (symbolicate "TYPE-" name)))
+    (let* ((class-name    (symbolicate '#:type- name))
+	   (variable-name (symbolicate '#:+ name '#:+)))
       `(progn
-	 (defclass ,name (,@supertypes fundamental-type-mixin)
+	 (defclass ,class-name (,@supertypes fundamental-type-mixin)
 	   ()
 	   (:default-initargs
 	    :category ,category
-	    ,@properties))))))
+	    ,@properties))
+
+	 (defparameter ,variable-name (make-instance ',class-name)
+	   ,(format nil "Singleton instance of the `~(~A~)' fundamental type."
+		    name))))))
 
 (define-fundamental-type (bool (fixed-width-mixin) :bool)
   :width 1)
@@ -101,6 +106,8 @@ storage."))
 (defmethod validate-value ((type type-bool) (value t)
 			   &key &allow-other-keys)
   (typep value 'boolean))
+
+;;; Integer types
 
 (defclass sign-mixin ()
   ((signed? :initarg  :signed?
@@ -114,8 +121,12 @@ data type represents signed or unsigned numbers."))
   (:documentation
    "This mixin class adds a signed? slot to data type classes."))
 
-(define-fundamental-type (integer* (fixed-width-mixin
-				    sign-mixin) :integer))
+(defclass type-integer* (fixed-width-mixin
+			 sign-mixin
+			 fundamental-type-mixin)
+  ()
+  (:default-initargs
+   :category :integer))
 
 (defmethod validate-value ((type type-integer*) (value integer)
 			   &key &allow-other-keys)
@@ -139,7 +150,13 @@ data type represents signed or unsigned numbers."))
   (define-fundamental-integer-type t   64)
   (define-fundamental-integer-type nil 64))
 
-(define-fundamental-type (float* (fixed-width-mixin) :float))
+;;; Float types
+
+(defclass type-float* (fixed-width-mixin
+		       fundamental-type-mixin)
+  ()
+  (:default-initargs
+   :category :float))
 
 (define-fundamental-type (float32 (type-float*) :float)
   :width 32)
@@ -154,6 +171,8 @@ data type represents signed or unsigned numbers."))
 (defmethod validate-value ((type type-float64) (value float)
 			   &key &allow-other-keys)
   (typep value `(real ,most-negative-double-float ,most-positive-double-float)))
+
+;;; Strings and octet sequences
 
 (defclass string-mixin ()
   ((encoding :initarg  :encoding

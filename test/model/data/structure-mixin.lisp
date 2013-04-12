@@ -1,6 +1,6 @@
 ;;; structure-mixin.lisp --- Unit tests for the structure-mixin class.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,12 +35,12 @@
   construction
 
   (ensure-cases ((args expected))
-      `(((:fields 5)                                         type-error)
-	((:fields #("bla"))                                  type-error)
-	((:fields ("a" ,(make-instance 'type-utf-8-string))) ("a"))
+      `(((:fields 5)                                       type-error)
+	((:fields #("bla"))                                type-error)
+	((:fields ("a" ,+utf-8-string+))                   ("a"))
 	((:fields (,(make-instance 'base-field
 				   :name "g"
-				   :type 'string)))          ("g")))
+				   :type +utf-8-string+))) ("g")))
     (let+ (((&flet do-it ()
 	      (apply #'make-instance 'structure-mixin args))))
       (case expected

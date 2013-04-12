@@ -80,25 +80,21 @@ the rosetta.model.data package."))
 		      width
 		      signed?
 		      encoding)
-  (make-instance (ecase category
-		   (:bool
-		    'type-bool)
-		   (:integer
-		    (or (find-symbol (format nil "TYPE-~:[U~;~]INT~D"
-					     signed? width)
-				     :rs.m.d)
-			(error "~:<There is no ~:[un~;~]signed integer ~
-type with width ~D.~@>" signed? width)))
-		   (:float
-		    (ecase width
-		      (32 'type-float32)
-		      (64 'type-float64)))
-		   (:string
-		    (ecase encoding
-		      (:ascii 'type-ascii-string)
-		      (:utf-8 'type-utf-8-string)))
-		   (:bytes
-		    'type-octet-vector))))
+  (ecase category
+    (:bool    +bool+)
+    (:integer (or (symbol-value
+		   (find-symbol (format nil "+~:[U~;~]INT~D+" signed? width)
+				:rs.m.d))
+		  (error "~:<There is no ~:[un~;~]signed integer type ~
+with width ~D.~@>"
+			 signed? width)))
+    (:float  (ecase width
+	       (32 +float32+)
+	       (64 +float64+)))
+    (:string (ecase encoding
+	       (:ascii +ascii-string+)
+	       (:utf-8 +utf-8-string+)))
+    (:bytes  +octet-vector+)))
 
 (defmethod find-node ((builder model-builder)
 		      (kind    (eql :singleton))

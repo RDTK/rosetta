@@ -58,7 +58,7 @@
     (if source-var
 	`(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
 	   ,(let+ (((&env (:source-var temp-var))))
-	      (generate (make-instance 'type-octet-vector) target language)))
+	      (generate +octet-vector+ target language)))
 	0)))
 
 (defmethod emit/context ((node     type-string*) ; note: any string
@@ -69,19 +69,18 @@
     (if source-var
 	`(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
 	   ,(let+ (((&env (:source-var temp-var))))
-	      (generate (make-instance 'type-octet-vector) target language)))
+	      (generate +octet-vector+ target language)))
 	0)))
 
 (defmethod emit/context ((node     type-string*) ; note: any string
 			 (target   target-unpack)
 			 (language language-lisp))
-  (let+ ((type-octet-vector (make-instance 'type-octet-vector))
-	 ((&env-r/o destination-var))
+  (let+ (((&env-r/o destination-var))
 	 ((&with-gensyms vector-var)))
-    `(let ((,vector-var ,(generate type-octet-vector :instantiate language)))
+    `(let ((,vector-var ,(generate +octet-vector+ :instantiate language)))
        (prog1
 	   ,(let+ (((&env (:destination-var vector-var))))
-	      (generate type-octet-vector target language))
+	      (generate +octet-vector+ target language))
 	 (setf ,destination-var (sb-ext:octets-to-string ,vector-var))))))
 
 (defmethod emit ((node     type-octet-vector)

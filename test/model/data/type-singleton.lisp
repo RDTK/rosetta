@@ -1,6 +1,6 @@
 ;;; type-singleton.lisp ---
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -37,11 +37,11 @@
   (ensure-cases (initargs expected-value)
       `(;; These are invalid.
 	(()                                              missing-required-initarg)
-	((:type ,(make-instance 'type-uint8) :value -1)  value-invalid-for-type)
+	((:type ,+uint8+ :value -1)  value-invalid-for-type)
 
 	;; These are valid.
-	((:type ,(make-instance 'type-uint8) :value 1)   1)
-	((:type ,(make-instance 'type-uint8) :value 255) 255))
+	((:type ,+uint8+ :value 1)   1)
+	((:type ,+uint8+ :value 255) 255))
 
     (let+ (((&flet do-it ()
 	      (value (apply #'make-instance 'singleton initargs)))))
@@ -60,12 +60,12 @@
 
   (ensure-cases (initargs value expected)
       `(;; These are invalid.
-	((:type ,(make-instance 'type-uint8) :value 1)   -1   nil)
-	((:type ,(make-instance 'type-uint8) :value 1)   2    nil)
+	((:type ,+uint8+ :value 1)   -1   nil)
+	((:type ,+uint8+ :value 1)   2    nil)
 
 	;; These are valid.
-	((:type ,(make-instance 'type-uint8) :value 1)   1    t)
-	((:type ,(make-instance 'type-uint8) :value 255) 255  t))
+	((:type ,+uint8+ :value 1)   1    t)
+	((:type ,+uint8+ :value 255) 255  t))
 
     (ensure-same (validate-value
 		  (apply #'make-instance 'singleton initargs) value

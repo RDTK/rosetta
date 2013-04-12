@@ -1,6 +1,6 @@
 ;;; type-enum.lisp --- Unit tests for the enum data type.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -57,9 +57,7 @@
 	((:name "foo" :values ("a" 1 "b" 2)) (("a" 1) ("b" 2))))
 
     (let+ (((&flet do-it ()
-	      (apply #'make-instance 'enum
-		     :type (make-instance 'type-uint8)
-		     initargs))))
+	      (apply #'make-instance 'enum :type +uint8+ initargs))))
       (case expected
 	(error
 	 (ensure-condition 'error (do-it)))
@@ -107,24 +105,22 @@
 
   (ensure-cases (type names-and-values expected)
       `(;; Invalid
-	(type-uint8 ("a" -1)      child-error) ; -1 invalid for uint8
-	(type-uint8 ("a" 500)     child-error) ; 500 invalid for uint8
-	(type-uint8 ("a" 1 "a" 2) child-error) ; duplicate child name
-	(type-uint8 ("a" 1 "b" 1) child-error) ; duplicate child value
+	(,+uint8+ ("a" -1)      child-error) ; -1 invalid for uint8
+	(,+uint8+ ("a" 500)     child-error) ; 500 invalid for uint8
+	(,+uint8+ ("a" 1 "a" 2) child-error) ; duplicate child name
+	(,+uint8+ ("a" 1 "b" 1) child-error) ; duplicate child value
 
 	;; OK
-	(type-uint8 ("a" 1)       (("a" 1)))
-	(type-uint8 ("a" 1 "b" 2) (("a" 1) ("b" 2))))
+	(,+uint8+ ("a" 1)       (("a" 1)))
+	(,+uint8+ ("a" 1 "b" 2) (("a" 1) ("b" 2))))
 
-    (let+ ((enum (make-instance 'enum
-				:name "foo"
-				:type (make-instance type)))
+    (let+ ((enum (make-instance 'enum :name "foo" :type type))
 	   ((&flet do-it ()
 	      (iter (for (name value) on names-and-values :by #'cddr)
 		    (setf (lookup enum :value name)
 			  (make-instance 'enum-value
 					 :name  name
-					 :type  (make-instance 'type-int32)
+					 :type  +int32+
 					 :value value)))
 	      enum)))
       (case expected
@@ -138,7 +134,7 @@
 
   (let ((enum (make-instance 'enum
 			     :name   "enum"
-			     :type   (make-instance 'type-uint8)
+			     :type   +uint8+
 			     :values '("a" 1 "b" 255))))
     (ensure-cases (value expected)
 	'(;; These are not valid.

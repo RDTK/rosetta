@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for unit tests of the model.data module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -80,36 +80,34 @@
 ;;
 
 (defparameter +singleton/uint32+
-  (make-instance 'singleton :type  (make-instance 'type-uint32)
-			    :value 1)
+  (make-instance 'singleton :type +uint32+ :value 1)
   "An uint32 singleton.")
 
 (defparameter +singleton/float64+
-  (make-instance 'singleton :type  (make-instance 'type-float64)
-			    :value 1.0d0)
+  (make-instance 'singleton :type +float64+ :value 1.0d0)
   "A float64 singleton.")
 
 (defparameter +enum/uint8/simple+
   (make-instance 'enum :name   "simple/uint8"
-		       :type   (make-instance 'type-uint8)
+		       :type   +uint8+
 		       :values '(:a 1 :b 2))
   "A simple uint8 enum with two values.")
 
 (defparameter +enum/uint8/one+
   (make-instance 'enum :name   "one/uint8"
-		       :type   (make-instance 'type-uint8)
+		       :type   +uint8+
 		       :values '(:a 1))
   "A simple uint8 enum with a single value.")
 
 (defparameter +enum/uint32/simple+
   (make-instance 'enum :name   "simple/uint32"
-		       :type   (make-instance 'type-uint32)
+		       :type   +uint32+
 		       :values '(:a 1 :b 2))
   "A simple uint32 enum with two values.")
 
 (defparameter +enum/int32/simple+
   (make-instance 'enum :name   "simple/int32"
-		       :type   (make-instance 'type-int32)
+		       :type   +int32+
 		       :values '(:a 1 :b 2))
   "A simple int32 enum with two values.")
 
@@ -117,8 +115,7 @@
   (make-instance
    'base-structure
    :name   "simple"
-   :fields (list (make-instance
-		  'base-field
-		  :name "a"
-		  :type (make-instance 'type-utf-8-string))))
+   :fields (list (make-instance 'base-field
+				:name "a"
+				:type +utf-8-string+)))
   "A simple structure with a single field.")

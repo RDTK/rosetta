@@ -35,7 +35,7 @@
 		      print-items-mixin)
   ()
   (:default-initargs
-   :type (make-instance 'type-uint32))
+   :type +uint32+)
   (:documentation
    "Instances of this class represent enumeration values consisting of
 a name and an associated, usually numeric, value."))

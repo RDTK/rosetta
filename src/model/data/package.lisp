@@ -158,7 +158,7 @@
   (:export
    :mapping)
 
-  ;; Data type class
+  ;; Data type classes
   (:export
    :type-bool
 
@@ -170,8 +170,7 @@
    :type-float32 :type-float64
 
    :type-string*
-   :type-ascii-string
-   :type-utf-8-string
+   :type-ascii-string :type-utf-8-string
 
    :type-octet-vector
 
@@ -183,10 +182,22 @@
 
    :base-array
 
-   :singleton)
+   :singleton
 
-  (:export
    :package1)
+
+  ;; Builtin data type objects
+  (:export
+   :+bool+
+
+   :+uint8+ :+uint16+ :+uint32+  :+uint64+
+   :+int8+  :+int16+  :+int32+   :+int64+
+
+   :+float32+ :+float64+
+
+   :+ascii-string+ :+utf-8-string+
+
+   :+octet-vector+)
 
   ; Forward reference protocol and class
   (:export

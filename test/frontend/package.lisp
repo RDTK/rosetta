@@ -151,7 +151,7 @@
   ;; Workaround for `change-class': we return a proper CLOS instance
   ;; so the `forward-reference' instance can `change-class'.
   (if (equal (getf args :name) "unresolved")
-      (make-instance 'rs.m.d:type-uint8)
+      rs.m.d:+uint8+
       (apply #'make-node 'list kind args)))
 
 (defmethod make-node ((builder mock-builder) (kind (eql :comment))

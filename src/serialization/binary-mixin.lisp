@@ -1,6 +1,6 @@
 ;;; binary-mixin.lisp --- Mixin class for binary mechanism classes.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -31,7 +31,7 @@
 represent binary serialization mechanisms."))
 
 (defmethod wire-type ((mechanism binary-mixin))
-  (make-instance 'rs.m.d:type-octet-vector))
+  rs.m.d:+octet-vector+)
 
 (defmethod pack ((mechanism   binary-mixin)
 		 (source      t)

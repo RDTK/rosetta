@@ -1,6 +1,6 @@
 ;;; emitter-conversion.lisp --- Unit tests for conversion emitter.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -43,22 +43,22 @@
 		 left->right-condition left->right-cases
 		 right->left-condition right->left-cases)
       `(;; Completely impossible
-	((type-uint32)       (type-ascii-string) error nil       error   nil)
-	((type-utf-8-string) (type-ascii-string) error nil       error   nil)
+	(,+uint32+       ,+ascii-string+ error nil       error   nil)
+	(,+utf-8-string+ ,+ascii-string+ error nil       error   nil)
 
 	;; uint32 <-> int32 => different signedness
-	((type-uint32)  (type-int32)   error nil       error   nil)
+	(,+uint32+       ,+int32+   error nil       error   nil)
 
 	;; uint32 <-> uint64 => can widen, cannot narrow
-	((type-uint32)  (type-uint64)  nil   ((1 . 1)) error   ((1 . 1)))
+	(,+uint32+       ,+uint64+  nil   ((1 . 1)) error   ((1 . 1)))
 
 	;; uint32 <-> float64 => ok, different signedness
-	((type-uint32) (type-float64)
+	(,+uint32+       ,+float64+
 	 nil     ((1     . 1.0d0))
 	 error   ((1.0d0 . 1)))
 
 	;; int32    <-> float64 => loss of precision
-	((type-int32)  (type-float64)
+	(,+int32+        ,+float64+
 	 nil     ((1     . 1.0d0)
 		  (5     . 5.0d0))
 	 warning ((1.0d0 . 1)
@@ -66,7 +66,7 @@
 		  (5.0d0 . 5)))
 
 	;; float32    <-> float64 => loss of precision
-	((type-float32) (type-float64)
+	(,+float32+      ,+float64+
 	 nil     ((1     . 1.0d0)
 		  (5     . 5.0d0))
 	 warning ((1.0d0 . 1.0f0)
@@ -74,25 +74,23 @@
 		  (5.0d0 . 5.0f0)))
 
 	;; uint32 <-> uint32 => no problem
-	((type-uint32)  (type-uint32)  nil   ((1 . 1)) nil     ((1 . 1)))
+	(,+uint32+       ,+uint32+  nil   ((1 . 1)) nil     ((1 . 1)))
 
 	;; singleton/int32 <-> float64
-	((singleton :type  ,(make-instance 'type-int32)
-		    :value 1)
-	 (type-float64)
+	((singleton :type  ,+int32+ :value 1) ,+float64+
 	 nil     ((1     . 1.0d0))
 	 warning ((1.0d0 . 1)
 		  (1.1d0 . 1)
 		  (5.0d0 . error))) ; 1 is the only acceptable value
 
 	;; enum/uint8 <-> uint32 => can widen, cannot narrow
-	(,+enum/uint8/simple+ (type-uint32)
+	(,+enum/uint8/simple+ ,+uint32+
 	 nil   ((:a . 1)
 		(:b . 2))
 	 error ())
 
 	;; enum/uint32 <-> uint32 => no problem
-	(,+enum/uint32/simple+ (type-uint32)
+	(,+enum/uint32/simple+ ,+uint32+
 	 nil     ((:a . 1)
 		  (:b . 2))
 	 nil     ((1  . :a)
@@ -100,7 +98,7 @@
 		  (3  . error))) ; 3 is not a value of the enum
 
 	;; enum/int32 <-> float32 => loss of precision
-	(,+enum/int32/simple+ (type-float32)
+	(,+enum/int32/simple+ ,+float32+
 	 nil     ((:a    . 1.0f0)
 		  (:b    . 2.0f0))
 	 warning ((1.0f0 . :a)
