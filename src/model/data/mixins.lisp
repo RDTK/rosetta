@@ -85,6 +85,9 @@ refer to another type such as a field of a structure."))
 			   &key &allow-other-keys)
   (validate-value (type1 type) value))
 
+(defmethod direct-dependencies append ((thing typed-mixin))
+  (list (type1 thing)))
+
 (defmethod print-items append ((object typed-mixin))
   "Try to enforce a meaningful order of the name and type print
 items."
@@ -245,6 +248,9 @@ which implement the composite protocol for kind ~A."
 (define-composite-mixin nested
     :class-name nesting-mixin)
 
+(defmethod direct-dependencies append ((thing nesting-mixin))
+  (contents thing :nested))
+
 (define-composite-mixin nested
     :class-name container/absolute-mixin
     :kind       symbol
@@ -320,6 +326,9 @@ concepts similar to fields in a structure."))
 (define-composite-mixin fields
   :kind :field)
 
+(defmethod direct-dependencies append ((thing fields-mixin))
+  (mappend #'direct-dependencies (contents thing :field)))
+
 (defclass structure-mixin (nesting-mixin
 			   fields-mixin)
   ()
@@ -393,6 +402,9 @@ element type."))
 
 (defmethod kind ((type array-mixin))
   :array)
+
+(defmethod direct-dependencies append ((thing array-mixin))
+  (list (element-type thing) (index-type thing)))
 
 (defmethod fixed-size? ((type array-mixin))
   (let+ (((&accessors-r/o index-type) type))

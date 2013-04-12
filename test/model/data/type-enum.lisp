@@ -145,3 +145,16 @@
 	  (:|b| t))
 
       (validate-value enum value :if-invalid nil))))
+
+(addtest (model-data-enum-root
+          :documentation
+	  "Test method on `direct-dependencies'.")
+  direct-dependencies
+
+  (ensure-cases (type expected)
+      `((,+enum/uint8/simple+  (,+uint8+))
+	(,+enum/uint8/one+     (,+uint8+))
+	(,+enum/uint32/simple+ (,+uint32+))
+	(,+enum/int32/simple+  (,+int32+)))
+
+    (ensure-same (direct-dependencies type) expected :test #'set-equal)))

@@ -334,6 +334,76 @@ a function, a `cl:continue' restart is established around the call."))
   nil)
 
 
+;;; Dependency protocol
+;;
+
+(defgeneric direct-dependencies (thing)
+  (:method-combination append)
+  (:documentation
+   "Return a duplicate-free list of things on which THING directly
+depends. For example, a structure depends on the types of its fields
+and an array type depends on its element type."))
+
+(defgeneric dependencies (thing
+			  &key
+			  include-self?
+			  blacklist)
+  (:documentation
+   "Return a duplicate-free list of things on which THING (directly or
+indirectly) depends. The set of dependencies is determined as the
+transitive closure with respect to data-type dependencies. For
+example, a structure depends on the types of its fields and an array
+type depends on its element type. Cyclic relations (when THING depends
+on itself through intermediate dependencies) can be processed.
+
+INCLUDE-SELF? controls whether THING should be included in the
+returned set.
+
+BLACKLIST can be (), a function of one argument, a sequence of
+blacklisted objects or a list or the form
+
+  (or BLACKLIST1 BLACKLIST2 ...)"))
+
+;; Default behavior
+
+(defmethod direct-dependencies append ((thing t))
+  '())
+
+(defmethod direct-dependencies :around ((thing t))
+  (remove thing (remove-duplicates (call-next-method) :test #'eq)
+	  :test #'eq))
+
+(defmethod dependencies ((thing t)
+			 &key
+			 (include-self? t)
+			 blacklist)
+  (let+ ((seen (make-hash-table :test #'eq))
+	 ((&labels blacklisted? (thing blacklist)
+	    (etypecase blacklist
+	      (null
+	       nil)
+	      (function
+	       (funcall blacklist thing))
+	      ((cons (eql or))
+	       (mapcar (curry #'blacklisted? thing) (rest blacklist)))
+	      (sequence
+	       (find thing blacklist)))))
+	 ((&labels do-thing (thing)
+	    (cond
+	      ((blacklisted? thing blacklist)
+	       (return-from do-thing))
+	      ((gethash thing seen)
+	       (return-from do-thing))
+	      (t
+	       (setf (gethash thing seen) t)))
+	    (cons thing (mappend #'do-thing (direct-dependencies thing))))))
+    ;; If requested, remove THING from an arbitrary position. It can
+    ;; end up there because of cycles.
+    (if include-self?
+	(do-thing thing)
+	(remove thing (do-thing thing)))))
+
+
 ;;; Fundamental type protocol
 ;;
 

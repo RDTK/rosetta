@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for model.data module.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -88,6 +88,11 @@
   ;; Value validation protocol
   (:export
    :validate-value)
+
+  ;; Dependency protocol
+  (:export
+   :direct-dependencies
+   :dependencies)
 
   ;; Fundamental type protocol
   (:export

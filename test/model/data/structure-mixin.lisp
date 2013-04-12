@@ -52,8 +52,8 @@
 
 (addtest (structure-mixin-root
           :documentation
-	  "Test the `composite-child' method specialization
-`structure-mixin'")
+	  "Test the `contents' method specialization
+`structure-mixin'.")
   lookup
 
   (ensure-cases (struct args expected)
@@ -65,3 +65,13 @@
       (case expected
 	(no-such-child (ensure-condition 'no-such-child (do-it)))
 	(t             (ensure-same (do-it) expected :test #'eq))))))
+
+(addtest (structure-mixin-root
+          :documentation
+	  "Test method on `direct-dependencies'.")
+  direct-dependencies
+
+  (ensure-cases (type expected)
+      `((,+struct/simple+ (,+utf-8-string+)))
+
+    (ensure-same (direct-dependencies type) expected :test #'set-equal)))
