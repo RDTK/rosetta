@@ -384,12 +384,15 @@ cache parsing results."))
 			    (source  t)
 			    (builder source-level-caching-mixin)
 			    &key &allow-other-keys)
-  ;; Construct a key based on FORMAT and a normalized version of
-  ;; SOURCE and retrieve the parsing result from the cache or delegate
-  ;; to the next method to perform a parse.
+  ;; Construct a key based on FORMAT and a normalized version
+  ;; (e.g. using the truename) of SOURCE and retrieve the parsing
+  ;; result from the cache or delegate to the next method to perform a
+  ;; parse. If SOURCE is a pathname, but does not have a truename,
+  ;; disable caching.
   (let ((key (typecase source
 	       (pathname (unless (wild-pathname-p source)
-			   (cons format (truename source))))
+			   (when-let ((truename (probe-file source)))
+			     (cons format truename))))
 	       (stream   nil)
 	       (t        (cons format source)))))
     (if key

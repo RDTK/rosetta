@@ -281,14 +281,19 @@ bar"))
 	  "Test management of duplicate parsing requests.")
   parse/smoke
 
-  (let ((source1 "some source")
-	(source2 "some source")
-	(source3 "some other source")
-	(source4 #.(or *compile-file-truename* *load-truename*))
-	(source5 (merge-pathnames "../frontend/"
-				  #.(or *compile-file-truename* *load-truename*))))
+  (let* ((source1 "some source")
+	 (source2 "some source")
+	 (source3 "some other source")
+	 (source4 #.(or *compile-file-truename* *load-truename*))
+	 (source5 (merge-pathnames "../frontend/" source4))
+	 (source6 #P"/does-not-exist"))
     (ensure-builder-cases (source-level-caching-mixin-mock-builder)
-	(;; All sources equal => should produce exactly one `parse'
+	(;; A non-existing source cannot be cached (because of lacking
+	 ;; a truename), but should not signal an error from the cache
+	 ;; either.
+	 `(nil ((:mock ,source6))                  (,source6))
+
+	 ;; All sources equal => should produce exactly one `parse'
 	 ;; call.
 	 `(nil ((:mock ,source1))                  (,source1))
 	 `(nil ((:mock ,source1) (:mock ,source1)) (,source1)) ; `eq' sources
