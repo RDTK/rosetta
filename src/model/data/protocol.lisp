@@ -167,12 +167,18 @@ allowed:
 					    :type container
 					    :key  (list kind key)))
 		 (use-value (value)
+		   :report (lambda (stream)
+			     (format stream "~@<Use a given value that ~
+should be used in place of the missing value.~@:>"))
 		   :interactive (lambda ()
 				  (format *query-io* "Value (evaluated): ")
 				  (finish-output *query-io*)
 				  (list (eval (read *query-io*))))
 		   value)
 		 (store-value (value)
+		   :report (lambda (stream)
+			     (format stream "~@<Store a value to be ~
+used in place of the missing value.~@:>"))
 		   :interactive (lambda ()
 				  (format *query-io* "Replacement value (evaluated): ")
 				  (finish-output *query-io*)
@@ -202,8 +208,17 @@ allowed:
 		    (make-condition 'duplicate-child-key
 				    :type container
 				    :key  (list kind key)))
-	 (continue ())
+	 (continue (&optional condition)
+	   :report (lambda (stream)
+		     (format stream "~@<Replace the existing value ~S ~
+with ~S.~@:>"
+			     existing new-value))
+	   (declare (ignore condition)))
 	 (keep ()
+	   :report (lambda (stream)
+		     (format stream "~@<Keep the existing value ~
+~S.~@:>"
+			     existing))
 	   (return-from lookup existing))))))
 
   (call-next-method))

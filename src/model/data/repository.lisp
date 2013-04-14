@@ -25,7 +25,7 @@
 (cl:in-package :rosetta.model.data)
 
 
-;;;
+;;; `forward-reference-upgrader-mixin' mixin class
 ;;
 
 (defclass forward-reference-upgrader-mixin ()
@@ -64,7 +64,7 @@ the objects they represent."))
 			  (kind       t)
 			  (name       list)
 			  &key &allow-other-keys)
-  (check-type name (or name/absolute (cons (eql or)))) ;;; TODO(jmoringe, 2012-05-03): proper type
+  (check-type name name-expression/absolute)
 
   (push (cons (cons kind name) new-value)
 	(forward-references repository))
@@ -94,7 +94,7 @@ the objects they represent."))
 	    (call-next-method)))))
 
 
-;;;
+;;; `base-repository' class
 ;;
 
 (defclass base-repository (container/absolute-mixin

@@ -141,14 +141,6 @@ with width ~D.~@>"
   (setf (lookup parent (kind child) (list :absolute (name child))) child) ; TODO(jmoringe, 2012-04-24): temp
   parent)
 
-(defmethod add-child ((builder model-builder) ;;; TODO(jmoringe, 2012-04-24):
-		      (parent  package1)
-		      (child   named-mixin))
-  (assert (not (eq parent child))) ; TODO(jmoringe, 2012-10-24): proper condition
-
-  (setf (lookup parent (kind child) (name child)) child) ; TODO(jmoringe, 2012-04-24):
-  parent)
-
 
 ;;; Comment handling
 ;;

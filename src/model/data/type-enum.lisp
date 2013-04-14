@@ -41,7 +41,7 @@
 a name and an associated, usually numeric, value."))
 
 
-;;; `base-enum' class
+;;; `enum' class
 ;;
 
 (define-composite-mixin value

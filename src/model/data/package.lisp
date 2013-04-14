@@ -120,43 +120,26 @@
    :data-holder
    :wire-schema)
 
-  ;; `documentation-mixin' mixin class
+  ;; Type mixin classes
   (:export
-   :documentation-mixin)
+   :documentation-mixin
 
-  ;; `named-mixin' mixin class
-  (:export
-   :named-mixin)
+   :named-mixin
 
-  ;; `fundamental-type-mixin' and `*-with-mixin' classes
-  (:export
    :fundamental-type-mixin
 
    :fixed-width-mixin
-   :variable-width-mixin)
+   :variable-width-mixin
 
-  ;; `composite-mixin' mixin class
-  (:export
-   :composite-mixin)
+   :composite-mixin
 
-  ;; `typed-mixin' mixin class
-  (:export
-   :typed-mixin)
+   :typed-mixin
 
-  ;; `field-mixin' mixin class
-  (:export
-   :field-mixin)
+   :field-mixin
+   :structure-mixin
 
-  ;; `structure-mixin' mixin class
-  (:export
-   :structure-mixin)
+   :array-mixin
 
-  ;; `array-mixin' mixin class
-  (:export
-   :array-mixin)
-
-  ;; `toplevel-mixin'
-  (:export
    :toplevel-mixin)
 
   ;; `mapping' class
