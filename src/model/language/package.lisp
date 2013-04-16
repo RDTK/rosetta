@@ -11,6 +11,7 @@
   (:use
    #:cl
    #:alexandria
+   #:let-plus
    #:more-conditions)
 
   ;; Language protocol

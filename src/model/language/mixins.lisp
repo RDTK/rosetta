@@ -34,14 +34,20 @@ characters when processing identifiers."))
 
 (defmethod legalize-name ((language constrained-identifiers-mixin)
                           (name     string))
-  ;; Replace illegal characters with legal ones.
-  (let ((more-legal
-          (map 'string
-               (lambda (char position)
-                 (if (legal-identifier-char? language char position)
-                     char
-                     (funcall (language-char-legalizer language) char)))
-               name (iota (length name)))))
+  ;; Replace illegal characters with legal characters or strings.
+  (let* ((legalizer (language-char-legalizer language))
+         (more-legal
+           (reduce
+            (curry #'concatenate 'string)
+            (map 'list #'list name (iota (length name)))
+            :key (lambda+ ((char position))
+                   (let ((new (if (legal-identifier-char?
+                                   language char position)
+                                  char
+                                  (funcall legalizer char))))
+                     (etypecase new
+                       (character (make-string 1 :initial-element new))
+                       (string    new)))))))
     (if (next-method-p)
         (call-next-method language more-legal)
         more-legal)))

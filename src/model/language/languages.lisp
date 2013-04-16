@@ -50,7 +50,10 @@ See `language-lisp'."))
                                       foreign-mixin)
   ()
   (:default-initargs
-   :char-legalizer (constantly #\_)
+   :char-legalizer (lambda (char)
+                     (if (digit-char-p char)
+                         (string-downcase (char-name char))
+                         #\_))
    :name-legalizer (lambda (name) (concatenate 'string name "_")))
   (:documentation
    "Superclass for common imperative languages."))

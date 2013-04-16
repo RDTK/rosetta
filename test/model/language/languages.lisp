@@ -60,7 +60,7 @@
    '("foo_bar"  t))
 
   (legalize-name
-   '("1foo"     "_foo")
+   '("1foo"     "digit_onefoo")
    '("foo-bar"  "foo_bar")
    '("foo?"     "foo_")
    '("foo bar"  "foo_bar")
@@ -87,7 +87,7 @@
    '("foo_bar" t))
 
   (legalize-name
-   '("1foo"    "_foo")
+   '("1foo"    "digit_onefoo")
    '("foo-bar" "foo_bar")
    '("foo?"    "foo_")
    '("foo bar" "foo_bar")
@@ -114,7 +114,7 @@
    '("foo_bar"  t))
 
   (legalize-name
-   '("1foo"    "_foo")
+   '("1foo"    "digit_onefoo")
    '("foo-bar" "foo_bar")
    '("foo?"    "foo_")
    '("foo bar" "foo_bar")
