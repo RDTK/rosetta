@@ -147,7 +147,9 @@ allowed:
                  (use-value (value)
                    :report (lambda (stream)
                              (format stream "~@<Use a given value that ~
-should be used in place of the missing value.~@:>"))
+                                             should be used in place ~
+                                             of the missing ~
+                                             value.~@:>"))
                    :interactive (lambda ()
                                   (format *query-io* "Value (evaluated): ")
                                   (finish-output *query-io*)
@@ -156,7 +158,8 @@ should be used in place of the missing value.~@:>"))
                  (store-value (value)
                    :report (lambda (stream)
                              (format stream "~@<Store a value to be ~
-used in place of the missing value.~@:>"))
+                                             used in place of the ~
+                                             missing value.~@:>"))
                    :interactive (lambda ()
                                   (format *query-io* "Replacement value (evaluated): ")
                                   (finish-output *query-io*)
@@ -189,13 +192,13 @@ used in place of the missing value.~@:>"))
          (continue (&optional condition)
            :report (lambda (stream)
                      (format stream "~@<Replace the existing value ~S ~
-with ~S.~@:>"
+                                     with ~S.~@:>"
                              existing new-value))
            (declare (ignore condition)))
          (keep ()
            :report (lambda (stream)
                      (format stream "~@<Keep the existing value ~
-~S.~@:>"
+                                     ~S.~@:>"
                              existing))
            (return-from lookup existing))))))
 
@@ -311,7 +314,8 @@ a function, a `cl:continue' restart is established around the call."))
                    (funcall if-invalid (make-error cause))
                  (continue ()
                    :report (lambda (stream)
-                             (format stream "~@<Ignore the incompatibility.~@:>"))
+                             (format stream "~@<Ignore the ~
+                                             incompatibility.~@:>"))
                    t)))))))
     (or (handler-bind
             (((or simple-error value-invalid-for-type) #'handle-invalid))

@@ -157,7 +157,7 @@ and compare the result of the function call with EXPECTED-VAR."
                          (t      type-spec)))
             (target    (or case-target ,default-target
                            (error "~@<Neither case-specific target nor ~
-~S has been supplied.~@:>"
+                                   ~S has been supplied.~@:>"
                                :default-target)))
             ;; Generate code for TYPE and TARGET using fresh SOURCE,
             ;; DESTINATION and OFFSET variables.

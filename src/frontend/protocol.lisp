@@ -138,12 +138,13 @@ described by FORMAT."))
       (retry ()
         :report (lambda (stream)
                   (format stream "~@<Retry processing ~S in format ~S ~
-with builder ~A.~@:>"
+                                  with builder ~A.~@:>"
                           (maybe-shorten source) format builder)))
       (use-value (value)
         :report (lambda (stream)
                   (format stream "~@<Use specified value instead of ~
-processing ~S in format ~S with builder ~A.~@:>"
+                                  processing ~S in format ~S with ~
+                                  builder ~A.~@:>"
                           (maybe-shorten source) format builder))
         :interactive (lambda ()
                        (format *query-io* "Value (evaluated): ")
@@ -164,7 +165,8 @@ processing ~S in format ~S with builder ~A.~@:>"
                          (continue (&optional condition)
                            :report (lambda (stream)
                                      (format stream "~@<Skip ~S and ~
-continue with the next source.~@:>"
+                                                     continue with the ~
+                                                     next source.~@:>"
                                              (maybe-shorten source1)))
                            (declare (ignore condition))))))
              (collect result))))))

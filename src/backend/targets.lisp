@@ -82,9 +82,10 @@ object."))
            :mechanism nil) ; TODO(jmoringe, 2012-05-08): ok?
           (:documentation
            ,(format nil "The ~A target, for example, emits methods on ~
-`rosetta.serialization:~(~:*~A~)' or otherwise generates code for ~
-given serialization mechanisms and classes described by model ~
-component instances."
+                         `rosetta.serialization:~(~:*~A~)' or ~
+                         otherwise generates code for given ~
+                         serialization mechanisms and classes ~
+                         described by model component instances."
                     name)))))
 
   (define-serialization-target packed-size)

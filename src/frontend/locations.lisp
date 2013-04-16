@@ -146,8 +146,8 @@ content."
     (cond
       ((source-content info)
        (format stream "~@[  ~V@Tv~&~]~
-~<| ~@;~/rosetta.frontend::format-content/~:>~
-~@[~&  ~V@T^~]"
+                       ~<| ~@;~/rosetta.frontend::format-content/~:>~
+                       ~@[~&  ~V@T^~]"
                start-column (list info) end-column))
       ((not colon?)
        (format-content stream info)))))

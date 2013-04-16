@@ -28,7 +28,7 @@
                 (lambda (stream)
                   (format stream
                           "~@<Retry running the emit method for node ~
-~S and target ~S.~@:>"
+                           ~S and target ~S.~@:>"
                           ,node ,target))
                 (go :retry))
 
@@ -36,7 +36,7 @@
               (continue (&optional condition)
                 :report (lambda (stream)
                           (format stream "~@<Skip the emit method for ~
-node ~S and target ~S.~@:>"
+                                          node ~S and target ~S.~@:>"
                                   ,node ,target))
                 (declare (ignore condition)))
 
@@ -46,7 +46,7 @@ node ~S and target ~S.~@:>"
                 (lambda (stream)
                   (format stream
                           "~@<Specify a value instead of running the ~
-emit method for node ~S and target ~S.~@:>"
+                           emit method for node ~S and target ~S.~@:>"
                           ,node ,target))
                 :interactive ,read-value-var
                 (setf ,result-var (list value)))))
@@ -155,11 +155,12 @@ is derived from NAME. For NAME, the resulting targets are:
   (let+ ((name/method (format-symbol *package* "~A/METHOD" name))
          (body-class  (format-symbol *package* "TARGET-~A" name))
          ((&flet default-documentation ()
-            (format nil "The ~A target delegates to the ~A ~
-target which, for example, emits methods on ~
-`rosetta.serialization:~:*~(~A~)' or otherwise generates code for ~
-given serialization mechanisms and classes described by model ~
-component instances."
+            (format nil "The ~A target delegates to the ~A target ~
+                         which, for example, emits methods on ~
+                         `rosetta.serialization:~:*~(~A~)' or ~
+                         otherwise generates code for given ~
+                         serialization mechanisms and classes ~
+                         described by model component instances."
                     name/method name)))
          (options (apply #'append options))
          ((&plist-r/o (documentation :documentation (default-documentation)))
@@ -186,8 +187,8 @@ have to be symbols."
        (:default-initargs
         :mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
        (:documentation
-        ,(format nil "~A~2%This target class generates ~
-code that implements the ~(~A~) mechanism.~@[~2%~A~]"
+        ,(format nil "~A~2%This target class generates code that ~
+                      implements the ~(~A~) mechanism.~@[~2%~A~]"
                  (documentation superclass 'type)
                  mechanism
                  (when-let ((mechanism (find-mechanism-class mechanism)))
@@ -207,8 +208,9 @@ which have to be symbols."
          ()
          (:documentation
           ,(format nil "The ~S/METHOD target is a specialization of ~
-the ~S target which generates methods that implement the ~(~A~) ~
-function for the ~(~A~) mechanism.~@[~2%~A~]~@[~2%~A~]"
+                        the ~S target which generates methods that ~
+                        implement the ~(~A~) function for the ~(~A~) ~
+                        mechanism.~@[~2%~A~]~@[~2%~A~]"
                    name superclass method mechanism
                    (documentation superclass 'type)
                    (when-let ((mechanism (find-mechanism-class mechanism)))

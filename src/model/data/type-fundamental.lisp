@@ -71,7 +71,8 @@ storage."))
             ,@properties))
 
          (defparameter ,variable-name (make-instance ',class-name)
-           ,(format nil "Singleton instance of the `~(~A~)' fundamental type."
+           ,(format nil "Singleton instance of the `~(~A~)' ~
+                         fundamental type."
                     name))))))
 
 (define-fundamental-type (bool (fixed-width-mixin) :bool)

@@ -36,7 +36,7 @@
            ()
            (:documentation
             ,(format nil "Unit tests for the `~(~A~)' language
-class."
+                          class."
                      class-name)))
 
          ,@(mapcar #'process-spec specs)))))

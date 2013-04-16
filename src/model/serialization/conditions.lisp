@@ -23,7 +23,7 @@ invalid.")
   (:report
    (lambda (condition stream)
      (format stream "~@<Type ~A is invalid for mechanism ~
-~A~/more-conditions::maybe-print-cause/~@:>"
+                     ~A~/more-conditions::maybe-print-cause/~@:>"
              (type1     condition)
              (mechanism condition)
              condition)))

@@ -26,7 +26,7 @@ deserialization operation."))
   (:report
    (lambda (condition stream)
      (format stream "~@<An error occurred when serializing ~A to ~A ~
-using mechanism ~A.~@:>"
+                     using mechanism ~A.~@:>"
              (serialization-error-source      condition)
              (serialization-error-destination condition)
              (serialization-error-mechanism   condition))))

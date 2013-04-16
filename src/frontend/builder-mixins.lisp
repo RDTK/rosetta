@@ -304,12 +304,14 @@ unresolved references as forward references and resolve them later."))
                      :cause    (make-instance
                                 'simple-error
                                 :format-control "~@<Unresolved forward ~
-reference to the ~A named \"~/rosetta.model::print-qname/\".~@:>"
+                                                 reference to the ~A ~
+                                                 named ~
+                                                 \"~/rosetta.model::print-qname/\".~@:>"
                                 :format-arguments (list kind qname)))
             (continue ()
               :report (lambda (stream)
                         (format stream "~@<Ignore the unresolved ~
-reference and continue.~@:>")))))))
+                                        reference and continue.~@:>")))))))
 
 ;;; `dependency-delegating-mixin' mixin class
 

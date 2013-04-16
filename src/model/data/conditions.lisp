@@ -26,7 +26,7 @@ type-related error condition classes."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The value ~S is invalid for type ~
-~A~/more-conditions::maybe-print-cause/~@:>"
+                     ~A~/more-conditions::maybe-print-cause/~@:>"
              (data-type-error-value condition)
              (data-type-error-type  condition)
              condition)))
@@ -65,7 +65,7 @@ types and their children."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Child ~S caused an error within type ~
-~S~/more-conditions::maybe-print-cause/~@:>"
+                     ~S~/more-conditions::maybe-print-cause/~@:>"
              (data-type-error-key  condition)
              (data-type-error-type condition)
              condition)))
@@ -112,7 +112,7 @@ generated from FORMAT-CONTROL and FORMAT-ARGUMENTS."
   (:report
    (lambda (condition stream)
      (format stream "~@<The requested child type ~S could not be found ~
-within the type ~S.~@:>"
+                     within the type ~S.~@:>"
              (data-type-error-key  condition)
              (data-type-error-type condition))))
   (:documentation
@@ -132,7 +132,7 @@ within the specified container type."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The child key ~S is already in use~@[ by child ~
-~A~] within type ~S.~@:>"
+                     ~A~] within type ~S.~@:>"
              (data-type-error-key      condition)
              (data-type-error-existing condition)
              (data-type-error-type     condition))))

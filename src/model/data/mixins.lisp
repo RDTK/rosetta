@@ -151,12 +151,12 @@ with KIND `t'. The returned value is compared to the KEY of the
                     :initform (make-hash-table :test #'equal)
                     :documentation
                     ,(format nil "Stores the contents of kind ~A of ~
-the container."
+                                  the container."
                              kind)))
        (:documentation
-
         ,(format nil "This class is intended to be mixed into classes ~
-which implement the composite protocol for kind ~A."
+                      which implement the composite protocol for ~
+                      kind ~A."
                  kind)))
 
      (defmethod contents ((container ,class-name)

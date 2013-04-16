@@ -52,9 +52,10 @@ have an associated builder object."))
   (:report
    (lambda (condition stream)
      (let+ (((&accessors-r/o location source-content) condition))
-       (format stream "~<When parsing ~:/rosetta.frontend::format-location/~@:>~
-~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
-~@<~/more-conditions::maybe-print-cause/~@:>"
+       (format stream "~<When parsing ~
+                       ~:/rosetta.frontend::format-location/~@:> ~:[~*~; which is~
+                       ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
+                       ~@<~/more-conditions::maybe-print-cause/~@:>"
                (list location)
                source-content location
                condition))))
@@ -69,9 +70,11 @@ parsing the contents of a source."))
   (:report
    (lambda (condition stream)
      (let+ (((&accessors-r/o location source-content builder) condition))
-       (format stream "~<When processing ~:/rosetta.frontend::format-location/~@:>~
-~:[ ~*~; which is ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
-~@<~@[with builder ~A~].~/more-conditions::maybe-print-cause/~@:>"
+       (format stream "~<When processing ~
+                       ~:/rosetta.frontend::format-location/~@:>~:[~*~; which is~
+                       ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
+                       ~@<~@[with builder
+                       ~A~].~/more-conditions::maybe-print-cause/~@:>"
                (list location)
                source-content location
                builder condition))))
@@ -90,17 +93,20 @@ processing the contents of a source after or during parsing."))
                                          parsing-condition)
             ()
             (:documentation
-             ,(format nil "This ~(~A~) is signaled when a problem is
-encountered during parsing of the contents of a source."
+             ,(format nil "This ~(~A~) is signaled when a problem is ~
+                           encountered during parsing of the contents ~
+                           of a source."
                       kind)))
 
           (define-condition ,processing-name (,kind
                                               processing-condition)
             ()
             (:documentation
-             ,(format nil "This ~(~A~) is signaled when a problem is
-encountered during processing of the contents of a source after or
-during parsing."
+
+             ,(format nil "This ~(~A~) is signaled when a problem is ~
+                           encountered during processing of the ~
+                           contents of a source after or during ~
+                           parsing."
                       kind))))))
 
   (define-frontend-conditions warning)
@@ -134,8 +140,9 @@ resolve the dependency."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The dependency ~S could not be resolved. ~:[No ~
-locations have been tried. Check dependency handler~;~:*These ~
-locations have been tried: ~{~S~^, ~}~].~@:>"
+                     locations have been tried. Check dependency ~
+                     handler~;~:*These locations have been tried: ~
+                     ~{~S~^, ~}~].~@:>"
              (dependency-error-dependency condition)
              (dependency-error-locations  condition))))
   (:documentation
@@ -158,7 +165,7 @@ errors."
   (:report
    (lambda (condition stream)
      (format stream "~@<Ambiguous dependency ~S. Candidates are ~
-~{~S~^, ~}.~@:>"
+                     ~{~S~^, ~}.~@:>"
              (dependency-error-dependency condition)
              (dependency-error-candidates condition))))
   (:documentation

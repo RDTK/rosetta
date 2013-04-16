@@ -34,7 +34,8 @@ describe conversions."))
               ()
               (:report
                (lambda (condition stream)
-                 (format stream "~@<Cannot convert from type ~A to type ~A.~@:>"
+                 (format stream "~@<Cannot convert from type ~A to ~
+                                 type ~A.~@:>"
                          (conversion-condition-from condition)
                          (conversion-condition-to   condition))))
               (:documentation
@@ -47,7 +48,7 @@ when a conversion fails."))
               (:report
                (lambda (condition stream)
                  (format stream "~@<Cannot convert from type ~A to type ~A: ~
-~?~@:>"
+                                 ~?~@:>"
                          (conversion-condition-from         condition)
                          (conversion-condition-to           condition)
                          (simple-condition-format-control   condition)
@@ -63,7 +64,7 @@ when a conversion fails."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Cannot convert from wider type ~A to narrower ~
-type ~A.~@:>"
+                     type ~A.~@:>"
              (conversion-condition-from condition)
              (conversion-condition-to   condition))))
   (:documentation
@@ -75,7 +76,7 @@ because it would illegally narrow the source type."))
   (:report
    (lambda (condition stream)
      (format stream "~@<Conversion from type ~A to type ~A looses ~
-precision.~:>"
+                     precision.~:>"
              (conversion-condition-from condition)
              (conversion-condition-to   condition))))
   (:documentation
@@ -108,8 +109,9 @@ signaled."))
      (let+ (((&accessors-r/o (name    missing-environment-entry-name)
                              (context context-condition-context)) condition))
        (format stream "~@<The requested entry ~S could not be found in ~
-~:[empty environment ~;~:*environment~2%~2@T~<~@;~{~32S ~
-~S~^~&~}~:>~2%~]of context ~A.~@:>"
+                       ~:[the empty environment~
+                       ~;~:*environment~2%~2@T~<~@;~{~32S ~
+                       ~S~^~&~}~:>~2%~]of context ~A.~@:>"
                name
                (list (alist-plist (context-environment/alist context)))
                context))))
@@ -177,7 +179,7 @@ Stack:
             (:documentation
 
              ,(format nil "This ~(~A~) is signaled when something ~
-goes wrong during an emission process."
+                           goes wrong during an emission process."
                       kind))))))
 
   (define-emit-condition error   "failed")

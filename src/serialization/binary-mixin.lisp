@@ -87,7 +87,8 @@ size and create such an octet-vector."
                             (start 0)
                             end)
             ,(format nil "Open a stream for SOURCE and, potentially ~
-seek to START, then ~(~A~)." name)
+                          seek to START, then ~(~A~)."
+                     name)
             (with-input-from-file (stream source
                                           :element-type '(unsigned-byte 8))
               (unless (zerop start)
