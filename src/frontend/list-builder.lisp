@@ -53,10 +53,10 @@
 
 (defmethod lookup ((container list) (kind t) (key string)
                    &key &allow-other-keys)
-  (find-if #'(lambda (element)
-               (and (listp element)
-                    (or (eq kind t) (eq kind (kind element)))
-                    (equal key (name element))))
+  (find-if (lambda (element)
+             (and (listp element)
+                  (or (eq kind t) (eq kind (kind element)))
+                  (equal key (name element))))
            (second container)))
 
 (defmethod validate-value ((type list) (value t)

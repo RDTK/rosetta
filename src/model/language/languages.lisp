@@ -51,8 +51,7 @@ See `language-lisp'."))
   ()
   (:default-initargs
    :char-legalizer (constantly #\_)
-   :name-legalizer #'(lambda (name)
-                       (concatenate 'string name "_")))
+   :name-legalizer (lambda (name) (concatenate 'string name "_")))
   (:documentation
    "Superclass for common imperative languages."))
 

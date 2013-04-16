@@ -376,10 +376,10 @@ element type."))
 
 (defmethod print-items append ((type array-mixin))
   (list (list :element-type (name (element-type type)))
-        (list :index-type   (mapcar #'(lambda (index)
-                                        (if (typep index 'singleton)
-                                            (value index)
-                                            '*))
+        (list :index-type   (mapcar (lambda (index)
+                                      (if (typep index 'singleton)
+                                          (value index)
+                                          '*))
                                     (ensure-list (index-type type)))
               "[~{~A~^, ~}]"))) ; TODO(jmoringe, 2012-03-28):
 

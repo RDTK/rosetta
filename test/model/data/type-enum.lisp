@@ -12,8 +12,8 @@
    "Tests for the `enum' and `enum-value' types."))
 
 (defun ensure-values (enum expected)
-  (ensure-same (mapcar #'(lambda (value)
-                           (list (name value) (value value)))
+  (ensure-same (mapcar (lambda (value)
+                         (list (name value) (value value)))
                        (contents enum :value))
                expected
                :test (rcurry #'set-equal :test #'equal)))

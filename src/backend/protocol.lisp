@@ -89,9 +89,9 @@ This state consists of:
   ;; The `first'/`list' trickery and use of multiple return values
   ;; from `gethash' is necessary for correct handling of nil values.
   (first
-   (or (some #'(lambda (env)
-                 (let+ (((&values value found?) (gethash key env)))
-                   (when found? (list value))))
+   (or (some (lambda (env)
+               (let+ (((&values value found?) (gethash key env)))
+                 (when found? (list value))))
              (%context-environment context))
        (if (eq default :error)
            (error 'missing-environment-entry

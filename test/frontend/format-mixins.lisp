@@ -53,9 +53,9 @@ EXPECTED can be an object which is then used in BODY."
               (,conditions-var '())
               (,result-var
                (handler-bind
-                   ((condition #'(lambda (condition)
-                                   (appendf ,conditions-var
-                                            (list condition)))))
+                   ((condition (lambda (condition)
+                                 (appendf ,conditions-var
+                                          (list condition)))))
                  (parse format source builder))))
          (declare (ignorable ,result-var))
          ,@body))))

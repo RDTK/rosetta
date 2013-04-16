@@ -166,7 +166,7 @@ data type represents signed or unsigned numbers."))
 
 (defmethod validate-value ((type type-ascii-string) (value string)
                            &key &allow-other-keys)
-  (every #'(lambda (code) (<= 0 (char-code code) 127)) value))
+  (every (lambda (code) (<= 0 (char-code code) 127)) value))
 
 (define-fundamental-type (utf-8-string (type-string*) :string)
   :encoding :utf-8)

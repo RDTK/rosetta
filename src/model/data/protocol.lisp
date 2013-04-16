@@ -233,8 +233,7 @@ KEY can be usually be a `cl:string', a `name/relative' or a
 (defmethod query ((container t)
                   (kind      list)
                   (key       t))
-  (some #'(lambda (kind) (query container kind key))
-        kind))
+  (some (lambda (kind) (query container kind key)) kind))
 
 (defgeneric parent (thing)
   (:documentation

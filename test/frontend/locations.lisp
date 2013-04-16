@@ -174,8 +174,8 @@ baz fez"            (8 . 11) nil   4)             "baz…"))
                      (format-content stream info colon?))))
       (ensure-same result  expected
                    :test   (if (null content)
-                               #'(lambda (result expected)
-                                   (search expected result :test #'string=))
+                               (lambda (result expected)
+                                 (search expected result :test #'string=))
                                #'string=)))))
 
 (addtest (frontend-locations-root
@@ -217,6 +217,6 @@ baz fez"            (8 . 11) nil   4)             "  v
                      (format-content-with-delimiters stream info colon?))))
       (ensure-same result  expected
                    :test   (if (null content)
-                               #'(lambda (result expected)
-                                   (search expected result :test #'string=))
+                               (lambda (result expected)
+                                 (search expected result :test #'string=))
                                #'string=)))))

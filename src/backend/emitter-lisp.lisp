@@ -18,9 +18,10 @@
                   ,(generate node target :lisp))))
     (handler-bind
         (#+sbcl (sb-c::redefinition-warning #'muffle-warning)
-         (error #'(lambda (condition)
-                    (error "~@<Failed to compile code~2%~S~2%Caused by:~%~A~@:>"
-                           code condition))))
+         (error  (lambda (condition)
+                   (error "~@<Failed to compile code~2%~S~2%Caused ~
+                           by:~%~A~@:>"
+                          code condition))))
       (eval code))))
 
 ;;; Generic stuff

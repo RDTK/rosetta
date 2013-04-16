@@ -411,7 +411,7 @@ and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
        (- ,offset-var ,start-var))))
 
 (defmacro with-offset-computation ((target language) &body body)
-  `(invoke-with-offset-computation ,target ,language #'(lambda () ,@body)))
+  `(invoke-with-offset-computation ,target ,language (lambda () ,@body)))
 
 (macrolet
     ((define-offset-computation-method (target)

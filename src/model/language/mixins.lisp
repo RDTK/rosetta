@@ -37,10 +37,10 @@ characters when processing identifiers."))
   ;; Replace illegal characters with legal ones.
   (let ((more-legal
           (map 'string
-               #'(lambda (char position)
-                   (if (legal-identifier-char? language char position)
-                       char
-                       (funcall (language-char-legalizer language) char)))
+               (lambda (char position)
+                 (if (legal-identifier-char? language char position)
+                     char
+                     (funcall (language-char-legalizer language) char)))
                name (iota (length name)))))
     (if (next-method-p)
         (call-next-method language more-legal)

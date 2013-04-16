@@ -60,9 +60,9 @@
         ((,#P"1" ,#P"2")      ((use-value :foo) continue)               (:foo)))
 
     (ensure-same
-     (handler-bind ((error #'(lambda (condition)
-                               (apply #'invoke-restart
-                                      (ensure-list (pop restart-specs))))))
+     (handler-bind ((error (lambda (condition)
+                             (apply #'invoke-restart
+                                    (ensure-list (pop restart-specs))))))
        (process :mock sources :error))
      expected
      :test #'equal)))
