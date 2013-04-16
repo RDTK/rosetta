@@ -4,22 +4,22 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.test
+(cl:defpackage #:rosetta.model.test
   (:use
-   :cl
-   :lift
+   #:cl
+   #:lift
 
-   :rosetta.model
+   #:rosetta.model
 
-   :rosetta.test)
+   #:rosetta.test)
 
   (:export
-   :model-root)
+   #:model-root)
 
   (:documentation
    "This package contains unit tests for the model module."))
 
-(cl:in-package :rosetta.model.test)
+(cl:in-package #:rosetta.model.test)
 
 (deftestsuite model-root (root)
   ()

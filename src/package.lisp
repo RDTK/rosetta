@@ -4,24 +4,24 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta
+(cl:defpackage #:rosetta
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus)
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus)
 
   ;; print-items mechanism and mixin class
   (:export
-   :print-items
+   #:print-items
 
-   :print-items-mixin)
+   #:print-items-mixin)
 
   ;; Utilities
   (:export
-   :camel-case-boundary?
-   :underscore-boundary?
-   :normalize-name)
+   #:camel-case-boundary?
+   #:underscore-boundary?
+   #:normalize-name)
 
   (:documentation
    "This package contains generic facilities used within the rosetta

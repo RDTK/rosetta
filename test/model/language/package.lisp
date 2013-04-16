@@ -4,19 +4,19 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.language.test
+(cl:defpackage #:rosetta.model.language.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:lift
 
-   :rosetta.model.language
+   #:rosetta.model.language
 
-   :rosetta.model.test)
+   #:rosetta.model.test)
 
   (:export
-   :rosetta.model.language-root)
+   #:rosetta.model.language-root)
 
   (:documentation
    "This package contains unit tests for the model.language module."))

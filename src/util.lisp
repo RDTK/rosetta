@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta)
+(cl:in-package #:rosetta)
 
 ;;; Name normalization utilities
 

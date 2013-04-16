@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.frontend.test)
+(cl:in-package #:rosetta.frontend.test)
 
 (deftestsuite frontend-util-root (frontend-root)
   ()

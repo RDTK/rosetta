@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.backend)
+(cl:in-package #:rosetta.backend)
 
 ;;; Target protocol and class family
 

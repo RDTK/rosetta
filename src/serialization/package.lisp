@@ -4,58 +4,58 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.serialization
+(cl:defpackage #:rosetta.serialization
   (:nicknames
-   :rs.s)
+   #:rs.s)
 
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
 
-   :nibbles
+   #:nibbles
 
-   :rosetta.model.serialization)
+   #:rosetta.model.serialization)
 
   ;; Conditions
   (:export
-   :serialization-error
-   :serialization-error-mechanism
-   :serialization-error-source
-   :serialization-error-destination
+   #:serialization-error
+   #:serialization-error-mechanism
+   #:serialization-error-source
+   #:serialization-error-destination
 
-   :pack-error
+   #:pack-error
 
-   :unpack-error)
+   #:unpack-error)
 
   ;; Serialization and deserialization protocol
   (:export
-   :packed-size
+   #:packed-size
 
-   :pack :unpack
-   :pack*)
+   #:pack #:unpack
+   #:pack*)
 
   ;; Partial deserialization protocol
   (:export
-   :location
-   :extract)
+   #:location
+   #:extract)
 
   ;; `textual-mixin' mixin class
   (:export
-   :textual-mixin)
+   #:textual-mixin)
 
   ;; `textual-stream-mixin' mixin class
   (:export
-   :textual-stream-mixin)
+   #:textual-stream-mixin)
 
   ;; `binary-mixin' mixin class
   (:export
-   :binary-mixin)
+   #:binary-mixin)
 
   ;; `data-holder' mixin class
   (:export
-   :data-holder-mixin)
+   #:data-holder-mixin)
 
   (:documentation
    "This package contains protocols and functionality related to

@@ -4,72 +4,72 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.data
+(cl:defpackage #:rosetta.model.data
   (:nicknames
-   :rs.m.d)
+   #:rs.m.d)
 
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:more-conditions
 
-   :rosetta
-   :rosetta.model)
+   #:rosetta
+   #:rosetta.model)
 
   ;; Conditions
   (:export
-   :data-type-error
-   :data-type-error-type
+   #:data-type-error
+   #:data-type-error-type
 
-   :value-invalid-for-type ; condition and function
-   :data-type-error-value
+   #:value-invalid-for-type ; condition and function
+   #:data-type-error-value
 
-   :child-error
-   :data-type-error-key
+   #:child-error
+   #:data-type-error-key
 
-   :chainable-child-error  ; condition and function
+   #:chainable-child-error  ; condition and function
 
-   :simple-child-error     ; condition and function
+   #:simple-child-error     ; condition and function
 
-   :no-such-child          ; condition and function
+   #:no-such-child          ; condition and function
 
-   :duplicate-child-key)   ; condition and function
+   #:duplicate-child-key)   ; condition and function
 
   ;; Restarts
   (:export
-   :upgrade)
+   #:upgrade)
 
   ;; Documentation protocol
   (:export
-   :documentation1)
+   #:documentation1)
 
   ;; Composition protocol
   (:export
-   :contents
-   :contents/plist
+   #:contents
+   #:contents/plist
 
-   :lookup
-   :query
+   #:lookup
+   #:query
 
-   :parent
-   :ancestors
-   :root
+   #:parent
+   #:ancestors
+   #:root
 
-   :composite?)
+   #:composite?)
 
   ;; Storage protocol
   (:export
-   :fixed-size?)
+   #:fixed-size?)
 
   ;; Typed protocol
   (:export
-   :type1)
+   #:type1)
 
   ;; Value validation protocol
   (:export
-   :validate-value)
+   #:validate-value)
 
   ;; Dependency protocol
   (:export
@@ -78,29 +78,29 @@
 
   ;; Fundamental type protocol
   (:export
-   :fundamental?
-   :category
-   :width
-   :signed?
-   :encoding)
+   #:fundamental?
+   #:category
+   #:width
+   #:signed?
+   #:encoding)
 
   ;; Field protocol
   (:export
-   :optional?)
+   #:optional?)
 
   ;; Array protocol
   (:export
-   :element-type
-   :index-type)
+   #:element-type
+   #:index-type)
 
   ;; Singleton protocol
   (:export
-   :value)
+   #:value)
 
   ;; Mapping protocol
   (:export
-   :data-holder
-   :wire-schema)
+   #:data-holder
+   #:wire-schema)
 
   ;; Type mixin classes
   (:export
@@ -126,66 +126,66 @@
 
   ;; `mapping' class
   (:export
-   :mapping)
+   #:mapping)
 
   ;; Data type classes
   (:export
-   :type-bool
+   #:type-bool
 
-   :type-integer*
-   :type-uint8 :type-uint16 :type-uint32  :type-uint64
-   :type-int8  :type-int16  :type-int32   :type-int64
+   #:type-integer*
+   #:type-uint8 #:type-uint16 #:type-uint32  #:type-uint64
+   #:type-int8  #:type-int16  #:type-int32   #:type-int64
 
-   :type-float*
-   :type-float32 :type-float64
+   #:type-float*
+   #:type-float32 #:type-float64
 
-   :type-string*
-   :type-ascii-string :type-utf-8-string
+   #:type-string*
+   #:type-ascii-string #:type-utf-8-string
 
-   :type-octet-vector
+   #:type-octet-vector
 
-   :enum-value
-   :enum
+   #:enum-value
+   #:enum
 
-   :base-field
-   :base-structure
+   #:base-field
+   #:base-structure
 
-   :base-array
+   #:base-array
 
-   :singleton
+   #:singleton
 
-   :package1)
+   #:package1)
 
   ;; Builtin data type objects
   (:export
-   :+bool+
+   #:+bool+
 
-   :+uint8+ :+uint16+ :+uint32+  :+uint64+
-   :+int8+  :+int16+  :+int32+   :+int64+
+   #:+uint8+ #:+uint16+ #:+uint32+ #:+uint64+
+   #:+int8+  #:+int16+  #:+int32+  #:+int64+
 
-   :+float32+ :+float64+
+   #:+float32+ #:+float64+
 
-   :+ascii-string+ :+utf-8-string+
+   #:+ascii-string+ #:+utf-8-string+
 
-   :+octet-vector+)
+   #:+octet-vector+)
 
   ; Forward reference protocol and class
   (:export
-   :upgrade!
+   #:upgrade!
 
-   :forward-reference)
+   #:forward-reference)
 
   ;; Builder protocol
   (:export
-   :find-node
-   :make-node
-   :add-child)
+   #:find-node
+   #:make-node
+   #:add-child)
 
   ;; Builder class family
   (:export
-   :no-such-builder-class
-   :find-builder-class
-   :builder-classes)
+   #:no-such-builder-class
+   #:find-builder-class
+   #:builder-classes)
 
   (:documentation
    "This package contains protocols and classes which can be used to

@@ -4,59 +4,59 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.language
+(cl:defpackage #:rosetta.model.language
   (:nicknames
-   :rs.m.l)
+   #:rs.m.l)
 
   (:use
-   :cl
-   :alexandria
-   :more-conditions)
+   #:cl
+   #:alexandria
+   #:more-conditions)
 
   ;; Language protocol
   (:export
-   :legal-name?
-   :legalize-name)
+   #:legal-name?
+   #:legalize-name)
 
   ;; Language class family
   (:export
-   :no-such-language-class
-   :find-language-class
-   :language-classes)
+   #:no-such-language-class
+   #:find-language-class
+   #:language-classes)
 
   ;; Reserved words protocol and `reserved-words-mixin'
   (:export
-   :reserved-word?
+   #:reserved-word?
 
-   :language-reserved-words
-   :language-name-legalizer
+   #:language-reserved-words
+   #:language-name-legalizer
 
-   :reserved-words-mixin)
+   #:reserved-words-mixin)
 
   ;; Identifier character protocol and `constrained-identifiers-mixin'
   (:export
-   :legal-identifier-char?
+   #:legal-identifier-char?
 
-   :language-char-legalizer
+   #:language-char-legalizer
 
-   :constrained-identifiers-mixin)
+   #:constrained-identifiers-mixin)
 
   ;; Foreign language protocol and `foreign-mixin'
   (:export
-   :foreign?
+   #:foreign?
 
-   :foreign-mixin)
+   #:foreign-mixin)
 
   ;; Languages
   (:export
-   :language-abstract
+   #:language-abstract
 
-   :language-lisp
-   :language-lisp/compiled
+   #:language-lisp
+   #:language-lisp/compiled
 
-   :language-c++
-   :language-python
-   :language-java)
+   #:language-c++
+   #:language-python
+   #:language-java)
 
   (:documentation
    "This package contains functions and classes which model

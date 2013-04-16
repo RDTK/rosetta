@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.data)
+(cl:in-package #:rosetta.model.data)
 
 ;; TODO(jmoringe, 2012-05-03): mixin?
 (defclass singleton (typed-mixin

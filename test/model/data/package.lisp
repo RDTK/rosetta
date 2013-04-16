@@ -4,41 +4,41 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.data.test
+(cl:defpackage #:rosetta.model.data.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :more-conditions
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:more-conditions
+   #:lift
 
-   :rosetta
-   :rosetta.model
-   :rosetta.model.data
+   #:rosetta
+   #:rosetta.model
+   #:rosetta.model.data
 
-   :rosetta.test
-   :rosetta.model.test)
+   #:rosetta.test
+   #:rosetta.model.test)
 
   (:shadow
-   :root)
+   #:root)
 
   ;; Some simple types
   (:export
-   :+singleton/uint32+
-   :+singleton/float64+
+   #:+singleton/uint32+
+   #:+singleton/float64+
 
-   :+enum/uint8/simple+
-   :+enum/uint8/one+
-   :+enum/uint32/simple+
-   :+enum/int32/simple+
+   #:+enum/uint8/simple+
+   #:+enum/uint8/one+
+   #:+enum/uint32/simple+
+   #:+enum/int32/simple+
 
-   :+struct/simple+)
+   #:+struct/simple+)
 
   (:documentation
    "This package contains unit tests for the model.data module."))
 
-(cl:in-package :rosetta.model.data.test)
+(cl:in-package #:rosetta.model.data.test)
 
 (deftestsuite model-data-root (model-root)
   ()

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.language.test)
+(cl:in-package #:rosetta.model.language.test)
 
 (eval-when (:compile-toplevel)
   (defmacro define-language-test-case ((name method) &body cases)

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.frontend)
+(cl:in-package #:rosetta.frontend)
 
 (defclass search-path-resolver (print-items-mixin)
   ((search-path  :initarg  :search-path

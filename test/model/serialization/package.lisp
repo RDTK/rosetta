@@ -4,24 +4,24 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model.serialization.test
+(cl:defpackage #:rosetta.model.serialization.test
   (:use
-   :cl
-   :let-plus
-   :lift
+   #:cl
+   #:let-plus
+   #:lift
 
-   :rosetta.model.serialization
+   #:rosetta.model.serialization
 
-   :rosetta.model.test)
+   #:rosetta.model.test)
 
   (:export
-   :model-serialization-root)
+   #:model-serialization-root)
 
   (:documentation
    "This package contains unit tests for the model.serialization
 module."))
 
-(cl:in-package :rosetta.model.serialization.test)
+(cl:in-package #:rosetta.model.serialization.test)
 
 (deftestsuite model-serialization-root (model-root)
   ()

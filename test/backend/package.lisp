@@ -4,50 +4,50 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.backend.test
+(cl:defpackage #:rosetta.backend.test
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :iterate
-   :nibbles
-   :lift
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:iterate
+   #:nibbles
+   #:lift
 
-   :rosetta.model.data
-   :rosetta.model.language
-   :rosetta.model.serialization
-   :rosetta.serialization
-   :rosetta.backend
+   #:rosetta.model.data
+   #:rosetta.model.language
+   #:rosetta.model.serialization
+   #:rosetta.serialization
+   #:rosetta.backend
 
-   :rosetta.test
-   :rosetta.model.data.test)
+   #:rosetta.test
+   #:rosetta.model.data.test)
 
-  (:import-from :rosetta.backend
-   :context)
+  (:import-from #:rosetta.backend
+   #:context)
 
-  (:shadowing-import-from :rosetta.model.data
-   :name
-   :type1)
+  (:shadowing-import-from #:rosetta.model.data
+   #:name
+   #:type1)
 
-  (:shadowing-import-from :rosetta.backend
-   :generate)
+  (:shadowing-import-from #:rosetta.backend
+   #:generate)
 
-  (:shadowing-import-from :rosetta.test
-   :root)
+  (:shadowing-import-from #:rosetta.test
+   #:root)
 
-  (:import-from :rosetta.backend
-   :context)
+  (:import-from #:rosetta.backend
+   #:context)
 
   (:export
-   :backend-root
+   #:backend-root
 
-   :ensure-serialization-cases)
+   #:ensure-serialization-cases)
 
   (:documentation
    "This package contains unit tests for the backend module."))
 
-(cl:in-package :rosetta.backend.test)
+(cl:in-package #:rosetta.backend.test)
 
 (deftestsuite backend-root (root)
   ()

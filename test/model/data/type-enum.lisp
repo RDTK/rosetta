@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.data.test)
+(cl:in-package #:rosetta.model.data.test)
 
 (deftestsuite model-data-enum-root (model-data-root)
   ()

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.frontend)
+(cl:in-package #:rosetta.frontend)
 
 ;;; `binary-format-mixin' mixin class
 

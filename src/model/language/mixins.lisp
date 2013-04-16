@@ -4,7 +4,7 @@
 ;;;;
 ;;;; This file may be licensed under the terms of the
 
-(cl:in-package :rosetta.model.language)
+(cl:in-package #:rosetta.model.language)
 
 ;;; `constrained-identifiers-mixin' mixin class
 

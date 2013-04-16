@@ -4,143 +4,143 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.backend
+(cl:defpackage #:rosetta.backend
   (:nicknames
-   :rs.b)
+   #:rs.b)
 
   (:use
-   :cl
-   :alexandria
-   :split-sequence
-   :let-plus
-   :iterate
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:split-sequence
+   #:let-plus
+   #:iterate
+   #:more-conditions
 
-   :rosetta
-   :rosetta.model
-   :rosetta.model.data
-   :rosetta.model.language
-   :rosetta.model.serialization
+   #:rosetta
+   #:rosetta.model
+   #:rosetta.model.data
+   #:rosetta.model.language
+   #:rosetta.model.serialization
 
-   :rosetta.serialization)
+   #:rosetta.serialization)
 
   (:shadow
-   :generate)
+   #:generate)
 
-  (:shadowing-import-from :rosetta.model
-   :name)
+  (:shadowing-import-from #:rosetta.model
+   #:name)
 
-  (:shadowing-import-from :rosetta.model.data
-   :type1)
+  (:shadowing-import-from #:rosetta.model.data
+   #:type1)
 
   ;; Conditions
   (:export
-   :conversion-condition
-   :conversion-condition-from
-   :conversion-condition-to
+   #:conversion-condition
+   #:conversion-condition-from
+   #:conversion-condition-to
 
-   :conversion-error        :conversion-warning
-   :simple-conversion-error :simple-conversion-warning
+   #:conversion-error        #:conversion-warning
+   #:simple-conversion-error #:simple-conversion-warning
 
-   :cannot-narrow
+   #:cannot-narrow
 
-   :loss-of-precision
+   #:loss-of-precision
 
-   :context-condition
-   :context-condition-context
+   #:context-condition
+   #:context-condition-context
 
-   :missing-environment-entry
-   :missing-environment-entry-name
+   #:missing-environment-entry
+   #:missing-environment-entry-name
 
-   :emit-condition
-   :emit-condition-node
-   :emit-condition-target
-   :emit-condition-language
+   #:emit-condition
+   #:emit-condition-node
+   #:emit-condition-target
+   #:emit-condition-language
 
-   :emit-error
+   #:emit-error
 
-   :emit-warning)
+   #:emit-warning)
 
   ;; Variables
   (:export
-   :*context*)
+   #:*context*)
 
   ;; generate/emit protocol
   (:export
-   :generate
-   :emit/context
-   :emit)
+   #:generate
+   #:emit/context
+   #:emit)
 
   ;; Context protocol
   (:export
-   :context-stack
+   #:context-stack
 
-   :context-node
-   :context-target
-   :context-language
+   #:context-node
+   #:context-target
+   #:context-language
 
-   :context-environment/alist
-   :context-get)
+   #:context-environment/alist
+   #:context-get)
 
   ;; Target protocol
   (:export
-   :make-target-like)
+   #:make-target-like)
 
   ;; Target class family
   (:export
-   :no-such-target-class
-   :find-target-class
-   :target-classes)
+   #:no-such-target-class
+   #:find-target-class
+   #:target-classes)
 
   (:export
-   :code-generating-target-mixin)
+   #:code-generating-target-mixin)
 
   ;; General-purpose target classes
   (:export
-   :target-class
+   #:target-class
 
-   :target-reference
+   #:target-reference
 
-   :target-instantiate
-   :target-initargs
+   #:target-instantiate
+   #:target-initargs
 
-   :target-value->code
-   :target-code->value
+   #:target-value->code
+   #:target-code->value
 
-   :target-convert)
+   #:target-convert)
 
   ;; Serialization-related target classes
   (:export
-   :mechanism-target-mixin
-   :mechanism
+   #:mechanism-target-mixin
+   #:mechanism
 
-   :target-packed-size :target-packed-size/method
-   :target-pack        :target-pack/method
-   :target-unpack      :target-unpack/method
+   #:target-packed-size #:target-packed-size/method
+   #:target-pack        #:target-pack/method
+   #:target-unpack      #:target-unpack/method
 
-   :target-location    :target-location/method
-   :target-extract     :target-extract/method)
+   #:target-location    #:target-location/method
+   #:target-extract     #:target-extract/method)
 
   ;; Macros
   (:export
-   :define-target
-   :define-target/method
-   :define-mechanism-target
-   :define-mechanism-target/method
-   :define-mechanism-targets
+   #:define-target
+   #:define-target/method
+   #:define-mechanism-target
+   #:define-mechanism-target/method
+   #:define-mechanism-targets
 
-   :with-updated-context
-   :with-emit-symbols
-   :parent
-   :grandparent
-   :ancestors
-   :recur
+   #:with-updated-context
+   #:with-emit-symbols
+   #:parent
+   #:grandparent
+   #:ancestors
+   #:recur
 
-   :optmization-case
+   #:optmization-case
 
    ;; let-plus
-   :&env :&env-r/o
-   :&context)
+   #:&env #:&env-r/o
+   #:&context)
 
   (:documentation
    "This package contains backend-related protocols and infrastructure

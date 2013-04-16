@@ -4,34 +4,34 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.frontend.test
+(cl:defpackage #:rosetta.frontend.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :more-conditions
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:more-conditions
+   #:lift
 
-   :rosetta
-   :rosetta.model
-   :rosetta.model.data
-   :rosetta.frontend)
+   #:rosetta
+   #:rosetta.model
+   #:rosetta.model.data
+   #:rosetta.frontend)
 
   (:import-from :rosetta.frontend
-   :maybe-shorten
-   :guess-format
+   #:maybe-shorten
+   #:guess-format
 
-   :locations
-   :resolver)
+   #:locations
+   #:resolver)
 
   (:export
-   :frontend-root)
+   #:frontend-root)
 
   (:documentation
    "This package contains unit tests for the frontend module"))
 
-(cl:in-package :rosetta.frontend.test)
+(cl:in-package #:rosetta.frontend.test)
 
 (deftestsuite frontend-root (root)
   ()

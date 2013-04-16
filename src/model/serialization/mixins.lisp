@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.serialization)
+(cl:in-package #:rosetta.model.serialization)
 
 ;;; `wire-type-mixin' mixin class
 

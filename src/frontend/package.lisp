@@ -4,148 +4,148 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.frontend
+(cl:defpackage #:rosetta.frontend
   (:nicknames
-   :rs.f)
+   #:rs.f)
 
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :more-conditions
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:more-conditions
 
-   :rosetta
-   :rosetta.model
-   :rosetta.model.data)
+   #:rosetta
+   #:rosetta.model
+   #:rosetta.model.data)
 
   ;; Conditions
   (:export
-   :location-condition
-   :location
+   #:location-condition
+   #:location
 
-   :builder-condition
-   :builder
+   #:builder-condition
+   #:builder
 
-   :parse-error1
+   #:parse-error1
 
-   :parse-warning
+   #:parse-warning
 
-   :processing-error
+   #:processing-error
 
-   :processing-warning
+   #:processing-warning
 
-   :dependency-error
-   :dependency-error-dependency
+   #:dependency-error
+   #:dependency-error-dependency
 
-   :cannot-resolve-dependency
-   :dependency-error-locations
+   #:cannot-resolve-dependency
+   #:dependency-error-locations
 
-   :ambiguous-dependency
-   :dependency-error-candidates)
+   #:ambiguous-dependency
+   #:dependency-error-candidates)
 
   ;; Restarts
   (:export
-   :retry)
+   #:retry)
 
 ;;; Location-related stuff
 
   ;; Location protocol
   (:export
-   :source
-   :source-content
-   :bounds
-   :line
-   :column
+   #:source
+   #:source-content
+   #:bounds
+   #:line
+   #:column
 
-   :location=)
+   #:location=)
 
   ;; Location repository protocol and class
   (:export
-   :location-of
+   #:location-of
 
-   :location-repository)
+   #:location-repository)
 
   ;; Location Utilities
   (:export
-   :location-info
+   #:location-info
 
-   :format-location
-   :format-content
-   :format-content-with-delimiters)
+   #:format-location
+   #:format-content
+   #:format-content-with-delimiters)
 
 ;;; Parsing- and format-related stuff
 
   ;; Processing protocol
   (:export
-   :process
-   :parse)
+   #:process
+   #:parse)
 
   ;; Format class family
   (:export
-   :no-such-format-class
-   :find-format-class
-   :format-classes)
+   #:no-such-format-class
+   #:find-format-class
+   #:format-classes)
 
   ;; `binary-format-mixin' mixin class
   (:export
-   :binary-format-mixin)
+   #:binary-format-mixin)
 
   ;; `text-format-mixin' mixin class
   (:export
-   :text-format-mixin)
+   #:text-format-mixin)
 
 ;;; Builder-related stuff
 
   ;; Comment attaching protocol
   (:export
-   :most-recent-comment
-   :comment
-   :comment?
-   :prettify)
+   #:most-recent-comment
+   #:comment
+   #:comment?
+   #:prettify)
 
   ;; Dependency resolution protocol
   (:export
-   :resolve)
+   #:resolve)
 
   ;; Search path-based resolution protocol and class
   (:export
-   :search-path
-   :if-ambiguous
+   #:search-path
+   #:if-ambiguous
 
-   :search-path-resolver)
+   #:search-path-resolver)
 
   ;; Recursive package creation protocol
   (:export
-   :ensure-package)
+   #:ensure-package)
 
   ;; `location-attach-mixin' mixin class
   (:export
-   :location-attaching-mixin)
+   #:location-attaching-mixin)
 
   ;; `comment-attaching-mixin' mixin class
   (:export
-   :comment-attaching-mixin)
+   #:comment-attaching-mixin)
 
   ;; `root-package-creating-mixin' mixin class
   (:export
-   :root-package-creating-mixin)
+   #:root-package-creating-mixin)
 
   ;; `lazy-resolver-mixin' mixin class
   (:export
-   :lazy-resolver-mixin)
+   #:lazy-resolver-mixin)
 
   ;; `dependency-delegating-mixin' mixin class
   (:export
-   :dependency-delegating-mixin)
+   #:dependency-delegating-mixin)
 
   ;; `source-level-caching-mixin' mixin class
   (:export
-   :source-level-caching-mixin)
+   #:source-level-caching-mixin)
 
   ;; `name-normalizing-mixin' mixin class
   (:export
-   :name-normalizing-mixin)
+   #:name-normalizing-mixin)
 
   (:documentation
    "This package contains frontend-related protocols and

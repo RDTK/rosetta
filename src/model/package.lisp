@@ -4,38 +4,38 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.model
+(cl:defpackage #:rosetta.model
   (:nicknames
-   :rs.m)
+   #:rs.m)
 
   (:use
-   :cl
-   :alexandria
-   :let-plus)
+   #:cl
+   #:alexandria
+   #:let-plus)
 
   ;; Types
   (:export
-   :name-component
+   #:name-component
 
-   :name/absolute
-   :name-expression/absolute
+   #:name/absolute
+   #:name-expression/absolute
 
-   :name/relative
-   :name-expression/relative
+   #:name/relative
+   #:name-expression/relative
 
-   :name
-   :name-expression)
+   #:name
+   #:name-expression)
 
   ;; Name protocol
   (:export
-   :kind
+   #:kind
 
-   :name
-   :qname)
+   #:name
+   #:qname)
 
   ;; Utility functions
   (:export
-   :print-qname)
+   #:print-qname)
 
   (:documentation
    "This package contains general model-related functions and

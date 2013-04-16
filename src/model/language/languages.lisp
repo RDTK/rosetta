@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.language)
+(cl:in-package #:rosetta.model.language)
 
 ;;; Abstract language
 

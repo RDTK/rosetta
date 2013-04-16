@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.frontend.test)
+(cl:in-package #:rosetta.frontend.test)
 
 (defvar +absolute-pathname-of-this-file+
   #.(or *compile-file-truename* *load-truename*))

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; This file may be licensed under the terms of the
 
-(cl:in-package :rosetta.model.serialization.test)
+(cl:in-package #:rosetta.model.serialization.test)
 
 (deftestsuite model-serialization-protocol-root (model-serialization-root)
   ()

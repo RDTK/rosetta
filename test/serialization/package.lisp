@@ -4,24 +4,24 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.serialization.test
+(cl:defpackage #:rosetta.serialization.test
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :flexi-streams
-   :lift
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:flexi-streams
+   #:lift
 
-   :rosetta.serialization
+   #:rosetta.serialization
 
-   :rosetta.model.serialization
+   #:rosetta.model.serialization
 
-   :rosetta.test)
+   #:rosetta.test)
 
   (:documentation
    "This package contains unit tests for the serialization module"))
 
-(cl:in-package :rosetta.serialization.test)
+(cl:in-package #:rosetta.serialization.test)
 
 (deftestsuite serialization-root (root)
   ()

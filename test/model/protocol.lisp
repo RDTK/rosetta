@@ -4,7 +4,7 @@
 ;;;;
 ;;;; This file may be licensed under the terms of the
 
-(cl:in-package :rosetta.model.test)
+(cl:in-package #:rosetta.model.test)
 
 (deftestsuite protocol-root (model-root)
   ()

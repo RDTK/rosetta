@@ -4,21 +4,21 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rosetta.test
+(cl:defpackage #:rosetta.test
   (:use
-   :cl
-   :alexandria
-   :lift
+   #:cl
+   #:alexandria
+   #:lift
 
-   :rosetta)
+   #:rosetta)
 
   (:export
-   :root)
+   #:root)
 
   (:documentation
    "This package contains unit tests for the rosetta system"))
 
-(cl:in-package :rosetta.test)
+(cl:in-package #:rosetta.test)
 
 (deftestsuite root ()
   ()

@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rosetta.model.data)
+(cl:in-package #:rosetta.model.data)
 
 (defclass mapping (print-items-mixin)
   ((data-holder :initarg  :data-holder
