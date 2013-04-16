@@ -59,6 +59,12 @@
 
    :constrained-identifiers-mixin)
 
+  ;; Foreign language protocol and `foreign-mixin'
+  (:export
+   :foreign?
+
+   :foreign-mixin)
+
   ;; Languages
   (:export
    :language-abstract

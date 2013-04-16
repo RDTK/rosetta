@@ -36,10 +36,12 @@
 	 ,case-name
 
 	 (let ((language (make-instance (find-language-class ,(make-keyword name)))))
-	   (ensure-cases (input expected)
-	       (list ,@cases)
+	   ,(if (length= 1 cases)
+		`(ensure-same (,method language) ,@cases)
+		`(ensure-cases (input expected)
+		     (list ,@cases)
 
-	     (ensure-same (,method language input) expected))))))
+		   (ensure-same (,method language input) expected)))))))
 
   (defmacro define-language-test-suite ((name) &body specs)
     (let+ ((suite-name (format-symbol *package* "ROSETTA.MODEL.LANGUAGE.~A-ROOT" name))
@@ -57,7 +59,12 @@ class."
 
 	 ,@(mapcar #'process-spec specs)))))
 
+(define-language-test-suite (lisp)
+  (foreign? nil))
+
 (define-language-test-suite (c++)
+  (foreign? t)
+
   (legal-name?
    '("1foo"     nil) ; invalid char at position 0
    '("foo-bar"  nil) ; invalid char
@@ -83,6 +90,8 @@ class."
    '("foo_bar"  "foo_bar")))
 
 (define-language-test-suite (python)
+  (foreign? t)
+
   (legal-name?
    '("1foo"    nil) ; invalid char at position 0
    '("foo-bar" nil) ; invalid char
@@ -108,6 +117,8 @@ class."
    '("foo_bar" "foo_bar")))
 
 (define-language-test-suite (java)
+  (foreign? t)
+
   (legal-name?
    '("1foo"     nil) ; invalid char at position 0
    '("foo-bar"  nil) ; invalid char

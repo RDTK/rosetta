@@ -72,7 +72,8 @@ See `language-lisp'."))
 ;;
 
 (defclass common-imperative-language (constrained-identifiers-mixin
-				      reserved-words-mixin)
+				      reserved-words-mixin
+				      foreign-mixin)
   ()
   (:default-initargs
    :char-legalizer (constantly #\_)

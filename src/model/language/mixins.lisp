@@ -112,3 +112,16 @@ reserved words when processing identifiers."))
     (if (next-method-p)
 	(call-next-method language more-legal)
 	more-legal)))
+
+
+;;; `foreign-mixin'
+;;
+
+(defclass foreign-mixin ()
+  ()
+  (:documentation
+   "This mixin class can be used to mark language classes as \"not
+Lisp\"."))
+
+(defmethod foreign? ((language foreign-mixin))
+  t)

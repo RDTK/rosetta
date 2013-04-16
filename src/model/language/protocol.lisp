@@ -55,6 +55,19 @@ LANGUAGE."))
    "Return non-nil if WORD is a reserved word in LANGUAGE."))
 
 
+;;; Foreign language protocol
+;;
+
+(defgeneric foreign? (language)
+  (:documentation
+   "Return non-nil if LANGUAGE is not Lisp."))
+
+;; default behavior
+
+(defmethod foreign? ((language t))
+  nil)
+
+
 ;;; Languages
 ;;
 
