@@ -162,3 +162,12 @@
         (,+enum/int32/simple+  (,+int32+)))
 
     (ensure-same (direct-dependencies type) expected :test #'set-equal)))
+
+(define-print-items-test (enum :suite model-data-enum-root)
+  `(,+enum/uint8/simple+                     "\"simple/uint8\": UINT8 (V 2)")
+  `(,+enum/uint8/one+                        "\"one/uint8\": UINT8 (V 1)")
+  `(,+enum/int32/simple+                     "\"simple/int32\": INT32 (V 2)")
+  `(,+enum/uint32/simple+                    "\"simple/uint32\": UINT32 (V 2)")
+
+  `(,(lookup +enum/uint8/simple+ :value "A") "\"A\": UINT8 = 1")
+  `(,(lookup +enum/uint8/simple+ :value "B") "\"B\": UINT8 = 2"))

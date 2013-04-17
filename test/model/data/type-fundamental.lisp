@@ -54,3 +54,6 @@ types.")
     (ensure-same (validate-value (make-instance type) value
                                  :if-invalid nil)
                  expected)))
+
+(define-print-items-test (fundamental-type-mixin :suite model-data-fundamental-root)
+  `(,+uint32+  "UINT32"))

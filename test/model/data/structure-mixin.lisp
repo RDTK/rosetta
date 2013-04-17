@@ -181,3 +181,10 @@
                               ,+uint16+)))
 
     (ensure-same (direct-dependencies type) expected :test #'set-equal)))
+
+(define-print-items-test (base-structure :suite structure-mixin-root)
+  `(,+struct/empty+                      "\"empty\" (N 0) (F 0)")
+  `(,+struct/simple+                     "\"simple\" (N 0) (F 1)")
+  `(,+struct/nested+                     "\"outer\" (N 1) (F 1)")
+
+  `(,(lookup +struct/simple+ :field "a") "\"a\": UTF-8-STRING"))

@@ -53,3 +53,8 @@
                   (apply #'make-instance 'singleton initargs) value
                   :if-invalid nil)
                  expected)))
+
+(define-print-items-test (singleton :suite model-data-singleton-root)
+  `(,+singleton/uint32+  ": UINT32 = 1")
+  #+depends-on-default-float-format
+  `(,+singleton/float64+ ": FLOAT64 = 1.0"))

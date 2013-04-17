@@ -47,5 +47,5 @@ reference object with the desired object."))
     instance))
 
 (defmethod print-items append ((object forward-reference))
-  (list (list :kind (kind object))
-        (list :name (getf (args object) :name) "~@[ ~A~]")))
+  `((:kind ,(kind object))
+    (:name ,(getf (args object) :name) "~@[ ~A~]" ((:after :kind)))))

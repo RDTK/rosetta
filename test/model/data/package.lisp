@@ -11,6 +11,7 @@
    #:let-plus
    #:iterate
    #:more-conditions
+   #:print-items
    #:lift
 
    #:rosetta
@@ -62,6 +63,26 @@
                            (value t)
                            &key &allow-other-keys)
   (error "~@<Mock value validation error.~@:>"))
+
+;;; Macros
+
+(defmacro define-print-items-test ((class &key suite) &body cases)
+  `(addtest (,suite
+             :documentation
+             ,(format nil "Test method on `print-items' for `~(~A~)'."
+                      class))
+     print-items/smoke
+
+     (ensure-cases (input expected)
+         (list ,@cases)
+
+       (let ((instance (typecase input
+                         (list (apply #'make-instance ',class input))
+                         (t    input))))
+         (ensure-same (with-output-to-string (stream)
+                        (format-print-items stream (print-items instance)))
+                      expected
+                      :test #'string=)))))
 
 ;;; Simple data types
 

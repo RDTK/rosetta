@@ -76,6 +76,7 @@ See `version/list' for details on keyword parameters."
                 :split-sequence
                 (:version :let-plus                      "0.2")
                 :more-conditions
+                (:version :utilities.print-items         "0.1")
                 :cl-dynamic-classes
                 (:version :architecture.service-provider "0.1")
 
@@ -87,8 +88,7 @@ See `version/list' for details on keyword parameters."
   :components  ((:module     "src"
                  :serial     t
                  :components ((:file       "package")
-                              (:file       "util")
-                              (:file       "print-items")))
+                              (:file       "util")))
 
                 (:module     "model"
                  :pathname   "src/model"
@@ -239,7 +239,8 @@ See `version/list' for details on keyword parameters."
                               (:file       "structure-mixin")
                               (:file       "type-singleton")
                               (:file       "type-fundamental")
-                              (:file       "type-enum")))
+                              (:file       "type-enum")
+                              (:file       "type-array")))
 
                 (:module     "model-serialization"
                  :pathname   "test/model/serialization"

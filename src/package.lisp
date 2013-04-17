@@ -11,12 +11,6 @@
    #:iterate
    #:let-plus)
 
-  ;; print-items mechanism and mixin class
-  (:export
-   #:print-items
-
-   #:print-items-mixin)
-
   ;; Utilities
   (:export
    #:camel-case-boundary?

@@ -42,7 +42,7 @@ documentation can be associated."))
 instances of which represent named data types."))
 
 (defmethod print-items append ((object named-mixin))
-  (list (list :name (name object) "~S ")))
+  `((:name ,(name object) "~S")))
 
 ;;; `typed-mixin' mixin class
 
@@ -67,7 +67,9 @@ refer to another type such as a field of a structure."))
 (defmethod print-items append ((object typed-mixin))
   "Try to enforce a meaningful order of the name and type print
 items."
-  (list (list :type (print-items (type1 object)) " : ~/rosetta::format-print-items/")))
+  `((:type ,(print-items (type1 object))
+           ": ~/print-items:format-print-items/"
+           ((:after :name)))))
 
 ;;; `parented-mixin' mixin class
 
@@ -413,14 +415,15 @@ element type."))
         (and (typep index-type 'list) ; TODO(jmoringe, 2012-04-24): tuple
              (every (of-type 'singleton) index-type)))))
 
-(defmethod print-items append ((type array-mixin))
-  (list (list :element-type (name (element-type type)))
-        (list :index-type   (mapcar (lambda (index)
-                                      (if (typep index 'singleton)
-                                          (value index)
-                                          '*))
-                                    (ensure-list (index-type type)))
-              "[~{~A~^, ~}]"))) ; TODO(jmoringe, 2012-03-28):
+(defmethod print-items append ((object array-mixin))
+  `((:element-type ,(name (element-type object)))
+    (:index-type   ,(mapcar (lambda (index)
+                              (if (typep index 'singleton)
+                                  (value index)
+                                  '*))
+                            (ensure-list (index-type object)))
+                   "[~{~A~^, ~}]" ; TODO(jmoringe, 2012-03-28):
+                   ((:after :element-type)))))
 
 ;;; `toplevel-mixin' mixin class
 

@@ -31,6 +31,9 @@ representing fundamental data types."))
 (defmethod qname ((type fundamental-type-mixin))
   (list :absolute (name type)))
 
+(defmethod print-items append ((object fundamental-type-mixin))
+  `((:name ,(name object))))
+
 ;;; `fixed-width-mixin' mixin class
 
 (defclass fixed-width-mixin ()

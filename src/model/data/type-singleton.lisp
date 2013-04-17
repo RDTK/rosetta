@@ -35,5 +35,5 @@ which consist of singleton values."))
                            &key &allow-other-keys)
   (equal value (value type)))
 
-(defmethod print-items append ((type singleton))
-  (list (list :value (value type))))
+(defmethod print-items append ((object singleton))
+  `((:value ,(value object) " = ~A" ((:after :type)))))

@@ -14,6 +14,7 @@
    #:iterate
    #:let-plus
    #:more-conditions
+   #:print-items
 
    #:rosetta
    #:rosetta.model
