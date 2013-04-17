@@ -13,7 +13,7 @@
 
 (addtest (named-mixin-root
           :documentation
-	  "Test constructing `named-mixin' instances.")
+          "Test constructing `named-mixin' instances.")
   construction
 
   (ensure-condition 'missing-required-initarg

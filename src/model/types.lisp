@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.model)
 
-
 ;;; Naming-related types
-;;
 
 (deftype name-component ()
   'string)
@@ -41,9 +39,7 @@
   "A `name' or a disjunction (with `cl:or') of multiple `name's."
   '(or name (cons (eql or) (cons name))))
 
-
 ;;; Utility functions
-;;
 
 (defun %every-name-component (list)
   (every (of-type 'name-component) list))

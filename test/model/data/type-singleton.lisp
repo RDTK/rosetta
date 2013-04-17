@@ -13,43 +13,43 @@
 
 (addtest (model-data-singleton-root
           :documentation
-	  "Test constructing instances of class `singleton'.")
+          "Test constructing instances of class `singleton'.")
   construction
 
   (ensure-cases (initargs expected-value)
       `(;; These are invalid.
-	(()                                              missing-required-initarg)
-	((:type ,+uint8+ :value -1)  value-invalid-for-type)
+        (()                                              missing-required-initarg)
+        ((:type ,+uint8+ :value -1)  value-invalid-for-type)
 
-	;; These are valid.
-	((:type ,+uint8+ :value 1)   1)
-	((:type ,+uint8+ :value 255) 255))
+        ;; These are valid.
+        ((:type ,+uint8+ :value 1)   1)
+        ((:type ,+uint8+ :value 255) 255))
 
     (let+ (((&flet do-it ()
-	      (value (apply #'make-instance 'singleton initargs)))))
+              (value (apply #'make-instance 'singleton initargs)))))
       (case expected-value
-	(missing-required-initarg
-	 (ensure-condition 'missing-required-initarg (do-it)))
-	(value-invalid-for-type
-	 (ensure-condition 'value-invalid-for-type (do-it)))
-	(t
-	 (ensure-same (do-it) expected-value))))))
+        (missing-required-initarg
+         (ensure-condition 'missing-required-initarg (do-it)))
+        (value-invalid-for-type
+         (ensure-condition 'value-invalid-for-type (do-it)))
+        (t
+         (ensure-same (do-it) expected-value))))))
 
 (addtest (model-data-singleton-root
           :documentation
-	  "Test method on `validate-value' for class `singleton'.")
+          "Test method on `validate-value' for class `singleton'.")
   validate-value
 
   (ensure-cases (initargs value expected)
       `(;; These are invalid.
-	((:type ,+uint8+ :value 1)   -1   nil)
-	((:type ,+uint8+ :value 1)   2    nil)
+        ((:type ,+uint8+ :value 1)   -1   nil)
+        ((:type ,+uint8+ :value 1)   2    nil)
 
-	;; These are valid.
-	((:type ,+uint8+ :value 1)   1    t)
-	((:type ,+uint8+ :value 255) 255  t))
+        ;; These are valid.
+        ((:type ,+uint8+ :value 1)   1    t)
+        ((:type ,+uint8+ :value 255) 255  t))
 
     (ensure-same (validate-value
-		  (apply #'make-instance 'singleton initargs) value
-		  :if-invalid nil)
-		 expected)))
+                  (apply #'make-instance 'singleton initargs) value
+                  :if-invalid nil)
+                 expected)))

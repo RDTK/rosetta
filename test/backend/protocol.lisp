@@ -13,7 +13,7 @@
 
 (addtest (backend-protocol-root
           :documentation
-	  "Test default behavior of methods on `generate'.")
+          "Test default behavior of methods on `generate'.")
   generate/smoke
 
   (ensure-cases ((node target language) expected-condition expected-result)
@@ -29,31 +29,31 @@
        nil          :result-from-context))
 
     (let+ (((&flet do-it ()
-	      (generate node target language)))
-	   ((&values result result?)
-	    (case expected-condition
-	      (emit-error   (ensure-condition 'emit-error (do-it)))
-	      (emit-warning (progn
-			      (ensure-condition 'emit-warning (do-it))
-			      (values (do-it) t)))
-	      ((nil)        (values (do-it) t)))))
+              (generate node target language)))
+           ((&values result result?)
+            (case expected-condition
+              (emit-error   (ensure-condition 'emit-error (do-it)))
+              (emit-warning (progn
+                              (ensure-condition 'emit-warning (do-it))
+                              (values (do-it) t)))
+              ((nil)        (values (do-it) t)))))
       (when result?
-	(ensure-same result expected-result :test #'equal)))))
+        (ensure-same result expected-result :test #'equal)))))
 
 (addtest (backend-protocol-root
           :documentation
-	  "Test context established by `generate'.")
+          "Test context established by `generate'.")
   generate/context
 
   (macrolet
       ((check-context (&body body)
-	 `(generate (make-instance
-		     'mock-node/callback
-		     :callback (lambda (node target language)
-				 (declare (ignorable node target language))
-				 ,@body))
-		    :reference
-		    :lisp)))
+         `(generate (make-instance
+                     'mock-node/callback
+                     :callback (lambda (node target language)
+                                 (declare (ignorable node target language))
+                                 ,@body))
+                    :reference
+                    :lisp)))
 
     ;; Ensure `*context*' gets bound.
     (check-context (ensure *context*))
@@ -61,28 +61,28 @@
     ;; Ensure `retry', `continue' and `use-value' restarts are
     ;; established.
     (ensure-same (check-context
-		  (ensure (find-restart 'rs.b::retry))
-		  (setf (slot-value node 'callback) nil)
-		  (invoke-restart 'rs.b::retry))
-		 :result-after-callback)
+                  (ensure (find-restart 'rs.b::retry))
+                  (setf (slot-value node 'callback) nil)
+                  (invoke-restart 'rs.b::retry))
+                 :result-after-callback)
     (ensure-null (check-context
-		  (ensure (find-restart 'continue))
-		  (invoke-restart 'continue)))
+                  (ensure (find-restart 'continue))
+                  (invoke-restart 'continue)))
     (ensure-same (check-context
-		  (ensure (find-restart 'use-value))
-		  (invoke-restart 'use-value :result-instead-of-callback))
-		 :result-instead-of-callback)))
+                  (ensure (find-restart 'use-value))
+                  (invoke-restart 'use-value :result-instead-of-callback))
+                 :result-instead-of-callback)))
 
 (addtest (backend-protocol-root
           :documentation
-	  "Smoke test for methods on `make-target-like'.")
+          "Smoke test for methods on `make-target-like'.")
   make-target-like/smoke
 
   (ensure-cases (class like expected-type)
       '((target-mock/little-endian-pack :packed-size target-mock/little-endian-packed-size)
-	(target-mock/little-endian-pack :unpack      target-mock/little-endian-unpack)
-	(target-mock/big-endian-pack    :packed-size target-mock/big-endian-packed-size)
-	(target-mock/big-endian-pack    :unpack      target-mock/big-endian-unpack))
+        (target-mock/little-endian-pack :unpack      target-mock/little-endian-unpack)
+        (target-mock/big-endian-pack    :packed-size target-mock/big-endian-packed-size)
+        (target-mock/big-endian-pack    :unpack      target-mock/big-endian-unpack))
 
     (ensure (typep (make-target-like (make-instance class) like)
-		   expected-type))))
+                   expected-type))))

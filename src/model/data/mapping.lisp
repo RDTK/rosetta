@@ -8,21 +8,21 @@
 
 (defclass mapping (print-items-mixin)
   ((data-holder :initarg  :data-holder
-		:reader   data-holder
-		:documentation
-		"Stores the structure type which describes the
+                :reader   data-holder
+                :documentation
+                "Stores the structure type which describes the
 data-holder part of the mapping.")
    (wire-schema :initarg  :wire-schema
-		:reader   wire-schema
-		:documentation
-		"Stores the structure type which describes the
+                :reader   wire-schema
+                :documentation
+                "Stores the structure type which describes the
 wire-schema part of the mapping.")
    (rules       :initarg  :rules
-		:type     list
-		:accessor rules
-		:initform nil
-		:documentation
-		"Stores the rules which associate field of the
+                :type     list
+                :accessor rules
+                :initform nil
+                :documentation
+                "Stores the rules which associate field of the
 data-holder and wire-schema structure types."))
   (:default-initargs
    :data-holder (missing-required-initarg 'mapping     :data-holder)
@@ -44,5 +44,5 @@ via simple expressions."))
 (defmethod print-items append ((object mapping))
   (let+ (((&accessors-r/o data-holder wire-schema rules) object))
     (list (list :data-holder (name data-holder))
-	  (list :wire-schema (name wire-schema)  " -> ~A")
-	  (list :num-items   (length rules)      " (~D)"))))
+          (list :wire-schema (name wire-schema)  " -> ~A")
+          (list :num-items   (length rules)      " (~D)"))))

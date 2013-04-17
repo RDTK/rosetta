@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta)
 
-
 ;;; Print Items Protocol
-;;
 
 (defgeneric print-items (object)
   (:method-combination append)
@@ -20,9 +18,7 @@ representation of OBJECT."))
   "Default behavior is to not return any print items for OBJECT."
   nil)
 
-
 ;;; Print Items Mixin
-;;
 
 (defclass print-items-mixin ()
   ()
@@ -33,9 +29,7 @@ representation of OBJECT."))
   (print-unreadable-object (object stream :type t :identity t)
     (format-print-items stream (print-items object))))
 
-
 ;;; Utility Functions
-;;
 
 (defun format-print-items (stream items &optional colon? at?)
   "Print ITEMS onto STREAM.
@@ -47,7 +41,7 @@ FORMAT ::= a format string (Default is \"~A\")"
   (declare (ignore colon? at?))
 
   (mapc (lambda+ ((&ign value &optional format))
-	  (format stream (or format "~A") value))
-	(remove-duplicates items
-			   :key      #'first
-			   :from-end t)))
+          (format stream (or format "~A") value))
+        (remove-duplicates items
+                           :key      #'first
+                           :from-end t)))

@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta)
 
-
 ;;; Name normalization utilities
-;;
 
 (defun digit-boundary? (string position)
   "Return a boundary position when there is a DIGIT-NON-DIGIT
@@ -20,9 +18,9 @@ boundary position is of the form
 ."
   (when (< (1+ position) (length string))
     (let ((first?  (digit-char-p (aref string position)))
-	  (second? (digit-char-p (aref string (1+ position)))))
+          (second? (digit-char-p (aref string (1+ position)))))
       (when (xor first? second?)
-	(list (1+ position) (1+ position))))))
+        (list (1+ position) (1+ position))))))
 
 (defun camel-case-boundary? (string position)
   "Return a boundary position when there is a lower case-upper case
@@ -35,13 +33,13 @@ boundary position is of the form
   (cond
     ;; For cases like Data|XOP
     ((and (< (1+ position) (length string))
-	  (lower-case-p (aref string position))
-	  (upper-case-p (aref string (1+ position))))
+          (lower-case-p (aref string position))
+          (upper-case-p (aref string (1+ position))))
      (list (1+ position) (1+ position)))
     ;; For cases like XOP|Data and Vec2D|Double
     ((and (< (+ position 2) (length string))
-	  (upper-case-p (aref string (1+ position)))
-	  (lower-case-p (aref string (+ position 2))))
+          (upper-case-p (aref string (1+ position)))
+          (lower-case-p (aref string (+ position 2))))
      (list (1+ position) (1+ position)))))
 
 (defun underscore-boundary? (string position)
@@ -55,12 +53,12 @@ POSITION. The returned boundary position is of the form
     (list position (1+ position))))
 
 (defun normalize-name (name
-		       &key
-		       (boundary? (disjoin #'digit-boundary?
-					   #'camel-case-boundary?
-					   #'underscore-boundary?))
-		       (transform #'string-downcase)
-		       (separator #\-))
+                       &key
+                       (boundary? (disjoin #'digit-boundary?
+                                           #'camel-case-boundary?
+                                           #'underscore-boundary?))
+                       (transform #'string-downcase)
+                       (separator #\-))
   "Normalize NAME to the form
 
   (concatenate 'string (TRANSFORM COMPONENT1) SEPARATOR
@@ -85,31 +83,31 @@ When SEPARATOR is a character it is used as explained above. When
 SEPARATOR is nil, components are simply concatenated."
   (with-output-to-string (stream)
     (let+ (((&flet component (string &optional first?)
-	      "Add component STRING, potentially with a separator."
-	      (when (and (not first?) separator)
-		(write-char separator stream))
-	      (write-string (funcall transform string) stream)))
-	   (first? t))
+              "Add component STRING, potentially with a separator."
+              (when (and (not first?) separator)
+                (write-char separator stream))
+              (write-string (funcall transform string) stream)))
+           (first? t))
       ;; Go through NAME, testing each position for being a boundary.
       (iter (for  char     each     name :with-index i)
-	    (for  previous previous char)
-	    (with start    =        0)
+            (for  previous previous char)
+            (with start    =        0)
 
-	    ;; Once a component is detected, collect it. Only collect
-	    ;; non-empty components.
-	    (let+ (((&optional end new-start) (funcall boundary? name i)))
-	      (when end
-		;; Collect.
-		(when (and (not (zerop (- end start))) ; there is a component
-			   (or (/= end new-start)      ; separator character
-			       (> (- end start) 1)))   ; multi-char component
-		  (component (subseq name start end) first?)
-		  (setf first? nil))
-		;; Advance start pointer unless we delayed a
-		;; single-char component.
-		(unless (and (= end new-start) (= (- end start) 1))
-		  (setf start new-start))))
+            ;; Once a component is detected, collect it. Only collect
+            ;; non-empty components.
+            (let+ (((&optional end new-start) (funcall boundary? name i)))
+              (when end
+                ;; Collect.
+                (when (and (not (zerop (- end start))) ; there is a component
+                           (or (/= end new-start)      ; separator character
+                               (> (- end start) 1)))   ; multi-char component
+                  (component (subseq name start end) first?)
+                  (setf first? nil))
+                ;; Advance start pointer unless we delayed a
+                ;; single-char component.
+                (unless (and (= end new-start) (= (- end start) 1))
+                  (setf start new-start))))
 
-	    ;; Collect the final component.
-	    (finally
-	     (component (subseq name start) first?))))))
+            ;; Collect the final component.
+            (finally
+             (component (subseq name start) first?))))))

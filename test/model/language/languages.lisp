@@ -9,37 +9,37 @@
 (eval-when (:compile-toplevel)
   (defmacro define-language-test-case ((name method) &body cases)
     (let ((suite-name (format-symbol *package* "ROSETTA.MODEL.LANGUAGE.~A-ROOT" name))
-	  (case-name  (format-symbol *package* "~A/SMOKE" method))
-	  (class-name (format-symbol *package* "LANGUAGE-~A" name)))
+          (case-name  (format-symbol *package* "~A/SMOKE" method))
+          (class-name (format-symbol *package* "LANGUAGE-~A" name)))
       `(addtest (,suite-name
-		 :documentation
-		 ,(format nil "Smoke test for the `~(~A~)' method."
-			  method))
-	 ,case-name
+                 :documentation
+                 ,(format nil "Smoke test for the `~(~A~)' method."
+                          method))
+         ,case-name
 
-	 (let ((language (make-instance (find-language-class ,(make-keyword name)))))
-	   ,(if (length= 1 cases)
-		`(ensure-same (,method language) ,@cases)
-		`(ensure-cases (input expected)
-		     (list ,@cases)
+         (let ((language (make-instance (find-language-class ,(make-keyword name)))))
+           ,(if (length= 1 cases)
+                `(ensure-same (,method language) ,@cases)
+                `(ensure-cases (input expected)
+                     (list ,@cases)
 
-		   (ensure-same (,method language input) expected)))))))
+                   (ensure-same (,method language input) expected)))))))
 
   (defmacro define-language-test-suite ((name) &body specs)
     (let+ ((suite-name (format-symbol *package* "ROSETTA.MODEL.LANGUAGE.~A-ROOT" name))
-	   (class-name (format-symbol *package* "LANGUAGE-~A" name))
-	   ((&flet+ process-spec ((method &body cases))
-	      `(define-language-test-case (,name ,method)
-		 ,@cases))))
+           (class-name (format-symbol *package* "LANGUAGE-~A" name))
+           ((&flet+ process-spec ((method &body cases))
+              `(define-language-test-case (,name ,method)
+                 ,@cases))))
       `(progn
-	 (deftestsuite ,suite-name (rosetta.model.language-root)
-	   ()
-	   (:documentation
-	    ,(format nil "Unit tests for the `~(~A~)' language
+         (deftestsuite ,suite-name (rosetta.model.language-root)
+           ()
+           (:documentation
+            ,(format nil "Unit tests for the `~(~A~)' language
 class."
-		     class-name)))
+                     class-name)))
 
-	 ,@(mapcar #'process-spec specs)))))
+         ,@(mapcar #'process-spec specs)))))
 
 (define-language-test-suite (lisp)
   (foreign? nil))

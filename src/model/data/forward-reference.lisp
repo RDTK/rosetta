@@ -8,15 +8,15 @@
 
 (defclass forward-reference (print-items-mixin)
   ((kind :initarg  :kind
-	 :accessor kind
-	 :documentation
-	 "Stores a description of the kind of the object represented
+         :accessor kind
+         :documentation
+         "Stores a description of the kind of the object represented
 by this forward reference.")
    (args :initarg  :args
-	 :type     list
-	 :accessor args
-	 :documentation
-	 "Stores the arguments that would have been passed to the
+         :type     list
+         :accessor args
+         :documentation
+         "Stores the arguments that would have been passed to the
 object represented by this forward reference."))
   (:default-initargs
    :kind (missing-required-initarg 'forward-reference :kind)
@@ -37,15 +37,15 @@ reference object with the desired object."))
   (list :absolute (name thing)))
 
 (defmethod upgrade! ((instance forward-reference)
-		     (other    t))
+                     (other    t))
   (let ((new-class (class-of other)))
     (apply #'change-class instance new-class nil)
     (iter (for slot in (closer-mop:class-slots new-class))
-	  (let ((name (closer-mop:slot-definition-name slot)))
-	    (setf (slot-value instance name)
-		  (slot-value other name))))
+          (let ((name (closer-mop:slot-definition-name slot)))
+            (setf (slot-value instance name)
+                  (slot-value other name))))
     instance))
 
 (defmethod print-items append ((object forward-reference))
   (list (list :kind (kind object))
-	(list :name (getf (args object) :name) "~@[ ~A~]")))
+        (list :name (getf (args object) :name) "~@[ ~A~]")))

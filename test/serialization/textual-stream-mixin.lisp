@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.serialization.test)
 
-
 ;;; Mock mechanism class
-;;
 
 (defmethod find-mechanism-class ((spec (eql :mock-for-textual-stream-mixin)))
   (find-class 'mechanism-mock-for-textual-stream-mixin))
@@ -17,21 +15,19 @@
   ())
 
 (defmethod pack ((mechanism   mechanism-mock-for-textual-stream-mixin)
-		 (source      t)
-		 (destination stream)
-		 &key)
+                 (source      t)
+                 (destination stream)
+                 &key)
   (format destination "~S" source)
   (values nil destination))
 
 (defmethod unpack ((mechanism   mechanism-mock-for-textual-stream-mixin)
-		   (source      stream)
-		   (destination t)
-		   &key)
+                   (source      stream)
+                   (destination t)
+                   &key)
   (values (read source) nil))
 
-
 ;;; Test suite
-;;
 
 (deftestsuite textual-stream-mixin-root (serialization-root)
   ((simple-mechanism (make-instance 'mechanism-mock-for-textual-stream-mixin)))

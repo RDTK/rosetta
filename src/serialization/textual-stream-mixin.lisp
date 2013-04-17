@@ -13,21 +13,21 @@
 implement textual mechanisms based on streams."))
 
 (defmethod pack ((mechanism   textual-stream-mixin)
-		 (source      t)
-		 (destination (eql 'string))
-		 &rest args
-		 &key)
+                 (source      t)
+                 (destination (eql 'string))
+                 &rest args
+                 &key)
   "The value of DESTINATION indicates that a string should be created
 as destination."
   (let ((result (with-output-to-string (stream)
-		  (apply #'pack mechanism source stream args))))
+                  (apply #'pack mechanism source stream args))))
     (values (length result) result)))
 
 (defmethod unpack ((mechanism   textual-stream-mixin)
-		   (source      pathname)
-		   (destination t)
-		   &rest args
-		   &key)
+                   (source      pathname)
+                   (destination t)
+                   &rest args
+                   &key)
   "Open a stream for SOURCE and unpack the contents into DESTINATION."
   (with-input-from-file (stream source)
     (apply #'unpack mechanism stream destination args)))

@@ -32,6 +32,6 @@ module."))
   ())
 
 (defmethod validate-type ((mechanism mock-mechanism/validate-type)
-			  (type      t)
-			  &key &allow-other-keys)
+                          (type      t)
+                          &key &allow-other-keys)
   (error "~@<Mock type validation error.~@:>"))

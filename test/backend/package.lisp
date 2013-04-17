@@ -54,9 +54,7 @@
   (:documentation
    "Root unit test suite for the backend module."))
 
-
 ;;; mock-node/* classes
-;;
 
 (defclass mock-node/no-methods ()
   ())
@@ -65,8 +63,8 @@
   ())
 
 (defmethod emit ((node     mock-node/warning)
-		 (target   target-reference)
-		 (language language-lisp))
+                 (target   target-reference)
+                 (language language-lisp))
   (warn "~@<Mock warning for unit tests.~@:>")
   :result)
 
@@ -78,73 +76,69 @@
   ())
 
 (defmethod emit/context ((node     mock-node/context)
-			 (target   target-reference)
-			 (language language-lisp))
+                         (target   target-reference)
+                         (language language-lisp))
   (let ((*state-for-mock-node/context* :result-from-context))
     (call-next-method)))
 
 (defmethod emit ((node     mock-node/context)
-		 (target   target-reference)
-		 (language language-lisp))
+                 (target   target-reference)
+                 (language language-lisp))
   *state-for-mock-node/context*)
 
 (defclass mock-node/callback ()
   ((callback :initarg :callback)))
 
 (defmethod emit ((node     mock-node/callback)
-		 (target   t)
-		 (language t))
+                 (target   t)
+                 (language t))
   (when-let ((callback (slot-value node 'callback)))
     (funcall callback node target language))
   :result-after-callback)
 
-
 ;;;
-;;
 
 (macrolet
     ((define-mock-mechanism (endian)
        (let* ((name/short (symbolicate '#:mock/ endian))
-	      (name       (symbolicate '#:mechanism- name/short))
-	      (spec       (make-keyword name/short)))
-	 `(progn
-	    (eval-when (:compile-toplevel :load-toplevel :execute)
-	      (defmethod find-mechanism-class ((spec (eql ,spec)))
-		(find-class ',name))
+              (name       (symbolicate '#:mechanism- name/short))
+              (spec       (make-keyword name/short)))
+         `(progn
+            (eval-when (:compile-toplevel :load-toplevel :execute)
+              (defmethod find-mechanism-class ((spec (eql ,spec)))
+                (find-class ',name))
 
-	      (defclass ,name (binary-mixin
-			       data-holder-mixin
-			       offset-type-mixin
-			       length-type-mixin
-			       constant-endian-mixin)
-		()
-		(:default-initargs
-		 :offset-type +uint16+
-		 :length-type +uint8+
-		 :endian      ,endian)))
+              (defclass ,name (binary-mixin
+                               data-holder-mixin
+                               offset-type-mixin
+                               length-type-mixin
+                               constant-endian-mixin)
+                ()
+                (:default-initargs
+                 :offset-type +uint16+
+                 :length-type +uint8+
+                 :endian      ,endian)))
 
-	    (defmethod validate-type ((mechanism ,name) (type t)
-				      &key &allow-other-keys)
-	      t)
+            (defmethod validate-type ((mechanism ,name) (type t)
+                                      &key &allow-other-keys)
+              t)
 
-	    (define-mechanism-targets ,name/short)))))
+            (define-mechanism-targets ,name/short)))))
 
   (define-mock-mechanism :little-endian)
   (define-mock-mechanism :big-endian))
 
-
 ;;; Test macros
-;;
 
 (defmacro ensure-serialization-cases ((&key
-				       default-target
-				       (input-var           'input)
-				       (expected-var        'expected)
-				       (type-var            'type)
-				       (generated-var       'generated)
-				       destination-initform)
-				      cases
-				      &body body)
+                                       default-target
+                                       (input-var           'input)
+                                       (expected-var        'expected)
+                                       (type-var            'type)
+                                       (generated-var       'generated)
+                                       destination-initform)
+                                      cases
+                                      &body body)
   "Execute BODY for each case in CASES which are of the form
 
   (TYPE-SPEC TARGET ((INPUT1 . EXPECTED1) ...))
@@ -158,36 +152,36 @@ and compare the result of the function call with EXPECTED-VAR."
        ,cases
 
      (let+ ((,type-var (etypecase type-spec
-			 (symbol (make-instance type-spec))
-			 (list   (apply #'make-instance type-spec))
-			 (t      type-spec)))
-	    (target    (or case-target ,default-target
-			   (error "~@<Neither case-specific target nor ~
+                         (symbol (make-instance type-spec))
+                         (list   (apply #'make-instance type-spec))
+                         (t      type-spec)))
+            (target    (or case-target ,default-target
+                           (error "~@<Neither case-specific target nor ~
 ~S has been supplied.~@:>"
-			       :default-target)))
-	    ;; Generate code for TYPE and TARGET using fresh SOURCE,
-	    ;; DESTINATION and OFFSET variables.
-	    ((&with-gensyms source destination offset start end))
-	    ((&flet generate-code (type)
-	       (let+ ((*context* (make-instance 'context))
-		      ((&env (:source-var      source)
-			     (:destination-var destination)
-			     (:offset-var      offset)
-			     (:start-var       start)
-			     (:end-var         end))))
-		 (generate type target :lisp))))
-	    ;; Put the generated code into a simple context which binds
-	    ;; SOURCE, DESTINATION and OFFSET.
-	    (,generated-var
-	     (compile nil `(lambda (input)
-			     (let* ((,source      input)
-				    (,destination ,,destination-initform)
-				    (,offset      0)
-				    (,start       ,offset)
-				    (,end         100))
-			       (values ,(generate-code type) ,destination ,offset))))))
+                               :default-target)))
+            ;; Generate code for TYPE and TARGET using fresh SOURCE,
+            ;; DESTINATION and OFFSET variables.
+            ((&with-gensyms source destination offset start end))
+            ((&flet generate-code (type)
+               (let+ ((*context* (make-instance 'context))
+                      ((&env (:source-var      source)
+                             (:destination-var destination)
+                             (:offset-var      offset)
+                             (:start-var       start)
+                             (:end-var         end))))
+                 (generate type target :lisp))))
+            ;; Put the generated code into a simple context which binds
+            ;; SOURCE, DESTINATION and OFFSET.
+            (,generated-var
+             (compile nil `(lambda (input)
+                             (let* ((,source      input)
+                                    (,destination ,,destination-initform)
+                                    (,offset      0)
+                                    (,start       ,offset)
+                                    (,end         100))
+                               (values ,(generate-code type) ,destination ,offset))))))
        (iter (for (,input-var . ,expected-var) in inputs-and-expected)
-	     (let+ (((&flet do-it () ,@body)))
-	       (case ,expected-var
-		 (error (ensure-condition 'error (do-it)))
-		 (t     (do-it))))))))
+             (let+ (((&flet do-it () ,@body)))
+               (case ,expected-var
+                 (error (ensure-condition 'error (do-it)))
+                 (t     (do-it))))))))

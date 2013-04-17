@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.model.serialization)
 
-
 ;;; Mechanism protocol
-;;
 
 (defgeneric name (mechanism)
   (:documentation
@@ -36,8 +34,8 @@ represent lengths of arrays. The returned object models a type."))
 be used on the wire for the combination of MECHANISM and TYPE."))
 
 (defgeneric validate-type (mechanism type
-			   &key
-			   if-invalid)
+                           &key
+                           if-invalid)
   (:documentation
    "Check whether TYPE can be processed by MECHANISM.
 
@@ -59,55 +57,53 @@ around the call."))
   :little-endian)
 
 (defmethod validate-type :around ((mechanism t)
-				  (type      t)
-				  &key
-				  (if-invalid #'error))
+                                  (type      t)
+                                  &key
+                                  (if-invalid #'error))
   (let+ (((&flet make-error (&optional cause)
-	    (apply #'make-condition 'type-invalid-for-mechanism
-		   :mechanism  mechanism
-		   :type       type
-		   (when cause
-		     (list :cause cause)))))
-	 ((&flet handle-invalid (&optional cause)
-	    (etypecase if-invalid
-	      (null
-	       (return-from validate-type (values nil (make-error cause))))
-	      (function
-	       (restart-case
-		   (funcall if-invalid (make-error cause))
-		 (continue ()
-		   :report (lambda (stream)
-			     (format stream "~@<Ignore the incompatibility.~@:>"))
-		   t)))))))
+            (apply #'make-condition 'type-invalid-for-mechanism
+                   :mechanism  mechanism
+                   :type       type
+                   (when cause
+                     (list :cause cause)))))
+         ((&flet handle-invalid (&optional cause)
+            (etypecase if-invalid
+              (null
+               (return-from validate-type (values nil (make-error cause))))
+              (function
+               (restart-case
+                   (funcall if-invalid (make-error cause))
+                 (continue ()
+                   :report (lambda (stream)
+                             (format stream "~@<Ignore the incompatibility.~@:>"))
+                   t)))))))
     (or (handler-bind
-	    (((or simple-error type-invalid-for-mechanism)
-	       #'handle-invalid))
-	  (call-next-method))
-	(handle-invalid))))
+            (((or simple-error type-invalid-for-mechanism)
+               #'handle-invalid))
+          (call-next-method))
+        (handle-invalid))))
 
 (defmethod validate-type ((mechanism t)
-			  (type      t)
-			  &key &allow-other-keys)
+                          (type      t)
+                          &key &allow-other-keys)
   nil)
 
 (defmethod validate-type ((mechanism t)
-			  (type      composite-mixin)
-			  &key &allow-other-keys)
+                          (type      composite-mixin)
+                          &key &allow-other-keys)
   (every (curry #'validate-type mechanism) (contents type t)))
 
 (defmethod validate-type ((mechanism t)
-			  (type      typed-mixin)
-			  &key &allow-other-keys)
+                          (type      typed-mixin)
+                          &key &allow-other-keys)
   (validate-type mechanism (rs.m.d:type1 type)))
 
 (defmethod validate-type ((mechanism t)
-			  (type      array-mixin)
-			  &key &allow-other-keys)
+                          (type      array-mixin)
+                          &key &allow-other-keys)
   (validate-type mechanism (element-type type)))
 
-
 ;;; Mechanisms
-;;
 
 (intern "MECHANISM") ; for (documentation MECHANISM 'rosetta.model.serialization:mechanism)
 

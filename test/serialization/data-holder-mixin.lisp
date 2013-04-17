@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.serialization.test)
 
-
 ;;; Mock classes
-;;
 
 (defclass mock-class-for-data-holder-mixin ()
   ())
@@ -20,14 +18,12 @@
   ())
 
 (defmethod unpack ((mechanism   mechanism-mock-for-data-holder-mixin)
-		   (source      string)
-		   (destination mock-class-for-data-holder-mixin)
-		   &key)
+                   (source      string)
+                   (destination mock-class-for-data-holder-mixin)
+                   &key)
   destination)
 
-
 ;;; Test suite
-;;
 
 (deftestsuite data-holder-mixin-root (serialization-root)
   ((simple-mechanism (make-instance 'mechanism-mock-for-data-holder-mixin)))
@@ -36,18 +32,18 @@
 
 (addtest (data-holder-mixin-root
           :documentation
-	  "Test case for the methods on `unpack' provided by the
+          "Test case for the methods on `unpack' provided by the
 `data-holder-mixin' class.")
   unpack
 
   ;; Test finding the class by.
   (ensure (typep (unpack simple-mechanism
-			 "foo"
-			 'mock-class-for-data-holder-mixin)
-		 'mock-class-for-data-holder-mixin))
+                         "foo"
+                         'mock-class-for-data-holder-mixin)
+                 'mock-class-for-data-holder-mixin))
 
   ;; Test creating an instance to unpack into.
   (ensure (typep (unpack simple-mechanism
-			 "foo"
-			 (find-class 'mock-class-for-data-holder-mixin))
-		 'mock-class-for-data-holder-mixin)))
+                         "foo"
+                         (find-class 'mock-class-for-data-holder-mixin))
+                 'mock-class-for-data-holder-mixin)))

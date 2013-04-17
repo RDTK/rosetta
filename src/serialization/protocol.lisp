@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.serialization)
 
-
 ;;; Serialization and deserialization protocol
-;;
 
 (defgeneric packed-size (mechanism object &key &allow-other-keys)
   (:documentation
@@ -35,52 +33,46 @@ format of MECHANISM into DESTINATION.
 Two values are returned: the modified DESTINATION (or a new object)
 and the number of consumed octets or nil."))
 
-
 ;;; Default behavior
-;;
 
 (defmethod pack* ((mechanism t) (source t)
-		  &rest args &key)
+                  &rest args &key)
   "Default behavior is to use a nil destination and return the created
 destination instead of the amount of produced data."
   (nth-value 1 (apply #'pack mechanism source nil args)))
 
-
 ;;; Partial deserializtion protocol
-;;
 
 (defgeneric location (mechanism source schema part
-		      &key &allow-other-keys)
+                      &key &allow-other-keys)
   (:documentation
    "Find and return the location in SOURCE at which the first instance
 of the PART of SCHEMA occurs."))
 
 (defgeneric extract (mechanism source schema part
-		     &key &allow-other-keys)
+                     &key &allow-other-keys)
   (:documentation
    "Extract and return the value which PART of SCHEMA has in SOURCE."))
 
-
 ;;; Mechanism class lookup
-;;
 
 (macrolet
     ((define-mechanism-lookup (method args)
        (let ((args/typed
-	      (map 'list #'list
-		   args (make-list (length args) :initial-element t))))
-	 `(progn
-	    (defmethod ,method ((mechanism list) ,@args/typed
-				&rest rest-args &key)
-	      (let+ (((mechanism-name &rest mechanism-args) mechanism)
-		     (mechanism-class    (find-mechanism-class mechanism-name))
-		     (mechanism-instance
-		      (apply #'make-instance mechanism-class mechanism-args)))
-		(apply #',method mechanism-instance ,@args rest-args)))
+              (map 'list #'list
+                   args (make-list (length args) :initial-element t))))
+         `(progn
+            (defmethod ,method ((mechanism list) ,@args/typed
+                                &rest rest-args &key)
+              (let+ (((mechanism-name &rest mechanism-args) mechanism)
+                     (mechanism-class    (find-mechanism-class mechanism-name))
+                     (mechanism-instance
+                      (apply #'make-instance mechanism-class mechanism-args)))
+                (apply #',method mechanism-instance ,@args rest-args)))
 
-	    (defmethod ,method ((mechanism symbol) ,@args/typed
-				&rest rest-args &key)
-	      (apply #',method (list mechanism) ,@args rest-args))))))
+            (defmethod ,method ((mechanism symbol) ,@args/typed
+                                &rest rest-args &key)
+              (apply #',method (list mechanism) ,@args rest-args))))))
 
   (define-mechanism-lookup packed-size (source))
   (define-mechanism-lookup pack        (source destination))

@@ -6,24 +6,22 @@
 
 (cl:in-package :rosetta.backend)
 
-
 ;;; Target class
-;;
 
 (define-target class (code-generating-target-mixin)
   ((metaclass    :initarg  :metaclass
-		 :type     (or null symbol)
-		 :reader   target-metaclass
-		 :initform nil
-		 :documentation
-		 "Stores the desired metaclass of the to-be-generated
+                 :type     (or null symbol)
+                 :reader   target-metaclass
+                 :initform nil
+                 :documentation
+                 "Stores the desired metaclass of the to-be-generated
 class.")
    (superclasses :initarg  :superclasses
-		 :type     list
-		 :reader   target-superclasses
-		 :initform nil
-		 :documentation
-		 "Stores the list of desired superclasses of the
+                 :type     list
+                 :reader   target-superclasses
+                 :initform nil
+                 :documentation
+                 "Stores the list of desired superclasses of the
 to-be-generated class."))
   (:documentation
    "Define Lisp classes based on data type definitions. The generated
@@ -38,11 +36,11 @@ to the name of the data type."))
 
 (define-target instantiate (code-generating-target-mixin)
   ((initargs :initarg  :initargs
-	     :type     list
-	     :reader   target-initargs
-	     :initform nil
-	     :documentation
-	     "Stores initargs describing the instance that should be
+             :type     list
+             :reader   target-initargs
+             :initform nil
+             :documentation
+             "Stores initargs describing the instance that should be
 emitted."))
   (:documentation
    "Emit code for creating an instance of a data type."))
@@ -61,9 +59,9 @@ numeric value within an enumeration."))
 
 (define-target convert (code-generating-target-mixin)
     ((to :initarg  :to
-	 :reader   target-to
-	 :documentation
-	 "An object representing the target type of the conversion."))
+         :reader   target-to
+         :documentation
+         "An object representing the target type of the conversion."))
   (:default-initargs
    :to (missing-required-initarg 'convert :to))
   (:documentation
@@ -73,23 +71,21 @@ The source type is the NODE argument of the surrounding `emit' call
 and the target type is stored in the `to' slot of the target
 object."))
 
-
 ;;; Serialization-related target classes
-;;
 
 (macrolet
     ((define-serialization-target (name)
        `(define-target ,name (code-generating-target-mixin
-			      mechanism-target-mixin)
-	    ()
-	  (:default-initargs
-	   :mechanism nil) ;;; TODO(jmoringe, 2012-05-08): ok?
-	  (:documentation
-	   ,(format nil "The ~A target, for example, emits methods on ~
+                              mechanism-target-mixin)
+            ()
+          (:default-initargs
+           :mechanism nil) ; TODO(jmoringe, 2012-05-08): ok?
+          (:documentation
+           ,(format nil "The ~A target, for example, emits methods on ~
 `rosetta.serialization:~(~:*~A~)' or otherwise generates code for ~
 given serialization mechanisms and classes described by model ~
 component instances."
-		    name)))))
+                    name)))))
 
   (define-serialization-target packed-size)
   (define-serialization-target pack)
@@ -100,9 +96,7 @@ component instances."
   ;; to unpack individual parts of structures from serialized representations without unpacking the entire serialized representation.
   )
 
-
 ;;; Method target classes
-;;
 
 (define-target/method packed-size ()
     ())

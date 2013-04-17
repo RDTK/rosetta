@@ -6,44 +6,40 @@
 
 (cl:in-package :rosetta.serialization.test)
 
-
 ;;; Mock mechanism
-;;
 
 (defmethod find-mechanism-class ((spec (eql :mock-for-protocol)))
   (find-class 'mechanism-mock-for-protocol))
 
 (defclass mechanism-mock-for-protocol ()
   ((arg :initarg  :arg
-	:reader   mechanism-arg
-	:initform 0)))
+        :reader   mechanism-arg
+        :initform 0)))
 
 (defmethod packed-size ((mechanism mechanism-mock-for-protocol)
-			(source    t)
-			&key)
+                        (source    t)
+                        &key)
   (mechanism-arg mechanism))
 
 (defmethod pack ((mechanism   mechanism-mock-for-protocol)
-		 (source      t)
-		 (destination t)
-		 &key)
+                 (source      t)
+                 (destination t)
+                 &key)
   (values (mechanism-arg mechanism) destination))
 
 (defmethod pack ((mechanism   mechanism-mock-for-protocol)
-		 (source      t)
-		 (destination (eql nil))
-		 &key)
+                 (source      t)
+                 (destination (eql nil))
+                 &key)
   (values (mechanism-arg mechanism) :created))
 
 (defmethod unpack ((mechanism   mechanism-mock-for-protocol)
-		   (source      t)
-		   (destination t)
-		   &key)
+                   (source      t)
+                   (destination t)
+                   &key)
   (values destination (mechanism-arg mechanism)))
 
-
 ;;; Test suite
-;;
 
 (deftestsuite protocol-root (serialization-root)
   ((mechanism (make-instance 'mechanism-mock-for-protocol)))
@@ -53,64 +49,64 @@
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the `packed-size' function.")
+          "Smoke test for the `packed-size' function.")
   packed-size/smoke
 
   (ensure-cases (input expected-output)
       `((:no-such-mechanism          :error)
-	(:mock-for-protocol          0)
-	((:mock-for-protocol)        0)
-	((:mock-for-protocol :arg 5) 5)
-	(,mechanism                  0))
+        (:mock-for-protocol          0)
+        ((:mock-for-protocol)        0)
+        ((:mock-for-protocol :arg 5) 5)
+        (,mechanism                  0))
 
     (if (eq expected-output :error)
-	(ensure-condition 'no-such-mechanism-class
-	  (packed-size input :does-not-matter))
-	(ensure-same (packed-size input :does-not-matter) expected-output
-		     :test #'equalp))))
+        (ensure-condition 'no-such-mechanism-class
+          (packed-size input :does-not-matter))
+        (ensure-same (packed-size input :does-not-matter) expected-output
+                     :test #'equalp))))
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the `pack' and `pack*' functions.")
+          "Smoke test for the `pack' and `pack*' functions.")
   pack-and-pack*/smoke
 
   (ensure-cases (mechanism source destination expected-output)
       `((:no-such-mechanism          :bar :foo :error)
-	(:mock-for-protocol          :bar :foo (0 :foo))
-	((:mock-for-protocol)        :bar :foo (0 :foo))
-	((:mock-for-protocol :arg 5) :bar :foo (5 :foo))
-	(,mechanism                  :bar :foo (0 :foo)))
+        (:mock-for-protocol          :bar :foo (0 :foo))
+        ((:mock-for-protocol)        :bar :foo (0 :foo))
+        ((:mock-for-protocol :arg 5) :bar :foo (5 :foo))
+        (,mechanism                  :bar :foo (0 :foo)))
 
     ;; Test `pack'
     (if (eq expected-output :error)
-	(ensure-condition 'no-such-mechanism-class
-	  (pack mechanism source destination))
-	(ensure-same (pack mechanism source destination)
-		     (apply #'values expected-output)
-		     :test #'equalp))
+        (ensure-condition 'no-such-mechanism-class
+          (pack mechanism source destination))
+        (ensure-same (pack mechanism source destination)
+                     (apply #'values expected-output)
+                     :test #'equalp))
 
     ;; Test `pack*'
     (if (eq expected-output :error)
-	(ensure-condition 'no-such-mechanism-class
-	  (pack* mechanism source))
-	(ensure-same (pack* mechanism source) :created
-		     :test #'eq))))
+        (ensure-condition 'no-such-mechanism-class
+          (pack* mechanism source))
+        (ensure-same (pack* mechanism source) :created
+                     :test #'eq))))
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the `unpack' method.")
+          "Smoke test for the `unpack' method.")
   unpack/smoke
 
   (ensure-cases (mechanism destination expected-output)
       `((:no-such-mechanism          :dest :error)
-	(:mock-for-protocol          :dest (:dest 0))
-	((:mock-for-protocol)        :dest (:dest 0))
-	((:mock-for-protocol :arg 5) :dest (:dest 5))
-	(,mechanism                  :dest (:dest 0)))
+        (:mock-for-protocol          :dest (:dest 0))
+        ((:mock-for-protocol)        :dest (:dest 0))
+        ((:mock-for-protocol :arg 5) :dest (:dest 5))
+        (,mechanism                  :dest (:dest 0)))
 
     (if (eq expected-output :error)
-	(ensure-condition 'no-such-mechanism-class
-	  (unpack mechanism :does-not-matter destination))
-	(ensure-same (unpack mechanism :does-not-matter destination)
-		     (apply #'values expected-output)
-		     :test #'equalp))))
+        (ensure-condition 'no-such-mechanism-class
+          (unpack mechanism :does-not-matter destination))
+        (ensure-same (unpack mechanism :does-not-matter destination)
+                     (apply #'values expected-output)
+                     :test #'equalp))))

@@ -45,21 +45,17 @@
   (:documentation
    "Root unit test suite for the model.data module."))
 
-
 ;;; `mock-type/validate-value'
-;;
 
 (defclass mock-type/validate-value ()
   ())
 
 (defmethod validate-value ((type  mock-type/validate-value)
-			   (value t)
-			   &key &allow-other-keys)
+                           (value t)
+                           &key &allow-other-keys)
   (error "~@<Mock value validation error.~@:>"))
 
-
 ;;; Simple data types
-;;
 
 (defparameter +singleton/uint32+
   (make-instance 'singleton :type +uint32+ :value 1)
@@ -71,26 +67,26 @@
 
 (defparameter +enum/uint8/simple+
   (make-instance 'enum :name   "simple/uint8"
-		       :type   +uint8+
-		       :values '(:a 1 :b 2))
+                       :type   +uint8+
+                       :values '(:a 1 :b 2))
   "A simple uint8 enum with two values.")
 
 (defparameter +enum/uint8/one+
   (make-instance 'enum :name   "one/uint8"
-		       :type   +uint8+
-		       :values '(:a 1))
+                       :type   +uint8+
+                       :values '(:a 1))
   "A simple uint8 enum with a single value.")
 
 (defparameter +enum/uint32/simple+
   (make-instance 'enum :name   "simple/uint32"
-		       :type   +uint32+
-		       :values '(:a 1 :b 2))
+                       :type   +uint32+
+                       :values '(:a 1 :b 2))
   "A simple uint32 enum with two values.")
 
 (defparameter +enum/int32/simple+
   (make-instance 'enum :name   "simple/int32"
-		       :type   +int32+
-		       :values '(:a 1 :b 2))
+                       :type   +int32+
+                       :values '(:a 1 :b 2))
   "A simple int32 enum with two values.")
 
 (defparameter +struct/simple+
@@ -98,6 +94,6 @@
    'base-structure
    :name   "simple"
    :fields (list (make-instance 'base-field
-				:name "a"
-				:type +utf-8-string+)))
+                                :name "a"
+                                :type +utf-8-string+)))
   "A simple structure with a single field.")

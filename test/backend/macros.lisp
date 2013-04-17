@@ -25,29 +25,29 @@ and the entries in a context (where :foo = 1) and
       cases
 
     (let+ (((&flet do-it ()
-	      (eval `(let ((context   (make-instance 'context))
-			   (*context* (make-instance 'context)))
-		       (setf (context-get context   :foo) 1
-			     (context-get *context* :foo) 2)
-		       (let+ ((,spec))
-			 (values ,var
-				 (context-get context   :foo)
-				 (context-get *context* :foo))))))))
+              (eval `(let ((context   (make-instance 'context))
+                           (*context* (make-instance 'context)))
+                       (setf (context-get context   :foo) 1
+                             (context-get *context* :foo) 2)
+                       (let+ ((,spec))
+                         (values ,var
+                                 (context-get context   :foo)
+                                 (context-get *context* :foo))))))))
       (case (first expected)
-	(error (ensure-condition 'error (do-it)))
-	(t     (let+ (((&values result expected)
-		       (iter (for value  in (multiple-value-list (do-it)))
-			     (for expect in expected)
-			     (when expect
-			       (collect value  :into values)
-			       (collect expect :into expects))
-			     (finally (return (values values expects))))))
-		 (ensure-same (values-list result)
-			      (values-list expected))))))))
+        (error (ensure-condition 'error (do-it)))
+        (t     (let+ (((&values result expected)
+                       (iter (for value  in (multiple-value-list (do-it)))
+                             (for expect in expected)
+                             (when expect
+                               (collect value  :into values)
+                               (collect expect :into expects))
+                             (finally (return (values values expects))))))
+                 (ensure-same (values-list result)
+                              (values-list expected))))))))
 
 (addtest (backend-macros-root
           :documentation
-	  "Smoke test for `&env' `let+' expansion.")
+          "Smoke test for `&env' `let+' expansion.")
   &env/smoke
 
   (ensure-&env-cases
@@ -73,7 +73,7 @@ and the entries in a context (where :foo = 1) and
 
 (addtest (backend-macros-root
           :documentation
-	  "Smoke test for `&env-r/o' `let+' expansion.")
+          "Smoke test for `&env-r/o' `let+' expansion.")
   &env-r/o/smoke
 
   (ensure-&env-cases

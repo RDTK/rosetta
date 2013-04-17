@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.model.language)
 
-
 ;;; Abstract language
-;;
 
 (defmethod find-language-class ((spec (eql :abstract)))
   (find-class 'language-abstract))
@@ -19,9 +17,7 @@
    "This language is intended to be used as an abstract intermediate
 representation and for debugging purposes."))
 
-
 ;;; Lisp language
-;;
 
 (defmethod find-language-class ((spec (eql :lisp)))
   (find-class 'language-lisp))
@@ -34,9 +30,7 @@ compiled.
 
 See `language-lisp/compiled'."))
 
-
 ;;; Compiled Lisp language
-;;
 
 (defmethod find-language-class ((spec (eql :lisp/compiled)))
   (find-class 'language-lisp/compiled))
@@ -49,31 +43,27 @@ compiled.
 
 See `language-lisp'."))
 
-
 ;;; `common-imperative-language' class
-;;
 
 (defclass common-imperative-language (constrained-identifiers-mixin
-				      reserved-words-mixin
-				      foreign-mixin)
+                                      reserved-words-mixin
+                                      foreign-mixin)
   ()
   (:default-initargs
    :char-legalizer (constantly #\_)
    :name-legalizer #'(lambda (name)
-		       (concatenate 'string name "_")))
+                       (concatenate 'string name "_")))
   (:documentation
    "Superclass for common imperative languages."))
 
 (defmethod legal-identifier-char? ((language common-imperative-language)
-				   (char     character)
-				   (position integer))
+                                   (char     character)
+                                   (position integer))
   (or (char<= #\a char #\z) (char<= #\A char #\A)
       (char= char #\_)
       (and (plusp position) (char<= #\0 char #\9))))
 
-
 ;;; C++ language
-;;
 
 (defparameter *c++-reserved-words*
   '(;; Reserved words in the C programming language that have to be
@@ -117,9 +107,7 @@ See `language-lisp'."))
   (:documentation
    "C++ programming language."))
 
-
 ;;; Python language
-;;
 
 (defparameter *python-reserved-words*
   '("and" "as" "assert" "break" "class" "continue" "def" "del" "elif"
@@ -140,9 +128,7 @@ See `language-lisp'."))
   (:documentation
    "Python programming language."))
 
-
 ;;; Java language
-;;
 
 (defparameter *java-reserved-words*
   '("abstract" "assert" "boolean" "break" "byte" "case" "catch" "char"

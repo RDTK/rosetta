@@ -6,70 +6,66 @@
 
 (cl:in-package :rosetta.backend)
 
-
 ;;; Housekeeping macros
-;;
 
 (defmacro with-emit-restarts ((node target) &body body)
   "Establish restarts."
   (with-unique-names (result-var read-value-var)
     (once-only (node target)
       `(let+ ((,result-var)
-	      ((&flet ,read-value-var ()
-		 (format *query-io* "Replacement value: ")
-		 (force-output *query-io*)
-		 (list (read *query-io*)))))
-	 (tagbody
-	  :retry
-	    (restart-case
-		(setf ,result-var (multiple-value-list (progn ,@body)))
+              ((&flet ,read-value-var ()
+                 (format *query-io* "Replacement value: ")
+                 (force-output *query-io*)
+                 (list (read *query-io*)))))
+         (tagbody
+          :retry
+            (restart-case
+                (setf ,result-var (multiple-value-list (progn ,@body)))
 
-	      ;; Retry running the emit method.
-	      (retry ()
-		:report
-		(lambda (stream)
-		  (format stream
-			  "~@<Retry running the emit method for node ~
+              ;; Retry running the emit method.
+              (retry ()
+                :report
+                (lambda (stream)
+                  (format stream
+                          "~@<Retry running the emit method for node ~
 ~S and target ~S.~@:>"
-			  ,node ,target))
-		(go :retry))
+                          ,node ,target))
+                (go :retry))
 
-	      ;; Skip the emit method.
-	      (continue (&optional condition)
-		:report (lambda (stream)
-			  (format stream "~@<Skip the emit method for ~
+              ;; Skip the emit method.
+              (continue (&optional condition)
+                :report (lambda (stream)
+                          (format stream "~@<Skip the emit method for ~
 node ~S and target ~S.~@:>"
-				  ,node ,target))
-		(declare (ignore condition)))
+                                  ,node ,target))
+                (declare (ignore condition)))
 
-	      ;; Use a replacement value.
-	      (use-value (value)
-		:report
-		(lambda (stream)
-		  (format stream
-			  "~@<Specify a value instead of running the ~
+              ;; Use a replacement value.
+              (use-value (value)
+                :report
+                (lambda (stream)
+                  (format stream
+                          "~@<Specify a value instead of running the ~
 emit method for node ~S and target ~S.~@:>"
-			  ,node ,target))
-		:interactive ,read-value-var
-		(setf ,result-var (list value)))))
-	 (values-list ,result-var)))))
+                          ,node ,target))
+                :interactive ,read-value-var
+                (setf ,result-var (list value)))))
+         (values-list ,result-var)))))
 
 (defmacro with-updated-context ((node target
-				 &optional
-				 language
-				 (context '(or *context* (make-instance 'context))))
-				&body body)
+                                 &optional
+                                 language
+                                 (context '(or *context* (make-instance 'context))))
+                                &body body)
   "During the execution of BODY, set the current target type to
 TARGET-VAR and push NODE-VAR onto the context stack."
   `(let ((*context* ,context))
      (push-context ,node ,target ,language *context*)
      (unwind-protect
-	  (progn ,@body)
+          (progn ,@body)
        (pop-context *context*))))
 
-
 ;;; Convenience macros for clients
-;;
 
 (defmacro with-emit-symbols (&body body)
   "Execute BODY with the following symbols added to the lexical scope:
@@ -85,17 +81,17 @@ TARGET-VAR and push NODE-VAR onto the context stack."
                        environment of context.
 + intern*           :: Similar to `intern' but use the context package."
   `(symbol-macrolet ((stack       (context-stack *context*))
-		     (parent      (second (context-stack *context*)))
-		     (grandparent (third (context-stack *context*)))
-		     (ancestors   (rest (context-stack *context*))))
+                     (parent      (second (context-stack *context*)))
+                     (grandparent (third (context-stack *context*)))
+                     (ancestors   (rest (context-stack *context*))))
      (flet ((recur (node)
-	      (generate node
-			(context-target *context*)
-			(context-language *context*)))
-	    (cget (key)
-	      (context-get *context* key))
-	    ((setf cget) (new-value key)
-	      (setf (context-get *context* key) new-value)))
+              (generate node
+                        (context-target *context*)
+                        (context-language *context*)))
+            (cget (key)
+              (context-get *context* key))
+            ((setf cget) (new-value key)
+              (setf (context-get *context* key) new-value)))
        (declare (ignorable #'recur #'cget #'(setf cget)))
        ,@body)))
 
@@ -111,24 +107,22 @@ and BODY can rely on these symbols being bound to the respective
 optimization setting which is one of the integers 0, 1, 2 or 3."
   (once-only (target)
     (let+ ((qualities '(speed debug safety))
-	   ((&with-gensyms settings))
-	   ((&flet+ do-clause ((&whole clause condition &body body))
-	      (if (member condition qualities :test #'eq)
-		  (let ((remaining (remove condition qualities :test #'eq)))
-		   `((and (> ,condition ,(first remaining))
-			  (> ,condition ,(second remaining)))
-		     ,@body))
-		  clause))))
+           ((&with-gensyms settings))
+           ((&flet+ do-clause ((&whole clause condition &body body))
+              (if (member condition qualities :test #'eq)
+                  (let ((remaining (remove condition qualities :test #'eq)))
+                   `((and (> ,condition ,(first remaining))
+                          (> ,condition ,(second remaining)))
+                     ,@body))
+                  clause))))
       `(let* ((,settings (optimization-settings ,target))
-	      (speed     (or (second (find 'speed  ,settings :key #'first)) 1))
-	      (debug     (or (second (find 'debug  ,settings :key #'first)) 1))
-	      (safety    (or (second (find 'saftey ,settings :key #'first)) 1)))
-	 (declare (ignorable ,@qualities))
-	 (cond ,@(mapcar #'do-clause clauses))))))
+              (speed     (or (second (find 'speed  ,settings :key #'first)) 1))
+              (debug     (or (second (find 'debug  ,settings :key #'first)) 1))
+              (safety    (or (second (find 'saftey ,settings :key #'first)) 1)))
+         (declare (ignorable ,@qualities))
+         (cond ,@(mapcar #'do-clause clauses))))))
 
-
 ;;;
-;;
 
 (defmacro define-target (name superclasses slots &body options)
   "Define a target named by the symbol NAME. SUPERCLASSES, SLOTS and
@@ -136,17 +130,17 @@ OPTIONS have the same meaning as in `cl:defclass'."
   (check-type name symbol)
 
   (let ((spec       (make-keyword name))
-	(class-name (format-symbol *package* "TARGET-~A" name)))
+        (class-name (format-symbol *package* "TARGET-~A" name)))
     `(progn
        (defmethod find-target-class ((spec (eql ,spec)))
-	 (find-class ',class-name))
+         (find-class ',class-name))
 
        (defclass ,class-name (,@superclasses)
-	 (,@slots)
-	 ,@options))))
+         (,@slots)
+         ,@options))))
 
 (defmacro define-target/method (name superclasses slots
-				&body options)
+                                &body options)
   "Define a method target named by the symbol NAME. SUPERCLASSES,
 SLOTS and OPTIONS have the same meaning as in `cl:defclass'.
 
@@ -159,26 +153,26 @@ is derived from NAME. For NAME, the resulting targets are:
   (check-type name symbol)
 
   (let+ ((name/method (format-symbol *package* "~A/METHOD" name))
-	 (body-class  (format-symbol *package* "TARGET-~A" name))
-	 ((&flet default-documentation ()
-	    (format nil "The ~A target delegates to the ~A ~
+         (body-class  (format-symbol *package* "TARGET-~A" name))
+         ((&flet default-documentation ()
+            (format nil "The ~A target delegates to the ~A ~
 target which, for example, emits methods on ~
 `rosetta.serialization:~:*~(~A~)' or otherwise generates code for ~
 given serialization mechanisms and classes described by model ~
 component instances."
-		    name/method name)))
-	 (options (apply #'append options))
-	 ((&plist-r/o (documentation :documentation (default-documentation)))
-	  options))
+                    name/method name)))
+         (options (apply #'append options))
+         ((&plist-r/o (documentation :documentation (default-documentation)))
+          options))
     `(define-target ,name/method (,@(or superclasses '(method-target-mixin)))
        (,@slots)
        (:default-initargs
-	:body-target (make-instance ',body-class))
+        :body-target (make-instance ',body-class))
        (:documentation ,documentation)
        ,@(remove-from-plist options :documentation))))
 
 (defmacro define-mechanism-target ((mechanism target)
-				   (&rest mixins))
+                                   (&rest mixins))
   "Define a target for the combination of MECHANISM and TARGET which
 have to be symbols."
   (check-type mechanism symbol)
@@ -186,21 +180,21 @@ have to be symbols."
   (check-type mixins    list)
 
   (let ((name       (symbolicate mechanism "-" target))
-	(superclass (symbolicate "TARGET-" target)))
+        (superclass (symbolicate "TARGET-" target)))
     `(define-target ,name (,@mixins ,superclass)
-	 ()
+         ()
        (:default-initargs
-	:mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
+        :mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
        (:documentation
-	,(format nil "~A~2%This target class generates ~
+        ,(format nil "~A~2%This target class generates ~
 code that implements the ~(~A~) mechanism.~@[~2%~A~]"
-		 (documentation superclass 'type)
-		 mechanism
-		 (when-let ((mechanism (find-mechanism-class mechanism)))
-		   (documentation mechanism 'type)))))))
+                 (documentation superclass 'type)
+                 mechanism
+                 (when-let ((mechanism (find-mechanism-class mechanism)))
+                   (documentation mechanism 'type)))))))
 
 (defmacro define-mechanism-target/method ((mechanism method)
-					  (&rest mixins))
+                                          (&rest mixins))
   "Define a method target for the combination of MECHANISM and METHOD
 which have to be symbols."
   (check-type mechanism symbol)
@@ -208,17 +202,17 @@ which have to be symbols."
   (check-type mixins    list)
 
     (let ((name       (format-symbol *package* "~A-~A" mechanism method))
-	  (superclass (format-symbol *package* "TARGET-~A/METHOD" method)))
+          (superclass (format-symbol *package* "TARGET-~A/METHOD" method)))
       `(define-target/method ,name (,@mixins ,superclass)
-	 ()
-	 (:documentation
-	  ,(format nil "The ~S/METHOD target is a specialization of ~
+         ()
+         (:documentation
+          ,(format nil "The ~S/METHOD target is a specialization of ~
 the ~S target which generates methods that implement the ~(~A~) ~
 function for the ~(~A~) mechanism.~@[~2%~A~]~@[~2%~A~]"
-		   name superclass method mechanism
-		   (documentation superclass 'type)
-		   (when-let ((mechanism (find-mechanism-class mechanism)))
-		     (documentation mechanism 'type)))))))
+                   name superclass method mechanism
+                   (documentation superclass 'type)
+                   (when-let ((mechanism (find-mechanism-class mechanism)))
+                     (documentation mechanism 'type)))))))
 
 (defmacro define-mechanism-targets
     (mechanism
@@ -244,29 +238,27 @@ superclasses of all generated target classes."
   (check-type mixins    list)
   (unless (subsetp method-targets targets)
     (error "~@<~S ~S is not a subset of ~S ~S.~@:>"
-	   'method-targets method-targets
-	   'targets        targets))
+           'method-targets method-targets
+           'targets        targets))
 
   (let* ((mechanism-string (string mechanism))
-	 (base-name        (if (starts-with-subseq prefix mechanism-string)
-			       (subseq mechanism-string (length prefix))
-			       mechanism-string))
-	 (mechanism-spec   (make-keyword base-name)))
+         (base-name        (if (starts-with-subseq prefix mechanism-string)
+                               (subseq mechanism-string (length prefix))
+                               mechanism-string))
+         (mechanism-spec   (make-keyword base-name)))
     `(progn
        ,@(iter (for target in targets)
-	       (collect `(define-mechanism-target
-			     (,mechanism-spec ,target) ,mixins))
-	       (when (member target method-targets)
-		 (collect `(define-mechanism-target/method
-			       (,mechanism-spec ,target) ,mixins)))))))
+               (collect `(define-mechanism-target
+                             (,mechanism-spec ,target) ,mixins))
+               (when (member target method-targets)
+                 (collect `(define-mechanism-target/method
+                               (,mechanism-spec ,target) ,mixins)))))))
 
-
 ;;; let-plus extensions
-;;
 
 (define-let+-expansion (&env args
-			:uses-value? nil
-			:body-var    body)
+                        :uses-value? nil
+                        :body-var    body)
   "Bind environment entries. Syntax:
 
   (&env NAME | (NAME VALUE) ... [&context CONTEXT])
@@ -289,46 +281,46 @@ ENTRY, allowing update-constructs like
 CONTEXT can be used to specify the affected context. When not
 supplied, `*context*' is used."
   (let+ (((args &optional (context '(*context*)))
-	  (split-sequence '&context args))
-	 ((&values bindings setters cleanup)
-	  (iter (for name in args)
-		;; Split the variable into the name and optional value
-		;; parts.
-		(let+ (((name
-			 &optional
-			 (value `(gensym ,(string (first (ensure-list name))))))
-			(ensure-list name))
-		       ((variable &optional (entry (make-keyword variable)))
-			(typecase name
-			  (keyword (list nil name))
-			  (t       (ensure-list name))))
-		       (place `(context-get ,@context ,entry))
-		       ((&with-gensyms old))
-		       (value (if variable
-				  `(symbol-macrolet ((,variable ,old))
-				     ,value)
-				  value)))
-		  (check-type variable (or null symbol))
-		  (check-type entry    keyword)
+          (split-sequence '&context args))
+         ((&values bindings setters cleanup)
+          (iter (for name in args)
+                ;; Split the variable into the name and optional value
+                ;; parts.
+                (let+ (((name
+                         &optional
+                         (value `(gensym ,(string (first (ensure-list name))))))
+                        (ensure-list name))
+                       ((variable &optional (entry (make-keyword variable)))
+                        (typecase name
+                          (keyword (list nil name))
+                          (t       (ensure-list name))))
+                       (place `(context-get ,@context ,entry))
+                       ((&with-gensyms old))
+                       (value (if variable
+                                  `(symbol-macrolet ((,variable ,old))
+                                     ,value)
+                                  value)))
+                  (check-type variable (or null symbol))
+                  (check-type entry    keyword)
 
-		  ;; Collect a binding.
-		  (collect `(,old  ,place) :into bindings)
-		  (when variable
-		    (collect `(,variable ,value) :into bindings))
-		  ;; Collect a form to store the value in the `emit'
-		  ;; context.
-		  (collect `(setf ,place ,(or variable value)) :into setters)
-		  (collect `(setf ,place ,old)                 :into cleanup))
-		(finally (return (values bindings setters cleanup))))))
+                  ;; Collect a binding.
+                  (collect `(,old  ,place) :into bindings)
+                  (when variable
+                    (collect `(,variable ,value) :into bindings))
+                  ;; Collect a form to store the value in the `emit'
+                  ;; context.
+                  (collect `(setf ,place ,(or variable value)) :into setters)
+                  (collect `(setf ,place ,old)                 :into cleanup))
+                (finally (return (values bindings setters cleanup))))))
     `(let* ,bindings
        ,@setters
        (unwind-protect
-	    (progn ,@body)
-	 ,@cleanup))))
+            (progn ,@body)
+         ,@cleanup))))
 
 (define-let+-expansion (&env-r/o args
-			:uses-value? nil
-			:body-var    body)
+                        :uses-value? nil
+                        :body-var    body)
   "Bind variable to environment entries. Syntax:
 
   (&env-r/o NAME | (NAME DEFAULT) |... [&context CONTEXT])
@@ -343,17 +335,17 @@ into a keyword.
 CONTEXT can be used to specify the affected context. When not
 supplied, `*context*' is used."
   (let+ (((args &optional (context '(*context*)))
-	  (split-sequence '&context args))
-	 (bindings
-	  (iter (for name in args)
-		(let+ (((name &optional (default :error))
-			(ensure-list name))
-		       ((variable &optional (entry (make-keyword variable)))
-			(ensure-list name)))
-		  (check-type variable symbol)
-		  (check-type entry    keyword)
+          (split-sequence '&context args))
+         (bindings
+          (iter (for name in args)
+                (let+ (((name &optional (default :error))
+                        (ensure-list name))
+                       ((variable &optional (entry (make-keyword variable)))
+                        (ensure-list name)))
+                  (check-type variable symbol)
+                  (check-type entry    keyword)
 
-		  (collect
-		      `(,variable (context-get ,@context ,entry
-					       :default ,default)))))))
+                  (collect
+                      `(,variable (context-get ,@context ,entry
+                                               :default ,default)))))))
     `(let* ,bindings ,@body)))

@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.backend)
 
-
 ;;; Special variables
-;;
 
 (declaim (special *emit-verbose*))
 
@@ -23,9 +21,7 @@ calls which describe what is being emitted. Analogue to
   "When non-nil, print concise messages to `*standard-output*' during
 `emit' calls. Analogue to `cl:*compile-print*'.")
 
-
 ;;; Emission context
-;;
 
 (declaim (special *context*))
 

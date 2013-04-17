@@ -38,14 +38,14 @@
 
 (addtest (guess-format-root
           :documentation
-	  "Smoke test for the `guess-format' function.")
+          "Smoke test for the `guess-format' function.")
   smoke
 
   (ensure-cases (input format/expected found?/expected)
       `((,#P"foo/"     nil   nil) ; no type
-	(,#P"foo."     nil   nil) ; empty type
-	(,#P"foo.bla"  :bla  nil) ; unknown format class
-	(,#P"foo.mock" :mock t))  ; use `format-mock' class
+        (,#P"foo."     nil   nil) ; empty type
+        (,#P"foo.bla"  :bla  nil) ; unknown format class
+        (,#P"foo.mock" :mock t))  ; use `format-mock' class
 
     (ensure-same (guess-format input)
-		 (values format/expected found?/expected))))
+                 (values format/expected found?/expected))))

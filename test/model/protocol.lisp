@@ -13,31 +13,31 @@
 
 (addtest (protocol-root
           :documentation
-	  "Smoke test for the `print-qname' function.")
+          "Smoke test for the `print-qname' function.")
   print-qname/smoke
 
   (ensure-cases (input separator colon? at? expected)
       ;; input                   sep col at  expected
       '(((:absolute)             nil nil nil "")
-	((:absolute)             nil t   nil "<root>")
-	((:relative)             nil nil nil ".")
-	((:relative)             nil t   nil ".")
-	((:absolute)             #\/ nil nil "")
-	((:absolute)             #\/ t   nil "<root>")
-	((:relative)             #\/ nil nil "/")
-	((:relative)             #\/ t   nil "/")
+        ((:absolute)             nil t   nil "<root>")
+        ((:relative)             nil nil nil ".")
+        ((:relative)             nil t   nil ".")
+        ((:absolute)             #\/ nil nil "")
+        ((:absolute)             #\/ t   nil "<root>")
+        ((:relative)             #\/ nil nil "/")
+        ((:relative)             #\/ t   nil "/")
 
-	((:absolute "foo")       nil nil nil "foo")
-	((:relative "foo")       nil nil nil ".foo")
-	((:absolute "foo")       #\/ nil nil "foo")
-	((:relative "foo")       #\/ nil nil "/foo")
+        ((:absolute "foo")       nil nil nil "foo")
+        ((:relative "foo")       nil nil nil ".foo")
+        ((:absolute "foo")       #\/ nil nil "foo")
+        ((:relative "foo")       #\/ nil nil "/foo")
 
-	((:absolute "foo" "bar") nil nil nil "foo.bar")
-	((:relative "foo" "bar") nil nil nil ".foo.bar")
-	((:absolute "foo" "bar") #\/ nil nil "foo/bar")
-	((:relative "foo" "bar") #\/ nil nil "/foo/bar"))
+        ((:absolute "foo" "bar") nil nil nil "foo.bar")
+        ((:relative "foo" "bar") nil nil nil ".foo.bar")
+        ((:absolute "foo" "bar") #\/ nil nil "foo/bar")
+        ((:relative "foo" "bar") #\/ nil nil "/foo/bar"))
 
     (ensure-same (with-output-to-string (stream)
-		   (apply #'print-qname stream input colon? at?
-			  (when separator (list separator))))
-		 expected :test #'string=)))
+                   (apply #'print-qname stream input colon? at?
+                          (when separator (list separator))))
+                 expected :test #'string=)))

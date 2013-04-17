@@ -38,9 +38,7 @@
   (:documentation
    "Root unit test suite for the frontend module."))
 
-
 ;;; `format-mock' mock class
-;;
 
 (defmethod find-format-class ((spec (eql :mock)))
   (find-class 'format-mock))
@@ -51,49 +49,49 @@
    "Mock format for unit tests."))
 
 (defmethod parse ((format  format-mock)
-		  (source  t)
-		  (builder t)
-		  &key &allow-other-keys)
+                  (source  t)
+                  (builder t)
+                  &key &allow-other-keys)
   (when (equal source #P"some-file.mock")
     (return-from parse
       (make-node builder :structure
-		 :name   "foo"
-		 :qname  '(:absolute "bar")
-		 :bounds '(2 . 10))))
+                 :name   "foo"
+                 :qname  '(:absolute "bar")
+                 :bounds '(2 . 10))))
 
   (let* ((package    (make-node builder :package
-				:qname  '(:absolute "foo")
-				:name   "foo"
-				:bounds '(1 . 2)))
-	 (import     (make-node builder :dependency/file
-				:format   :mock
-				:pathname #P"some-file.mock"
-				:bounds   '(2 . 3)))
-	 (comment1   (make-node builder :comment
-				:content "comment1"
-				:bounds  '(3 . 4)))
-	 (comment2   (make-node builder :comment
-				:content "comment2"
-				:bounds  '(4 . 5)))
-	 (unresolved (find-node builder :structure
-				:qname  '(:absolute "unresolved")
-				:bounds '(5 . 6)))
-	 (field      (make-node builder :field
-				:name   "field"
-				:type   unresolved
-				:bounds '(5 . 6)))
-	 (structure  (make-node builder :structure
-				:name   "test"
-				:qname  '(:absolute "test")
-				:bounds '(3 . 6)))
-	 (name       (if (equal source "really-unresolved")
-			 "really-unresolved" "unresolved"))
-	 (resolved   (make-node builder :structure
-				:name   name
-				:qname  `(:absolute ,name)
-				:bounds '(6 . 7))))
+                                :qname  '(:absolute "foo")
+                                :name   "foo"
+                                :bounds '(1 . 2)))
+         (import     (make-node builder :dependency/file
+                                :format   :mock
+                                :pathname #P"some-file.mock"
+                                :bounds   '(2 . 3)))
+         (comment1   (make-node builder :comment
+                                :content "comment1"
+                                :bounds  '(3 . 4)))
+         (comment2   (make-node builder :comment
+                                :content "comment2"
+                                :bounds  '(4 . 5)))
+         (unresolved (find-node builder :structure
+                                :qname  '(:absolute "unresolved")
+                                :bounds '(5 . 6)))
+         (field      (make-node builder :field
+                                :name   "field"
+                                :type   unresolved
+                                :bounds '(5 . 6)))
+         (structure  (make-node builder :structure
+                                :name   "test"
+                                :qname  '(:absolute "test")
+                                :bounds '(3 . 6)))
+         (name       (if (equal source "really-unresolved")
+                         "really-unresolved" "unresolved"))
+         (resolved   (make-node builder :structure
+                                :name   name
+                                :qname  `(:absolute ,name)
+                                :bounds '(6 . 7))))
     (signal 'location-condition
-	    :location (make-instance 'location-info))
+            :location (make-instance 'location-info))
     (add-child builder package import)
     (add-child builder structure comment1)
     (add-child builder structure comment2)
@@ -101,27 +99,25 @@
     (add-child builder package structure)
     (add-child builder package resolved)))
 
-
 ;;; `mock-builder' mock class
-;;
 
 (defmethod find-builder-class ((spec (eql :mock)))
   (find-class 'mock-builder))
 
 (defclass mock-builder ()
   ((calls :initarg  :calls
-	  :type     list
-	  :accessor calls
-	  :initform nil
-	  :documentation
-	  "Stores the arguments to all `parse' calls."))
+          :type     list
+          :accessor calls
+          :initform nil
+          :documentation
+          "Stores the arguments to all `parse' calls."))
   (:documentation
    "Mock builder for unit tests. Delegates to list builder."))
 
 (defmethod parse ((format  format-mock)
-		  (source  t)
-		  (builder mock-builder)
-		  &key &allow-other-keys)
+                  (source  t)
+                  (builder mock-builder)
+                  &key &allow-other-keys)
   (appendf (calls builder) (list (list format source)))
   (when (next-method-p)
     (call-next-method)))
@@ -137,17 +133,15 @@
       (apply #'make-node 'list kind args)))
 
 (defmethod make-node ((builder mock-builder) (kind (eql :comment))
-		      &key
-		      content
-		      &allow-other-keys)
+                      &key
+                      content
+                      &allow-other-keys)
   content)
 
 (defmethod add-child ((builder mock-builder) (parent t) (child t))
   (add-child 'list parent child))
 
-
 ;;; `error-builder' mock class
-;;
 
 (defmethod find-builder-class ((spec (eql :error)))
   (find-class 'error-builder))
@@ -158,31 +152,29 @@
    "Mock builder for unit tests. Signals an error in `parse'."))
 
 (defmethod parse ((format  format-mock)
-		  (source  t)
-		  (builder error-builder)
-		  &key &allow-other-keys)
+                  (source  t)
+                  (builder error-builder)
+                  &key &allow-other-keys)
   (error "Intentional error."))
 
-
 ;;; `mock-resolver' mock class
-;;
 
 (defclass mock-resolver ()
   ((calls :initarg  :calls
-	  :type     list
-	  :accessor calls
-	  :initform nil
-	  :documentation
-	  "Stores the arguments to all `resolve' calls."))
+          :type     list
+          :accessor calls
+          :initform nil
+          :documentation
+          "Stores the arguments to all `resolve' calls."))
   (:documentation
    "A mock resolver which simply stores the arguments to `resolve'
 calls."))
 
 (defmethod resolve ((resolver mock-resolver)
-		    (format   t)
-		    (location t)
-		    &key
-		    if-does-not-exist)
+                    (format   t)
+                    (location t)
+                    &key
+                    if-does-not-exist)
   (declare (ignore if-does-not-exist))
 
   (push (list format location) (calls resolver))

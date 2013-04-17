@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.model)
 
-
 ;;; Name protocol
-;;
 
 (defgeneric kind (thing)
   (:documentation
@@ -22,13 +20,11 @@
   (:documentation
    "Return the fully qualified name of THING."))
 
-
 ;;; Printing qnames
-;;
 
 (declaim (ftype (function (stream name &optional t t character)
-			  (values name &rest nil))
-		print-qname))
+                          (values name &rest nil))
+                print-qname))
 
 (defun print-qname (stream qname &optional colon? at? (separator #\.))
   "Print the relative or absolute qualified name QNAME onto STREAM.
@@ -44,8 +40,8 @@ SEPARATOR is printed to separate name components."
   (declare (ignore at?))
 
   (let+ ((format (format nil "~~:[~~;~C~~]~~{~~A~~^~:*~C~~}" separator))
-	 ((anchor &rest components) qname)
-	 (relative? (eq anchor :relative)))
+         ((anchor &rest components) qname)
+         (relative? (eq anchor :relative)))
     (cond
       ((or relative? (not (length= 1 qname)))
        (format stream format relative? components))

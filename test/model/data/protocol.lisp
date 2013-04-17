@@ -18,20 +18,20 @@
 
 (addtest (lookup
           :documentation
-	  "Test default behavior of the `lookup' generic function.")
+          "Test default behavior of the `lookup' generic function.")
   default-behavior
 
   ;; A relative name with no components should refer to the object
   ;; itself.
   (let ((container :does-not-matter))
     (ensure-same (lookup container :does-not-matter '(:relative))
-		 container))
+                 container))
 
   ;; The following cases should all lead to unsuccessful lookup.
   (ensure-cases (key)
       '("does-not-matter"
-	(:relative "does-not-matter")
-	(:relative "does-not-matter" "does-not-matter"))
+        (:relative "does-not-matter")
+        (:relative "does-not-matter" "does-not-matter"))
 
     ;; Default behavior consists in not finding the requested object.
     (ensure-condition 'no-such-child
@@ -39,12 +39,12 @@
 
     ;; Test returning nil instead of signaling an error.
     (ensure-null (lookup :does-not-matter :does-not-matter key
-			 :if-does-not-exist nil))
+                         :if-does-not-exist nil))
 
     ;; Test returning a particular value instead of signaling an error.
     (ensure-same (lookup :does-not-matter :does-not-matter key
-			 :if-does-not-exist (curry #'use-value :replacement))
-		 :replacement)))
+                         :if-does-not-exist (curry #'use-value :replacement))
+                 :replacement)))
 
 (deftestsuite validate-value-root (model-data-protocol-root)
   ()
@@ -53,7 +53,7 @@
 
 (addtest (validate-value-root
           :documentation
-	  "Test default behavior of the `validate-value' generic
+          "Test default behavior of the `validate-value' generic
 function.")
   default-behavior
 
@@ -64,22 +64,22 @@ function.")
 
   ;; Test returning nil instead of signaling an error.
   (ensure-null (validate-value :does-not-matter :does-not-matter
-			       :if-invalid nil))
+                               :if-invalid nil))
 
   ;; Test continuing despite an invalid value.
   (ensure-same (validate-value :does-not-matter :does-not-matter
-			       :if-invalid #'continue)
-	       t))
+                               :if-invalid #'continue)
+               t))
 
 (addtest (validate-value-root
           :documentation
-	  "Test that `validate-value' returns the causing condition as
+          "Test that `validate-value' returns the causing condition as
 a second return value.")
   cause-return-value
 
   ;; Expect result nil, second return value causing condition.
   (let+ ((type (make-instance 'mock-type/validate-value))
-	 ((&values result cause) (validate-value type :does-not-matter
-						 :if-invalid nil)))
+         ((&values result cause) (validate-value type :does-not-matter
+                                                 :if-invalid nil)))
     (ensure-null result)
     (ensure (typep cause 'value-invalid-for-type))))

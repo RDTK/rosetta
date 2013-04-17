@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.model.data)
 
-
 ;;; Documentation protocol
-;;
 
 (defgeneric documentation1 (thing)
   (:documentation
@@ -21,9 +19,7 @@
 documentation of type 'data-type."
   (documentation1 thing))
 
-
 ;;; Composite data type protocol
-;;
 
 (defgeneric contents (container kind)
   (:documentation
@@ -39,9 +35,9 @@ in CONTAINER."))
 CONTAINER."))
 
 (defgeneric lookup (container kind key
-		    &key
-		    if-does-not-exist
-		    if-exists)
+                    &key
+                    if-does-not-exist
+                    if-exists)
   (:documentation
    "Retrieve the element of kind KIND identified by KEY,
 i.e. associated to the (KIND KEY) pair, within CONTAINER.
@@ -63,9 +59,9 @@ IF-EXISTS is accepted for parity with the `setf' method and
 ignored."))
 
 (defgeneric (setf lookup) (new-value container kind key
-			   &key
-			   if-does-not-exist
-			   if-exists)
+                           &key
+                           if-does-not-exist
+                           if-exists)
   (:documentation
    "Associate NEW-VALUE with the (KIND KEY) pair in CONTAINER.
 
@@ -94,16 +90,16 @@ allowed:
   nil)
 
 (defmethod lookup ((container t)
-		   (kind      t)
-		   (key       t)
-		   &key &allow-other-keys)
+                   (kind      t)
+                   (key       t)
+                   &key &allow-other-keys)
   "Default behavior is to not return a result."
   nil)
 
 (defmethod lookup ((container t)
-		   (kind      t)
-		   (key       list)
-		   &key &allow-other-keys)
+                   (kind      t)
+                   (key       list)
+                   &key &allow-other-keys)
   (cond
     ;; If KEY is not a relative name, we cannot do anything with it =>
     ;; call next method (which is probably the default behavior of
@@ -120,88 +116,88 @@ allowed:
     ;; direct lookup in CONTAINER.
     ((length= 2 key)
      (lookup container kind (second key)
-	     :if-does-not-exist nil))
+             :if-does-not-exist nil))
 
     ;; A relative name with more than one component => lookup first
     ;; name component and recur on the result and remaining
     ;; components.
     (t
      (when-let ((parent (lookup container t (second key)
-				:if-does-not-exist nil)))
+                                :if-does-not-exist nil)))
        (lookup parent kind (cons :relative (nthcdr 2 key))
-	       :if-does-not-exist nil)))))
+               :if-does-not-exist nil)))))
 
 (defmethod lookup :around ((container t)
-			   (kind      t)
-			   (key       t)
-			   &key
-			   (if-does-not-exist #'error)
-			   &allow-other-keys)
+                           (kind      t)
+                           (key       t)
+                           &key
+                           (if-does-not-exist #'error)
+                           &allow-other-keys)
   (let+ (((&flet handle-does-not-exist (&optional condition)
-	    (declare (ignore condition))
-	    (etypecase if-does-not-exist
-	      (null
-	       (return-from lookup nil))
-	      (function
-	       (restart-case
-		   (funcall if-does-not-exist
-			    (make-condition 'no-such-child
-					    :type container
-					    :key  (list kind key)))
-		 (use-value (value)
-		   :report (lambda (stream)
-			     (format stream "~@<Use a given value that ~
+            (declare (ignore condition))
+            (etypecase if-does-not-exist
+              (null
+               (return-from lookup nil))
+              (function
+               (restart-case
+                   (funcall if-does-not-exist
+                            (make-condition 'no-such-child
+                                            :type container
+                                            :key  (list kind key)))
+                 (use-value (value)
+                   :report (lambda (stream)
+                             (format stream "~@<Use a given value that ~
 should be used in place of the missing value.~@:>"))
-		   :interactive (lambda ()
-				  (format *query-io* "Value (evaluated): ")
-				  (finish-output *query-io*)
-				  (list (eval (read *query-io*))))
-		   value)
-		 (store-value (value)
-		   :report (lambda (stream)
-			     (format stream "~@<Store a value to be ~
+                   :interactive (lambda ()
+                                  (format *query-io* "Value (evaluated): ")
+                                  (finish-output *query-io*)
+                                  (list (eval (read *query-io*))))
+                   value)
+                 (store-value (value)
+                   :report (lambda (stream)
+                             (format stream "~@<Store a value to be ~
 used in place of the missing value.~@:>"))
-		   :interactive (lambda ()
-				  (format *query-io* "Replacement value (evaluated): ")
-				  (finish-output *query-io*)
-				  (list (eval (read *query-io*))))
-		   (setf (lookup container kind key) value))))))))
+                   :interactive (lambda ()
+                                  (format *query-io* "Replacement value (evaluated): ")
+                                  (finish-output *query-io*)
+                                  (list (eval (read *query-io*))))
+                   (setf (lookup container kind key) value))))))))
     (or (handler-bind
-	    (((or simple-error no-such-child) #'handle-does-not-exist))
-	  (call-next-method))
-	(handle-does-not-exist))))
+            (((or simple-error no-such-child) #'handle-does-not-exist))
+          (call-next-method))
+        (handle-does-not-exist))))
 
 (defmethod (setf lookup) :around ((new-value  t)
-				  (container  t)
-				  (kind       t)
-				  (key        t)
-				  &key
-				  (if-exists #'error)
-				  &allow-other-keys)
+                                  (container  t)
+                                  (kind       t)
+                                  (key        t)
+                                  &key
+                                  (if-exists #'error)
+                                  &allow-other-keys)
   (when-let ((existing (lookup container kind key
-			       :if-does-not-exist nil)))
+                               :if-does-not-exist nil)))
     (etypecase if-exists
       ((eql :keep)
        (return-from lookup existing))
       ((eql :supersede))
       (function
        (restart-case
-	   (funcall if-exists
-		    (make-condition 'duplicate-child-key
-				    :type container
-				    :key  (list kind key)))
-	 (continue (&optional condition)
-	   :report (lambda (stream)
-		     (format stream "~@<Replace the existing value ~S ~
+           (funcall if-exists
+                    (make-condition 'duplicate-child-key
+                                    :type container
+                                    :key  (list kind key)))
+         (continue (&optional condition)
+           :report (lambda (stream)
+                     (format stream "~@<Replace the existing value ~S ~
 with ~S.~@:>"
-			     existing new-value))
-	   (declare (ignore condition)))
-	 (keep ()
-	   :report (lambda (stream)
-		     (format stream "~@<Keep the existing value ~
+                             existing new-value))
+           (declare (ignore condition)))
+         (keep ()
+           :report (lambda (stream)
+                     (format stream "~@<Keep the existing value ~
 ~S.~@:>"
-			     existing))
-	   (return-from lookup existing))))))
+                             existing))
+           (return-from lookup existing))))))
 
   (call-next-method))
 
@@ -220,22 +216,22 @@ KEY can be usually be a `cl:string', a `name/relative' or a
   (OR ALTERNATIVE1 ALTERNATIVE2 ...)"))
 
 (defmethod query ((container t)
-		  (kind      t)
-		  (key       t))
+                  (kind      t)
+                  (key       t))
   (lookup container kind key :if-does-not-exist nil))
 
 (defmethod query ((container t)
-		  (kind      t)
-		  (key       list))
+                  (kind      t)
+                  (key       list))
   (if (eq (first key) 'or)
       (some (curry #'query container kind) (rest key))
       (call-next-method)))
 
 (defmethod query ((container t)
-		  (kind      list)
-		  (key       t))
+                  (kind      list)
+                  (key       t))
   (some #'(lambda (kind) (query container kind key))
-	kind))
+        kind))
 
 (defgeneric parent (thing)
   (:documentation
@@ -249,8 +245,8 @@ tuple/item.
 See: `ancestors', `root'."))
 
 (defgeneric ancestors (thing
-		       &key
-		       include-self?)
+                       &key
+                       include-self?)
   (:documentation
    "Return the list of transitive `parent's of THING.
 
@@ -274,21 +270,17 @@ other types."))
 (defmethod composite? ((type t))
   nil)
 
-
 ;;; Typed protocol
-;;
 
 (defgeneric type1 (thing)
   (:documentation
    "Return a type instance representing the type of THING."))
 
-
 ;;; Value validation protocol
-;;
 
 (defgeneric validate-value (type value
-			    &key
-			    if-invalid)
+                            &key
+                            if-invalid)
   (:documentation
    "Check whether VALUE is valid for TYPE.
 
@@ -302,37 +294,35 @@ condition object (of type `valid-invalid-for-type'). If IF-INVALID is
 a function, a `cl:continue' restart is established around the call."))
 
 (defmethod validate-value :around ((type t) (value t)
-				   &key
-				   (if-invalid #'error))
+                                   &key
+                                   (if-invalid #'error))
   (let+ (((&flet make-error (&optional cause)
-	    (apply #'make-condition 'value-invalid-for-type
-		   :type  type
-		   :value value
-		   (when cause
-		     (list :cause cause)))))
-	 ((&flet handle-invalid (&optional cause)
-	    (etypecase if-invalid
-	      (null
-	       (return-from validate-value (values nil (make-error cause))))
-	      (function
-	       (restart-case
-		   (funcall if-invalid (make-error cause))
-		 (continue ()
-		   :report (lambda (stream)
-			     (format stream "~@<Ignore the incompatibility.~@:>"))
-		   t)))))))
+            (apply #'make-condition 'value-invalid-for-type
+                   :type  type
+                   :value value
+                   (when cause
+                     (list :cause cause)))))
+         ((&flet handle-invalid (&optional cause)
+            (etypecase if-invalid
+              (null
+               (return-from validate-value (values nil (make-error cause))))
+              (function
+               (restart-case
+                   (funcall if-invalid (make-error cause))
+                 (continue ()
+                   :report (lambda (stream)
+                             (format stream "~@<Ignore the incompatibility.~@:>"))
+                   t)))))))
     (or (handler-bind
-	    (((or simple-error value-invalid-for-type) #'handle-invalid))
-	  (call-next-method))
-	(handle-invalid))))
+            (((or simple-error value-invalid-for-type) #'handle-invalid))
+          (call-next-method))
+        (handle-invalid))))
 
 (defmethod validate-value ((type t) (value t)
-			   &key &allow-other-keys)
+                           &key &allow-other-keys)
   nil)
 
-
 ;;; Dependency protocol
-;;
 
 (defgeneric direct-dependencies (thing)
   (:method-combination append)
@@ -342,9 +332,9 @@ depends. For example, a structure depends on the types of its fields
 and an array type depends on its element type."))
 
 (defgeneric dependencies (thing
-			  &key
-			  include-self?
-			  blacklist)
+                          &key
+                          include-self?
+                          blacklist)
   (:documentation
    "Return a duplicate-free list of things on which THING (directly or
 indirectly) depends. The set of dependencies is determined as the
@@ -368,41 +358,39 @@ blacklisted objects or a list or the form
 
 (defmethod direct-dependencies :around ((thing t))
   (remove thing (remove-duplicates (call-next-method) :test #'eq)
-	  :test #'eq))
+          :test #'eq))
 
 (defmethod dependencies ((thing t)
-			 &key
-			 (include-self? t)
-			 blacklist)
+                         &key
+                         (include-self? t)
+                         blacklist)
   (let+ ((seen (make-hash-table :test #'eq))
-	 ((&labels blacklisted? (thing blacklist)
-	    (etypecase blacklist
-	      (null
-	       nil)
-	      (function
-	       (funcall blacklist thing))
-	      ((cons (eql or))
-	       (mapcar (curry #'blacklisted? thing) (rest blacklist)))
-	      (sequence
-	       (find thing blacklist)))))
-	 ((&labels do-thing (thing)
-	    (cond
-	      ((blacklisted? thing blacklist)
-	       (return-from do-thing))
-	      ((gethash thing seen)
-	       (return-from do-thing))
-	      (t
-	       (setf (gethash thing seen) t)))
-	    (cons thing (mappend #'do-thing (direct-dependencies thing))))))
+         ((&labels blacklisted? (thing blacklist)
+            (etypecase blacklist
+              (null
+               nil)
+              (function
+               (funcall blacklist thing))
+              ((cons (eql or))
+               (mapcar (curry #'blacklisted? thing) (rest blacklist)))
+              (sequence
+               (find thing blacklist)))))
+         ((&labels do-thing (thing)
+            (cond
+              ((blacklisted? thing blacklist)
+               (return-from do-thing))
+              ((gethash thing seen)
+               (return-from do-thing))
+              (t
+               (setf (gethash thing seen) t)))
+            (cons thing (mappend #'do-thing (direct-dependencies thing))))))
     ;; If requested, remove THING from an arbitrary position. It can
     ;; end up there because of cycles.
     (if include-self?
-	(do-thing thing)
-	(remove thing (do-thing thing)))))
+        (do-thing thing)
+        (remove thing (do-thing thing)))))
 
-
 ;;; Fundamental type protocol
-;;
 
 (defgeneric fundamental? (type)
   (:documentation
@@ -431,9 +419,7 @@ allows negative values."))
 (defmethod fundamental? ((type t))
   (eq (kind type) :fundamental))
 
-
 ;;; Field protocol for structure-like data types
-;;
 
 (defgeneric optional? (field)
   (:documentation
@@ -443,9 +429,7 @@ realizations of its containing data type."))
 (defmethod optional? ((field t))
   nil)
 
-
 ;;; Array protocol
-;;
 
 (defgeneric element-type (array)
   (:documentation
@@ -462,19 +446,16 @@ ARRAY."))
    "Return non-nil if the array type described by TYPE has a fixed
 number of elements."))
 
-
 ;;; Singleton value protocol
-;;
-;; This protocol is provided by types whose extension is a single
-;; object.
+;;;
+;;; This protocol is provided by types whose extension is a single
+;;; object.
 
 (defgeneric value (singleton)
   (:documentation
    "Return the value of SINGLETON."))
 
-
 ;;; Forward reference protocol
-;;
 
 (defgeneric upgrade! (instance other)
   (:documentation
@@ -482,15 +463,13 @@ number of elements."))
 class to the class of OTHER and copying all slot values from OTHER to
 INSTANCE."))
 
-
 ;;; Builder protocol
-;;
 
 (defgeneric find-node (builder kind
-		       &rest args
-		       &key
-		       if-does-not-exist
-		       &allow-other-keys)
+                       &rest args
+                       &key
+                       if-does-not-exist
+                       &allow-other-keys)
   (:documentation
    "Use BUILDER to find and return the node described by KIND and
 ARGS.
@@ -503,8 +482,8 @@ function, the function is called with a `use-value' restart
 established."))
 
 (defgeneric make-node (builder kind
-		       &rest args
-		       &key &allow-other-keys)
+                       &rest args
+                       &key &allow-other-keys)
   (:documentation
    "Use BUILDER to create and return a node described by KIND and
 ARGS."))
@@ -514,27 +493,25 @@ ARGS."))
    "Use BUILDER to add CHILD to PARENT. Return the modified PARENT."))
 
 (defmethod find-node :around ((builder t) (kind t)
-			      &key
-			      qname
-			      (if-does-not-exist #'error)
-			      &allow-other-keys)
+                              &key
+                              qname
+                              (if-does-not-exist #'error)
+                              &allow-other-keys)
   "Default behavior in case a requested node cannot be found."
   (or (call-next-method)
       (etypecase if-does-not-exist
-	(null
-	 nil)
-	(function
-	 (restart-case
-	     (funcall if-does-not-exist
-		      (make-condition 'no-such-child
-				      :type builder
-				      :key  (list kind qname))) ;; TODO condition
-	   (use-value (value)
-	     value))))))
+        (null
+         nil)
+        (function
+         (restart-case
+             (funcall if-does-not-exist
+                      (make-condition 'no-such-child
+                                      :type builder
+                                      :key  (list kind qname))) ; TODO condition
+           (use-value (value)
+             value))))))
 
-
 ;;; Builder class family
-;;
 
 (intern "BUILDER") ;; (documentation 'builder 'dynamic-classes:class-family)
 

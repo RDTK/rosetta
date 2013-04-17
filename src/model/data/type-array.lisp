@@ -6,12 +6,10 @@
 
 (cl:in-package :rosetta.model.data)
 
-
 ;;; Class `base-array'
-;;
 
 (defclass base-array (array-mixin
-		      print-items-mixin)
+                      print-items-mixin)
   ()
   (:documentation
    "Instances of this class represent simple array types"))

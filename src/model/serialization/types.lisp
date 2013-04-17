@@ -6,21 +6,19 @@
 
 (cl:in-package :rosetta.model.serialization)
 
-
 ;;; Endianness specifications
-;;
 
 (deftype endian ()
   `(member :little-endian
-	   :big-endian))
+           :big-endian))
 
 (deftype endian-designator ()
   '(or endian
        (member :machine-endian
-	       :opposite-of-machine-endian)))
+               :opposite-of-machine-endian)))
 
 (declaim (ftype (function (endian-designator) (values endian &rest nil))
-		resolve-endian))
+                resolve-endian))
 
 (defun resolve-endian (endian-designator)
   "Return an `endian' which realizes ENDIAN-DESIGNATOR for the current
@@ -35,7 +33,7 @@ machine."
      endian-designator)))
 
 (declaim (ftype (function (endian) (values endian &rest nil))
-		opposite-endian))
+                opposite-endian))
 
 (defun opposite-endian (endian)
   "Return the opposite of ENDIAN."

@@ -6,13 +6,13 @@
 
 (cl:in-package :rosetta.model.data)
 
-;;; TODO(jmoringe, 2012-05-03): mixin?
+;; TODO(jmoringe, 2012-05-03): mixin?
 (defclass singleton (typed-mixin
-		     print-items-mixin)
+                     print-items-mixin)
   ((value :initarg  :value
-	  :reader   value
-	  :documentation
-	  "Stores the singleton value."))
+          :reader   value
+          :documentation
+          "Stores the singleton value."))
   (:default-initargs
    :value (missing-required-initarg 'singleton :value))
   (:documentation
@@ -22,7 +22,7 @@ which consist of singleton values."))
 (defmethod shared-initialize :after ((instance   singleton)
                                      (slot-names t)
                                      &key
-				     value)
+                                     value)
   (validate-value (type1 instance) value))
 
 (defmethod kind ((type singleton))
@@ -32,7 +32,7 @@ which consist of singleton values."))
   (format nil "=~A" (value type)))
 
 (defmethod validate-value ((type singleton) (value t)
-			   &key &allow-other-keys)
+                           &key &allow-other-keys)
   (equal value (value type)))
 
 (defmethod print-items append ((type singleton))

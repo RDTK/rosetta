@@ -16,7 +16,7 @@
      source)
     ((find-if (complement #'graphic-char-p) source)
      (maybe-shorten (substitute-if #\. (complement #'graphic-char-p) source)
-		    :max-length max-length))
+                    :max-length max-length))
     ((> (length source) max-length)
      (concatenate 'string (subseq source 0 (1- max-length)) '(#\…)))
     (t
@@ -30,13 +30,13 @@ designated by PATHNAME. Return two values: the name of the format and
 a boolean indicating whether a format class exists. When PATHNAME does
 not have a type, return nil."
   (when-let* ((type (pathname-type pathname))
-	      (key  (string-upcase type)))
+              (key  (string-upcase type)))
     (unless (emptyp key)
       (if-let ((spec (car (find key (rs.f:format-classes)
-				:test #'search
-				:key  (compose #'symbol-name #'car)))))
-	(values spec               t)
-	(values (make-keyword key) nil)))))
+                                :test #'search
+                                :key  (compose #'symbol-name #'car)))))
+        (values spec               t)
+        (values (make-keyword key) nil)))))
 
 ;; Local Variables:
 ;; coding: utf-8

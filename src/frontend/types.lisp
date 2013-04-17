@@ -6,9 +6,7 @@
 
 (cl:in-package :rosetta.frontend)
 
-
 ;;; Location-related types
-;;
 
 (deftype bounds/cons ()
   "Upper and lower bound of a region within a string. Upper bound can
@@ -17,13 +15,11 @@
               (or non-negative-integer null))
         (satisfies %valid-bounds)))
 
-
 ;;; Helper functions
-;;
 
 (defun %valid-bounds (bounds)
   (and (consp bounds)
        (let+ (((start . end) bounds))
-	 (or (null end)
-	     (and (integerp start) (integerp end)
-		  (<= start end))))))
+         (or (null end)
+             (and (integerp start) (integerp end)
+                  (<= start end))))))

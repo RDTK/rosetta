@@ -48,9 +48,7 @@
   (:export
    :retry)
 
-
 ;;; Location-related stuff
-;;
 
   ;; Location protocol
   (:export
@@ -76,9 +74,7 @@
    :format-content
    :format-content-with-delimiters)
 
-
 ;;; Parsing- and format-related stuff
-;;
 
   ;; Processing protocol
   (:export
@@ -99,9 +95,7 @@
   (:export
    :text-format-mixin)
 
-
 ;;; Builder-related stuff
-;;
 
   ;; Comment attaching protocol
   (:export
