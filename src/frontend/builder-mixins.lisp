@@ -33,13 +33,15 @@ location information to elements."))
     ((define-method (name)
        `(defmethod ,name :around ((builder location-attaching-mixin)
                                   (kind    t)
+                                  &rest args
                                   &key
                                   bounds)
 
           (let+ (((&accessors-r/o locations) builder)
-                 (element (call-next-method)))
-            ;;; TODO(jmoringe, 2012-11-13): if ELEMENT already has a
-            ;;; location, attach a sequence of locations
+                 (element (apply #'call-next-method builder kind
+                                 (remove-from-plist args :bounds))))
+            ;; TODO(jmoringe, 2012-11-13): if ELEMENT already has a
+            ;; location, attach a sequence of locations
             (when (and locations element
                        (not (location-of locations element)))
               (setf (location-of locations element)
