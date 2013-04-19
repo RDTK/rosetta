@@ -54,9 +54,10 @@ POSITION. The returned boundary position is of the form
 
 (defun normalize-name (name
                        &key
-                       (boundary? (disjoin #'digit-boundary?
+                       (boundary? (disjoin #'underscore-boundary?
                                            #'camel-case-boundary?
-                                           #'underscore-boundary?))
+                                           #'digit-boundary?
+                                           ))
                        (transform #'string-downcase)
                        (separator #\-))
   "Normalize NAME to the form

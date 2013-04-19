@@ -27,6 +27,11 @@
         ;; Some corner cases.
         ("_foo"        ()                            "foo")           ; separator at start
         ("f1_o"        ()                            "f1-o")          ; touching separators
+        ("DEPTH_8U"    ()                            "depth-8u")      ; likewise
+        ("DEPTH8U"     ()                            "depth-8u")      ; likewise
+        ("Depth8U"     ()                            "depth-8u")      ; likewise
+        ("DepthU8"     ()                            "depth-u8")      ; likewise
+        ("Depth_U8"    ()                            "depth-u8")      ; likewise
         ("f_o"         ()                            "f-o")           ; short components
 
         ;; Other transforms and separators.
