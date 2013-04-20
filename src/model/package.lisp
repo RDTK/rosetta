@@ -11,6 +11,7 @@
   (:use
    #:cl
    #:alexandria
+   #:iterate
    #:let-plus)
 
   ;; Types
@@ -35,7 +36,8 @@
 
   ;; Utility functions
   (:export
-   #:print-qname)
+   #:print-qname
+   #:print-name-expression)
 
   (:documentation
    "This package contains general model-related functions and

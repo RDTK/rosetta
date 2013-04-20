@@ -308,7 +308,7 @@ unresolved references as forward references and resolve them later."))
                                 :format-control "~@<Unresolved forward ~
                                                  reference to the ~A ~
                                                  named ~
-                                                 \"~/rosetta.model::print-qname/\".~@:>"
+                                                 ~/rosetta.model:print-name-expression/.~@:>"
                                 :format-arguments (list kind qname)))
             (continue ()
               :report (lambda (stream)
