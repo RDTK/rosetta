@@ -136,7 +136,7 @@
    #:ancestors
    #:recur
 
-   #:optmization-case
+   #:optimization-case
 
    ;; let-plus
    #:&env #:&env-r/o

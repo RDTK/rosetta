@@ -87,3 +87,23 @@ and the entries in a context (where :foo = 1) and
       ((&env-r/o ((var :foo) 3)                 ) var 2     1     2)
       ((&env-r/o ((var :bar) 3) &context context) var 3     1     2)
       ((&env-r/o ((var :bar) 3)                 ) var 3     1     2))))
+
+(addtest (backend-macros-root
+          :documentation
+          "Smoke test for `optimization-case' macro.")
+  optimization-case/smoke
+
+  (let+ (((&flet+ do-it ((settings clauses))
+            (let ((result
+                    (eval
+                     `(let ((target (make-instance
+                                     'code-generating-target-mixin
+                                     :optimization-settings ',settings)))
+                        (rs.b:optimization-case (target) ,@clauses)))))
+              (ensure-same result :selected)))))
+
+    (mapc #'do-it '((((speed 2))            ((speed  :selected) (safety)))
+                    (((safety 2))           ((safety :selected) (debug)))
+                    (((debug 2))            ((space) (debug :selected)))
+                    (((space 2))            ((speed) (space :selected)))
+                    (((speed 2) (safety 3)) ((speed) (safety :selected)))))))
