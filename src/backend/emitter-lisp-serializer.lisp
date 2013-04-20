@@ -119,10 +119,11 @@
                         ((:start ,start-var) 0)
                         ((:end   ,end-var)   (length ,destination-var)))
          (declare (ignorable ,end-var)
+                  (type ,(generate wire-type :reference language) ,destination-var)
                   (type ,(generate offset-type :reference language) ,start-var ,end-var))
          ,@(optimization-case (target)
              ((> safety speed)
-              `((check-type ,source-var ,(generate wire-type :reference language)))))
+              `((check-type ,destination-var ,(generate wire-type :reference language)))))
 
          (values ,(call-next-method) ,destination-var))))
 
@@ -135,10 +136,11 @@
                           ((:start ,start-var) 0)
                           ((:end   ,end-var)   (length ,source-var)))
          (declare (ignorable ,end-var)
+                  (type ,(generate wire-type :reference language) ,source-var)
                   (type ,(generate offset-type :reference language) ,start-var ,end-var))
          ,@(optimization-case (target)
              ((> safety speed)
-              `((check-type ,destination-var ,(generate wire-type :reference language)))))
+              `((check-type ,source-var ,(generate wire-type :reference language)))))
 
          (values ,destination-var ,(call-next-method))))))
 
