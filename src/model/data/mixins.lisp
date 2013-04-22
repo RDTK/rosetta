@@ -290,6 +290,25 @@ concepts similar to fields in a structure."))
 (define-composite-mixin fields
   :kind :field)
 
+(defmethod (setf lookup) :before ((new-value t)
+                                  (container fields-mixin)
+                                  (kind      (eql :field))
+                                  (key       t)
+                                  &key &allow-other-keys)
+  (when (let ((dependencies
+                (dependencies
+                 new-value :blacklist `(or ,#'optional?
+                                           ,(lambda (thing)
+                                              (eq (kind thing) :array))))))
+          (member container dependencies :test #'eq))
+    (simple-child-error container key
+                        "~@<Field ~A (transitively) contains a ~
+                         mandatory instantiation of its desired ~
+                         containing structure type ~A. Adding this ~
+                         field would make ~:*~A impossible to ~
+                         instantiate.~@:>"
+                        new-value container)))
+
 (defmethod direct-dependencies append ((thing fields-mixin))
   (mappend #'direct-dependencies (contents thing :field)))
 

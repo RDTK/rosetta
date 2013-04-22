@@ -34,6 +34,34 @@
 
 (addtest (structure-mixin-root
           :documentation
+          "Test constructing recursive `structure-mixin' instances.")
+  construction/recusive
+
+  (macrolet
+      ((test (type)
+         (let+ (((&flet make-ensure (type &rest body)
+                   `(ensure-condition 'simple-child-error
+                      (let* ((structure (make-instance 'structure-mixin))
+                             (field     (make-instance 'base-field
+                                                       :name "a"
+                                                       :type ,type)))
+                        (declare (ignorable field))
+                        ,@body)))))
+          `(progn
+             ,(make-ensure type
+               `(reinitialize-instance structure :fields (list field)))
+             ,(make-ensure type
+               `(reinitialize-instance structure :fields (list "a" ,type)))
+             ,(make-ensure type
+               `(setf (lookup structure :field "a") field))))))
+    ;; Direct mandatory instantiation of STRUCTURE.
+    (test structure)
+    ;; Indirect mandatory instantiation of STRUCTURE.
+    (test (make-instance 'structure-mixin
+                         :fields `("a" ,structure)))))
+
+(addtest (structure-mixin-root
+          :documentation
           "Test the `contents' method specialization
 `structure-mixin'.")
   lookup
