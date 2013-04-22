@@ -122,7 +122,8 @@ unsigned integer type.~:>"
                  'simple-conversion-error
                  :from             from
                  :to               to
-                 :format-control   "~@<Cannot convert ~A to singleton value ~A.~@:>"
+                 :format-control   "~@<Cannot convert ~A to singleton ~
+                                    value ~A.~@:>"
                  :format-arguments (list result (value to)))))
       ;; TODO(jmoringe): omit check at runtime when optimizing for speed
       (t

@@ -82,7 +82,7 @@ One example of a class representing such values is `enum-value'."))
   (unless (compute-applicable-methods #'value (list new-value))
     (simple-child-error container new-value
                         "~@<Supplied value ~A for ~A does not ~
-specialize the ~S method.~@:>"
+                         specialize the ~S method.~@:>"
                         new-value container 'value))
 
   (let ((value (value new-value)))
@@ -104,8 +104,8 @@ specialize the ~S method.~@:>"
   (unless (lookup type :value (string value) :if-does-not-exist nil)
     (let ((values (mapcar #'name (contents type :value))))
       (error "~@<~S is not one of the valid values of ~A. ~[There are ~
-no valid values~;The only valid value is ~:;Valid values are ~]~{~S~^, ~
-~}.~@:>"
+              no valid values~;The only valid value is ~:;Valid values ~
+              are ~]~{~S~^, ~}.~@:>"
              value type (length values) values)))
   t)
 
