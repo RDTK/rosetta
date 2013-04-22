@@ -173,7 +173,7 @@ install(DIRECTORY              "${CMAKE_CURRENT_SOURCE_DIR}/test"
         FILES_MATCHING PATTERN "*.lisp")
 install(DIRECTORY
         DESTINATION            "share/common-lisp/source/${CMAKE_PROJECT_NAME}")
-install(FILES                  ${ASD_FILES}
+install(FILES                  ${ASD_FILES} ${SEXP_FILES}
         DESTINATION            "share/common-lisp/source/${CMAKE_PROJECT_NAME}/")
 
 # Packaging
