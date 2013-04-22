@@ -56,11 +56,19 @@ around the call."))
   "Default behavior consists in using little endian."
   :little-endian)
 
+(declaim (special *seen*))
+
+(defvar *seen* nil
+  "During `validate-type' calls, stores a `hash-table' which is used
+to detect and process recursive types.")
+
 (defmethod validate-type :around ((mechanism t)
                                   (type      t)
                                   &key
                                   (if-invalid #'error))
-  (let+ (((&flet make-error (&optional cause)
+  (let+ ((*seen* (or *seen* (make-hash-table :test #'eq)))
+         ((&values seen? found?) (gethash type *seen*))
+         ((&flet make-error (&optional cause)
             (apply #'make-condition 'type-invalid-for-mechanism
                    :mechanism  mechanism
                    :type       type
@@ -77,6 +85,18 @@ around the call."))
                    :report (lambda (stream)
                              (format stream "~@<Ignore the incompatibility.~@:>"))
                    t)))))))
+
+    ;; If we already processed TYPE or are currently processing TYPE
+    ;; in recursive VALIDATE-TYPE calls, return the result which has
+    ;; been stored by the previous/outer call. For the outer call,
+    ;; this ensures that recursive appearances of TYPE do not lead to
+    ;; validation failure.
+    (when found?
+      (return-from validate-type seen?))
+    (setf (gethash type *seen*) t)
+
+    ;; Call the next method which either returns a generalized Boolean
+    ;; or signals an error.
     (or (handler-bind
             (((or simple-error type-invalid-for-mechanism)
                #'handle-invalid))

@@ -82,6 +82,8 @@
   direct-dependencies
 
   (ensure-cases (type expected)
-      `((,+struct/simple+ (,+utf-8-string+)))
+      `((,+struct/simple+    (,+utf-8-string+))
+        (,+struct/empty+     ())
+        #+later (,+struct/recursive+ (,+uint16+ ,+utf-8-string+ ,THE-ARRAY)))
 
     (ensure-same (direct-dependencies type) expected :test #'set-equal)))

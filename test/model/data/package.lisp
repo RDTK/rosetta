@@ -33,7 +33,9 @@
    #:+enum/uint32/simple+
    #:+enum/int32/simple+
 
-   #:+struct/simple+)
+   #:+struct/simple+
+   #:+struct/empty+
+   #:+struct/recursive+)
 
   (:documentation
    "This package contains unit tests for the model.data module."))
@@ -93,7 +95,31 @@
   (make-instance
    'base-structure
    :name   "simple"
-   :fields (list (make-instance 'base-field
-                                :name "a"
-                                :type +utf-8-string+)))
-  "A simple structure with a single field.")
+   :fields (list (make-instance 'base-field :name "a" :type +utf-8-string+))
+   :documentation
+   "A simple structure with a single field."))
+
+(defparameter +struct/empty+
+  (make-instance
+   'base-structure
+   :name   "empty"
+   :fields '()
+   :documentation
+   "An empty structure."))
+
+(defparameter +struct/recursive+
+  (let ((struct
+          (make-instance
+           'base-structure
+           :name   "recursive"
+           :fields (list (make-instance 'base-field :name "a" :type +uint16+)
+                         (make-instance 'base-field :name "b" :type +utf-8-string+))
+           :documentation
+           "A simple recursive structure.")))
+    (setf (lookup struct :field "c")
+          (make-instance 'base-field
+                         :name "c"
+                         :type (make-instance 'base-array
+                                              :index-type   +int32+
+                                              :element-type struct)))
+    struct))
