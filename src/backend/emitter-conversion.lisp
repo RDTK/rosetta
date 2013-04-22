@@ -12,6 +12,7 @@
   ;; Call `emit-conversion' for source and destination (stored in
   ;; `target-to' of TARGET) type.
   (let+ (((&accessors-r/o (to target-to)) target)
+         ((&env (:target target)))
          ((&env-r/o destination-var)))
     `(setf ,destination-var ,(emit-conversion node to language))))
 
@@ -29,10 +30,11 @@ variable `source-form' to FORM around BODY. BODY can call
                                  (to       ,to)
                                  (language rs.m.l:language-lisp))
        ,@(when documentation (list documentation))
-       (let+ (((&env-r/o source-var))
+       (let+ (((&env-r/o source-var target))
               ((&flet convert-using-coerce ()
                  `(coerce ,source-var ',(generate to :reference language)))))
          (declare (ignorable #'convert-using-coerce))
+         (check-type (optimization-settings target) list) ; force use
          ,@body))))
 
 ;;; Conversion methods
@@ -125,12 +127,13 @@ unsigned integer type.~:>"
                  :format-control   "~@<Cannot convert ~A to singleton ~
                                     value ~A.~@:>"
                  :format-arguments (list result (value to)))))
-      ;; TODO(jmoringe): omit check at runtime when optimizing for speed
       (t
        (with-gensyms (result-var)
-        `(let ((,result-var ,result))
-           (assert (equal ,result-var ,(value to)))
-           ,result-var))))))
+         `(let ((,result-var ,result))
+            ,@(optimization-case (target)
+                ((>= safety speed)
+                 `((assert (equal ,result-var ,(value to))))))
+            ,result-var))))))
 
 ;;; `enum'
 
