@@ -375,7 +375,7 @@ blacklisted objects or a list or the form
               (function
                (funcall blacklist thing))
               ((cons (eql or))
-               (mapcar (curry #'blacklisted? thing) (rest blacklist)))
+               (some (curry #'blacklisted? thing) (rest blacklist)))
               (sequence
                (find thing blacklist)))))
          ((&labels do-thing (thing)

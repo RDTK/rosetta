@@ -83,3 +83,51 @@ a second return value.")
                                                  :if-invalid nil)))
     (ensure-null result)
     (ensure (typep cause 'value-invalid-for-type))))
+
+;;; `dependencies'
+
+(defclass dependency-mock ()
+  ((direct-dependencies :initarg  :direct-dependencies
+                        :initform '())))
+
+(defmethod direct-dependencies append ((thing dependency-mock))
+  (slot-value thing 'direct-dependencies))
+
+(deftestsuite dependencies-root (model-data-protocol-root)
+  ()
+  (:documentation
+   "Tests for the `dependencies' generic function."))
+
+(addtest (dependencies-root
+          :documentation
+          "Test \"blacklist\" functionality of the `dependencies'
+generic function.")
+  blacklist
+
+  (let* ((type1 (make-instance 'dependency-mock))
+         (type2 (make-instance 'dependency-mock
+                               :direct-dependencies (list type1 type1)))
+         (type3 (make-instance 'dependency-mock)))
+    (setf type3 (reinitialize-instance
+                 type3 :direct-dependencies (list type2 type3)))
+
+    (ensure-cases (args expected-1 expected-2 expected-3)
+        ;; args
+        ;; type1    type2           type3
+        `((()
+           (,type1) (,type1 ,type2) (,type1 ,type2 ,type3))
+          ((:include-self? nil)
+           ()       (,type1)        (,type1 ,type2))
+          ((:include-self? t)
+           (,type1) (,type1 ,type2) (,type1 ,type2 ,type3))
+          ((:blacklist ,(lambda (thing) (eq thing type2)))
+           (,type1) ()              (,type3))
+          ((:blacklist (or (,type1) ,#'optional?))
+           ()       (,type2)        (,type2 ,type3)))
+
+      (ensure-same (apply #'dependencies type1 args) expected-1
+                   :test #'set-equal)
+      (ensure-same (apply #'dependencies type2 args) expected-2
+                   :test #'set-equal)
+      (ensure-same (apply #'dependencies type3 args) expected-3
+                   :test #'set-equal))))
