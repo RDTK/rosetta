@@ -55,9 +55,11 @@ target.")
         (,+enum/uint32/simple+ (:value :c)     error)
 
         ;; Structure type.
-        (,+struct/simple+      (:|a| "foo")    :no-error) ;;; TODO(jmoringe, 2012-12-20): proper check
-        (,+struct/simple+      (:|b| "foo")    error)  ; no such field
-        (,+struct/simple+      (:|a| 5)        error)) ; type
+        (,+struct/simple+      (:|a| "foo")    :no-error) ; TODO(jmoringe, 2012-12-20): proper check
+        (,+struct/simple+      (:|b| "foo")    error)     ; no such field
+        (,+struct/simple+      (:|a| 5)        error)     ; type
+        (,+struct/empty+       ()              :no-error)
+        (,+struct/recursive+   ()              :no-error))
     (let+ ((initargs (if args
                         `(:instantiate :initargs ,args)
                         :instantiate))
@@ -66,3 +68,64 @@ target.")
         (error     (ensure-condition 'error (do-it)))
         (:no-error (do-it))
         (t         (ensure-same (do-it) expected))))))
+
+(addtest (backend-emitter-lisp-root
+          :documentation
+          "Smoke test for generating classes.")
+  emit-definition/class/smoke
+
+  (ensure-cases (type slot-count expected/documentation)
+      `((,+struct/simple+ 1
+         "A simple structure with a single field.")
+        (,+struct/empty+ 0
+         "An empty structure.")
+        (,+struct/recursive+ 3
+         "A simple recursive structure."))
+
+    (let* ((class (generate type :class :lisp/compiled))
+           (name  (class-name class)))
+      (ensure (find-class name nil))
+      (closer-mop:finalize-inheritance class)
+      (ensure-same (length (closer-mop:class-slots class)) slot-count)
+      (ensure-same (documentation name 'type) expected/documentation)
+      (make-instance class))))
+
+(addtest (backend-emitter-lisp-root
+          :documentation
+          "Smoke test for generating enums.")
+  emit-definition/enum/smoke
+
+  (ensure-cases (type
+                 expected/members expected/name<->code
+                 expected/documentation)
+      `((,+enum/uint8/simple+
+         ;; Members
+         (:A :B)
+         ;; Code <-> name
+         ((:A    . 1)     ; valid pair
+          (:B    . 2)     ; valid pair
+          (:C    . error) ; no such name
+          (error . 3))    ; no such code
+         ;; Documentation
+         "A simple uint8 enum with two values."))
+
+    (let+ (((&values name code->name name->code)
+            (generate type :class :lisp/compiled)))
+      ;; Check members of generated type.
+      (iter (for member in expected/members)
+            (ensure (typep member name)))
+
+      ;; Check generated code <-> name mapping
+      (iter (for (name . code) in expected/name<->code)
+            (cond
+              ((eq name 'error)
+               (ensure-condition 'error (funcall code->name code)))
+
+              ((eq code 'error)
+               (ensure-condition 'error (funcall name->code name)))
+
+              (t
+               (ensure-same (funcall code->name code) name)
+               (ensure-same (funcall name->code name) code))))
+
+      (ensure-same (documentation name 'type) expected/documentation))))
