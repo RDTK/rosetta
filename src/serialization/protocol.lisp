@@ -43,24 +43,25 @@ destination instead of the amount of produced data."
 
 ;;; Partial deserializtion protocol
 
-(defgeneric location (mechanism source schema part
+(defgeneric location (mechanism source schema query
                       &key &allow-other-keys)
   (:documentation
-   "Find and return the location in SOURCE at which the first instance
-of the PART of SCHEMA occurs."))
+   "Find and return the location in SOURCE, which is assumed to be
+encoded in the serialization format of MECHANISM, at which the first
+thing matches QUERY which describes a part of SCHEMA."))
 
-(defgeneric extract (mechanism source schema part
+(defgeneric extract (mechanism source schema query destination
                      &key &allow-other-keys)
   (:documentation
-   "Extract and return the value which PART of SCHEMA has in SOURCE."))
+   "In SOURCE, which is assumed to be encoded in the serialization
+format of MECHANISM, find the first thing matching QUERY which
+describes a part of SCHEMA and store it in DESTINATION."))
 
 ;;; Mechanism class lookup
 
 (macrolet
     ((define-mechanism-lookup (method args)
-       (let ((args/typed
-              (map 'list #'list
-                   args (make-list (length args) :initial-element t))))
+       (let ((args/typed (mapcar #'list args (circular-list t))))
          `(progn
             (defmethod ,method ((mechanism list) ,@args/typed
                                 &rest rest-args &key)
@@ -78,5 +79,5 @@ of the PART of SCHEMA occurs."))
   (define-mechanism-lookup pack        (source destination))
   (define-mechanism-lookup pack*       (source))
   (define-mechanism-lookup unpack      (source destination))
-  (define-mechanism-lookup location    (source schema part))
-  (define-mechanism-lookup extract     (source schema part)))
+  (define-mechanism-lookup location    (source schema query))
+  (define-mechanism-lookup extract     (source schema query destination)))

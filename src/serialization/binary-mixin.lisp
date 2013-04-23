@@ -99,8 +99,8 @@ size and create such an octet-vector."
                      (remove-from-plist args :start :end)))))))
 
   (define-unpack-method unpack   ((destination t)))
-  (define-unpack-method location ((schema t) (part t)))
-  (define-unpack-method extract  ((schema t) (part t))))
+  (define-unpack-method location ((schema t) (query t)))
+  (define-unpack-method extract  ((schema t) (query t) (destination t))))
 
 ;;; Utility functions
 

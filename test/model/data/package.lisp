@@ -103,7 +103,7 @@
   (make-instance
    'base-structure
    :name   "simple"
-   :fields (list (make-instance 'base-field :name "a" :type +utf-8-string+))
+   :fields `("a" (,+utf-8-string+))
    :documentation
    "A simple structure with a single field."))
 
@@ -120,8 +120,7 @@
           (make-instance
            'base-structure
            :name   "recursive"
-           :fields (list (make-instance 'base-field :name "a" :type +uint16+)
-                         (make-instance 'base-field :name "b" :type +utf-8-string+))
+           :fields `("a" (,+uint16+)  "b" (,+utf-8-string+))
            :documentation
            "A simple recursive structure.")))
     (setf (lookup struct :field "c")

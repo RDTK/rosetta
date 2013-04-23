@@ -30,11 +30,10 @@
                             0))))
 
   (define-variable-width-method (target-pack :around)
-    (let+ (((&env-r/o source-var offset-var)))
-      `(+ ,(let+ (((&env (:source-var (if source-var `(length ,source-var) 0)))))
-             (generate length-type :pack language))
-          ,(let+ (((&env (:offset-var `(+ ,offset-var ,length-size)))))
-             (call-next-method)))))
+    `(+ ,(let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
+           (generate length-type :pack language))
+        ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size)))))
+           (call-next-method))))
 
   (define-variable-width-method (target-unpack :around)
     (let+ (((&with-gensyms temp-var)))

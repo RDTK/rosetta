@@ -368,11 +368,13 @@ consist of a collection of named fields."))
   ((element-type :initarg  :element-type
                  :reader   element-type
                  :documentation
-                 "")
+                 "Stores the type of the elements of the array.")
    (index-type   :initarg  :index-type
                  :reader   index-type
                  :documentation
-                 ""))
+                 "Stores the type of indices of the array. Usually,
+the index type is either an integer type of a tuple type of integer
+types."))
   (:default-initargs
    :element-type (missing-required-initarg 'array-mixin :element-type)
    :index-type   (missing-required-initarg 'array-mixin :index-type))

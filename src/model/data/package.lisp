@@ -104,25 +104,25 @@
 
   ;; Type mixin classes
   (:export
-   :documentation-mixin
+   #:documentation-mixin
 
-   :named-mixin
+   #:named-mixin
 
-   :fundamental-type-mixin
+   #:fundamental-type-mixin
 
-   :fixed-width-mixin
-   :variable-width-mixin
+   #:fixed-width-mixin
+   #:variable-width-mixin
 
-   :composite-mixin
+   #:composite-mixin
 
-   :typed-mixin
+   #:typed-mixin
 
-   :field-mixin
-   :structure-mixin
+   #:field-mixin
+   #:structure-mixin
 
-   :array-mixin
+   #:array-mixin
 
-   :toplevel-mixin)
+   #:toplevel-mixin)
 
   ;; `mapping' class
   (:export
