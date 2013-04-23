@@ -30,7 +30,5 @@ containers for data types."))
 (defmethod add-child ((builder t) ; TODO(jmoringe, 2012-04-24):
                       (parent  package1)
                       (child   named-mixin))
-  (assert (not (eq parent child))) ; TODO(jmoringe, 2012-10-24): proper condition
-
   (setf (lookup parent (kind child) (name child)) child) ; TODO(jmoringe, 2012-04-24):
   parent)

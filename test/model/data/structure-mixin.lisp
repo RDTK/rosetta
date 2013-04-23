@@ -34,6 +34,19 @@
 
 (addtest (structure-mixin-root
           :documentation
+          "Test constructing invalid parent relationships.")
+  construction/invalid-parent
+
+  (let ((foo (make-instance 'base-structure :name "foo"))
+        (bar (make-instance 'base-structure :name "bar")))
+    (ensure-condition 'child-error
+      (setf (lookup foo :nested "foo") foo))
+    (ensure-condition 'child-error
+      (setf (lookup foo :nested "bar") bar
+            (lookup bar :nested "foo") foo))))
+
+(addtest (structure-mixin-root
+          :documentation
           "Test constructing recursive `structure-mixin' instances.")
   construction/recusive
 

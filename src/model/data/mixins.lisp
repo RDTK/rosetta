@@ -98,12 +98,12 @@ associated parent object."))
     (append (qname parent) (list (name type)))
     (list :absolute (name type))))
 
-;; Hint for generic builders
-
-(defmethod add-child :after ((builder t)
-                             (parent  t)
-                             (child   parented-mixin))
-  (setf (parent child) parent))
+(defmethod (setf parent) :before ((new-value t)
+                                  (thing     parented-mixin))
+  (when (member thing (ancestors new-value))
+    (simple-child-error new-value thing
+                        "~@<Cyclic parent relation ~{~A~^ -> ~}.~@:>"
+                        (list* thing (ancestors new-value)))))
 
 ;;; `composite-mixin' mixin class
 
@@ -133,7 +133,8 @@ composite data types."))
                                      `(cons ,kind-var ,key-var)))))
      (key-func/any-kind (typecase kind
                           (keyword 'identity)
-                          (t       'rest))))
+                          (t       'rest)))
+     (set-parent?       t))
   "Define a class named NAME which implements to composite
 protocol (i.e `contents' and `lookup').
 
@@ -210,6 +211,20 @@ with KIND `t'. The returned value is compared to the KEY of the
                       (,accessor-name container))
              new-value))
 
+     ,@(when set-parent?
+         `((defmethod (setf lookup) :around ((new-value parented-mixin)
+                                             (container ,class-name)
+                                             (kind      ,kind-specializer)
+                                             (key       ,key-class)
+                                             &key &allow-other-keys)
+             (let ((old-parent (parent new-value)))
+               (setf (parent new-value) container)
+               (handler-bind
+                   ((error (lambda (condition)
+                             (declare (ignore condition))
+                             (setf (parent new-value) old-parent))))
+                 (call-next-method))))))
+
      (defmethod print-items append ((object ,class-name))
        `((,',(make-keyword name)
           ,(hash-table-count (,accessor-name object))
@@ -218,20 +233,21 @@ with KIND `t'. The returned value is compared to the KEY of the
      ',class-name))
 
 (define-composite-mixin nested
-    :class-name nesting-mixin)
+  :class-name nesting-mixin)
 
 (defmethod direct-dependencies append ((thing nesting-mixin))
   (contents thing :nested))
 
 (define-composite-mixin nested
-    :class-name container/absolute-mixin
-    :kind       symbol
-    :key-type   name/absolute
-    :key-class  list)
+  :class-name  container/absolute-mixin
+  :kind        symbol
+  :key-type    name/absolute
+  :key-class   list
+  :set-parent? nil)
 
 (define-composite-mixin nested
-    :class-name container/relative-mixin
-    :kind       symbol)
+  :class-name container/relative-mixin
+  :kind       symbol)
 
 ;;; `ordered-mixin' mixin class
 
