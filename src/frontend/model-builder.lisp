@@ -29,31 +29,40 @@ the rosetta.model.data package."))
             (symbolicate name '#:-supplied?)))
          ((&flet+ make-parameter ((name &optional &ign (required? t)))
             `(,name
-              ,(when required?
+              ,(when (and required? (not (eq '&ign required?)))
                  `(required-argument ,(make-keyword name)))
               ,(make-supplied-var name))))
          ((&flet+ make-type-check ((name &optional type (required? t)))
             (cond
               ((not type)
                nil)
-              (required?
+              ((and required? (not (eq '&ign required?)))
                `(check-type ,name ,type))
               (t
                `(when ,(make-supplied-var name)
-                  (check-type ,name ,type) )))))
+                  (check-type ,name ,type))))))
          ((&flet+ make-initarg ((name &optional &ign &ign))
             `(when ,(make-supplied-var name)
                (list ,(make-keyword name) ,name)))))
    `(defmethod make-node ((builder model-builder)
                           (kind    (eql ,kind))
+                          ,@(when class '(&rest args))
                           &key
-                          ,@(mapcar #'make-parameter args))
-      (declare (ignorable ,@(mapcar (compose #'make-supplied-var #'first)
-                                    args)))
+                          ,@(mapcar #'make-parameter args)
+                          ,@(when class `((class ',class))))
+      (declare (ignorable
+                ,@(mapcar (compose #'make-supplied-var #'first) args)
+                ,@(mapcar #'car (remove '&ign args :test-not #'eq :key #'third))
+                ,@(when class '(class))))
       ,@(remove nil (mapcar #'make-type-check args))
       ,@(or body
-            `((apply #'make-instance ',class
-                     (append ,@(mapcar #'make-initarg args))))))))
+            `((apply
+               #'make-instance class
+               (append
+                ,@(mapcar #'make-initarg (remove '&ign args :key #'third))
+                (remove-from-plist
+                 args :class
+                 ,@(mapcar (compose #'make-keyword #'first) args)))))))))
 
 (defmethod find-node ((builder model-builder)
                       (kind    (eql :fundamental))
@@ -100,20 +109,23 @@ the rosetta.model.data package."))
                                (documentation string nil)))
 
 (define-make-node :enum ((name          string)
+                         (qname         name/absolute &ign)
                          type
-                         (documentation string nil)))
+                         (documentation string        nil)))
 
 (define-make-node (:field base-field) ((name          string)
                                        type
                                        (documentation string nil)))
 
 (define-make-node (:structure base-structure) ((name          string)
-                                               (documentation string nil)))
+                                               (qname         name/absolute &ign)
+                                               (documentation string        nil)))
 
 (define-make-node (:array base-array) (element-type index-type))
 
 (define-make-node (:package package1) ((name          string)
-                                       (documentation string nil)))
+                                       (qname         name/absolute &ign)
+                                       (documentation string        nil)))
 
 (defmethod add-child ((builder model-builder) ; TODO(jmoringe, 2012-04-24):
                       (parent  rs.m.d::base-repository)
