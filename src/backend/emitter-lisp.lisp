@@ -70,7 +70,10 @@
     (:bool
      'boolean)
     (:integer
-     `(,(if (signed? node) 'signed-byte 'unsigned-byte) ,(width node)))
+     (let ((byte-type (if (signed? node) 'signed-byte 'unsigned-byte)))
+       (if (compute-applicable-methods #'width (list node))
+           `(,byte-type ,(width node))
+           byte-type)))
     (:float
      (ecase (width node)
        (32 'single-float)

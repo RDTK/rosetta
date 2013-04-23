@@ -96,8 +96,7 @@ data type represents signed or unsigned numbers."))
   (:documentation
    "This mixin class adds a signed? slot to data type classes."))
 
-(defclass type-integer* (fixed-width-mixin
-                         sign-mixin
+(defclass type-integer* (sign-mixin
                          fundamental-type-mixin)
   ()
   (:default-initargs
@@ -105,17 +104,35 @@ data type represents signed or unsigned numbers."))
 
 (defmethod validate-value ((type type-integer*) (value integer)
                            &key &allow-other-keys)
+  (typep value (if (signed? type) 'signed-byte 'unsigned-byte)))
+
+(defclass type-fixed-width-integer (type-integer*
+                                    fixed-width-mixin)
+  ()
+  (:documentation
+   "This class serves as a superclass for integer classes of a fixed
+width."))
+
+(defmethod validate-value ((type type-fixed-width-integer) (value integer)
+                           &key &allow-other-keys)
   (typep value `(,(if (signed? type) 'signed-byte 'unsigned-byte)
                  ,(width type))))
 
 (macrolet
-    ((define-fundamental-integer-type (signed? width)
-       (let ((name (format-symbol *package* "~:[U~;~]INT~D"
-                                  signed? width)))
-         `(define-fundamental-type (,name (type-integer*) :integer)
+    ((define-fundamental-integer-type (signed? &optional width)
+       (let ((name       (format-symbol *package* "~:[U~;~]INT~@[~D~]"
+                                   signed? width))
+             (superclass (if width
+                             'type-fixed-width-integer
+                             'type-integer*)))
+         `(define-fundamental-type (,name (,superclass) :integer)
             :signed? ,signed?
-            :width   ,width))))
-
+            ,@(when width
+                `(:width ,width))))))
+  ;; Variable width integers.
+  (define-fundamental-integer-type t)
+  (define-fundamental-integer-type nil)
+  ;; Fixed width integers.
   (define-fundamental-integer-type t    8)
   (define-fundamental-integer-type nil  8)
   (define-fundamental-integer-type t   16)

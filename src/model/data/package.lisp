@@ -135,8 +135,8 @@
    #:type-bool
 
    #:type-integer*
-   #:type-uint8 #:type-uint16 #:type-uint32  #:type-uint64
-   #:type-int8  #:type-int16  #:type-int32   #:type-int64
+   #:type-uint #:type-uint8 #:type-uint16 #:type-uint32  #:type-uint64
+   #:type-int  #:type-int8  #:type-int16  #:type-int32   #:type-int64
 
    #:type-float*
    #:type-float32 #:type-float64
@@ -162,8 +162,8 @@
   (:export
    #:+bool+
 
-   #:+uint8+ #:+uint16+ #:+uint32+ #:+uint64+
-   #:+int8+  #:+int16+  #:+int32+  #:+int64+
+   #:+uint+ #:+uint8+ #:+uint16+ #:+uint32+ #:+uint64+
+   #:+int+  #:+int8+  #:+int16+  #:+int32+  #:+int64+
 
    #:+float32+ #:+float64+
 

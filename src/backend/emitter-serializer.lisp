@@ -20,31 +20,49 @@
            (target   ,target)
            (language t))
           (let+ (((&accessors-r/o length-type) (mechanism target))
-                 (length-size (generate length-type :packed-size language)))
+                 (length-size (when (compute-applicable-methods
+                                     #'width (list length-type))
+                                (generate length-type :packed-size language)))
+                 ((&with-gensyms length-of-length-var)))
+            (declare (ignorable length-of-length-var))
             ,@body))))
 
   (define-variable-width-method (target-packed-size)
     (let+ (((&env-r/o source-var)))
-      `(+ ,length-size ,(if source-var
-                            `(length ,source-var)
-                            0))))
+      `(+ ,(or length-size
+               (let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
+                 (generate length-type :packed-size language)))
+          ,(if source-var `(length ,source-var) 0))))
 
   (define-variable-width-method (target-pack :around)
-    `(+ ,(let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
-           (generate length-type :pack language))
-        ,(let+ (((&env (offset-var `(+ ,offset-var ,length-size)))))
-           (call-next-method))))
+      (let* ((length-of-length (or length-size length-of-length-var))
+             (store-length
+               (let+ (((&env (source-var (if source-var `(length ,source-var) 0)))))
+                 (generate length-type :pack language)))
+             (store-value
+               (let+ (((&env (offset-var `(+ ,offset-var ,length-of-length)))))
+                 (call-next-method))))
+        (if length-size
+            `(+ ,store-length ,store-value)
+            `(let ((,length-of-length-var ,store-length))
+               (+ ,length-of-length-var ,store-value)))))
 
   (define-variable-width-method (target-unpack :around)
-    (let+ (((&with-gensyms temp-var)))
-      `(let ((,temp-var 0)) ;;; TODO(jmoringe, 2012-12-05): 0 is temp
-         (declare (type ,(generate length-type :reference language) ,temp-var))
-         (+ ,(let+ (((&env (:destination-var temp-var))))
-               (generate length-type :unpack language))
-            ,(let+ (((&env-r/o offset-var))
-                    ((&env (:offset-var `(+ ,offset-var ,length-size))
-                           (:end-var    `(+ ,offset-var ,length-size ,temp-var)))))
-               (call-next-method)))))))
+    (let+ ((length-of-length (or length-size length-of-length-var))
+           ((&with-gensyms length-var))
+           (unpack-length
+            (let+ (((&env (:destination-var length-var))))
+              (generate length-type :unpack language)))
+           (unpack-value
+            (let+ (((&env (offset-var `(+ ,offset-var ,length-of-length))
+                          (:end-var   `(+ ,offset-var ,length-var)))))
+              (call-next-method))))
+      `(let* ((,length-var ,(generate length-type :instantiate language)))
+         (declare (type ,(generate length-type :reference language) ,length-var))
+         ,(if length-size
+              `(+ ,unpack-length ,unpack-value)
+              `(let ((,length-of-length-var ,unpack-length))
+                 (+ ,length-of-length ,unpack-value)))))))
 
 ;;; `typed-mixin'
 
