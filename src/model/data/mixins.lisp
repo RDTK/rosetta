@@ -81,18 +81,6 @@ items."
    "This class is intended to be mixed into classes that have an
 associated parent object."))
 
-(defmethod root ((type parented-mixin))
-  (if-let ((parent (parent type)))
-    (root parent)
-    type))
-
-(defmethod ancestors ((type parented-mixin)
-                      &key
-                      (include-self? t))
-  (let ((from-parents (when-let ((parent (parent type)))
-                        (ancestors parent))))
-    (if include-self? (cons type from-parents) from-parents)))
-
 (defmethod qname ((type parented-mixin))
   (if-let ((parent (parent type)))
     (append (qname parent) (list (name type)))

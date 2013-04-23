@@ -45,19 +45,21 @@
   (:export
    #:documentation1)
 
+  ;; Parent protocol
+  (:export
+   #:parent
+   #:ancestors
+   #:root)
+
   ;; Composition protocol
   (:export
+   #:composite?
+
    #:contents
    #:contents/plist
 
    #:lookup
-   #:query
-
-   #:parent
-   #:ancestors
-   #:root
-
-   #:composite?)
+   #:query)
 
   ;; Storage protocol
   (:export

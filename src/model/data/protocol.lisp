@@ -19,7 +19,61 @@
 documentation of type 'data-type."
   (documentation1 thing))
 
+;;; Parent protocol
+
+(defgeneric parent (thing)
+  (:documentation
+   "Assuming the data type THING is contained in a composite data type,
+return that data type. Otherwise return nil.
+
+Note: this method does not reflect super/subtype relations like
+integer/uint32, but composition relations like structure/field or
+tuple/item.
+
+See: `ancestors', `root'."))
+
+(defgeneric ancestors (thing
+                       &key
+                       include-self?)
+  (:documentation
+   "Return the list of transitive `parent's of THING.
+
+INCLUDE-SELF? controls whether THING is included at the beginning of
+the returned list.
+
+See: `parent', `root'."))
+
+(defgeneric root (thing)
+  (:documentation
+   "Return the ancestor of THING which does not have a parent (the
+\"root\").
+
+See: `parent', `ancestors'."))
+
+;; Default behavior
+
+(defmethod parent ((thing t))
+  "Default behavior is to not return a parent."
+  nil)
+
+(defmethod ancestors ((thing t)
+                      &key
+                      (include-self? t))
+  (let ((from-parents (when-let ((parent (parent thing)))
+                        (ancestors parent))))
+    (if include-self? (cons thing from-parents) from-parents)))
+
+(defmethod root ((thing t))
+  (if-let ((parent (parent thing)))
+    (root parent)
+    thing))
+
 ;;; Composite data type protocol
+
+(defgeneric composite? (type)
+  (:documentation
+   "Return non-nil when the data type TYPE is in some way composed of
+other types."))
 
 (defgeneric contents (container kind)
   (:documentation
@@ -85,6 +139,9 @@ allowed:
     Make a `duplicate-child-key' error and call IF-EXISTS with it as
     the sole argument."))
 
+(defmethod composite? ((type t))
+  nil)
+
 (defmethod contents ((container t) (kind t))
   "Default behavior is to not return any contents."
   nil)
@@ -101,6 +158,11 @@ allowed:
                    (key       list)
                    &key &allow-other-keys)
   (cond
+    ;;
+    ((and (typep key 'name/absolute) (root container))
+     (lookup (root container) kind (cons :relative (rest key))
+             :if-does-not-exist nil))
+
     ;; If KEY is not a relative name, we cannot do anything with it =>
     ;; call next method (which is probably the default behavior of
     ;; just returning nil).
@@ -234,43 +296,6 @@ KEY can be usually be a `cl:string', a `name/relative' or a
                   (kind      list)
                   (key       t))
   (some (lambda (kind) (query container kind key)) kind))
-
-(defgeneric parent (thing)
-  (:documentation
-   "Assuming the data type THING is contained in a composite data type,
-return that data type. Otherwise return nil.
-
-Note: this method does not reflect super/subtype relations like
-integer/uint32, but composition relations like structure/field or
-tuple/item.
-
-See: `ancestors', `root'."))
-
-(defgeneric ancestors (thing
-                       &key
-                       include-self?)
-  (:documentation
-   "Return the list of transitive `parent's of THING.
-
-INCLUDE-SELF? controls whether THING is included at the beginning of
-the returned list.
-
-See: `parent', `root'."))
-
-(defgeneric root (thing)
-  (:documentation
-   "Return the ancestor of THING which does not have a parent (the
-\"root\").
-
-See: `parent', `ancestors'."))
-
-(defgeneric composite? (type)
-  (:documentation
-   "Return non-nil when the data type TYPE is in some way composed of
-other types."))
-
-(defmethod composite? ((type t))
-  nil)
 
 ;;; Typed protocol
 

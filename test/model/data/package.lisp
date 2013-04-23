@@ -20,7 +20,7 @@
    #:rosetta.test
    #:rosetta.model.test)
 
-  (:shadow
+  (:shadowing-import-from #:rosetta.model.data
    #:root)
 
   ;; Some simple types

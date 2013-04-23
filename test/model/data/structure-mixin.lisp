@@ -75,14 +75,35 @@
 
 (addtest (structure-mixin-root
           :documentation
+          "Test method on `parent', `ancestors' and `root' for class
+`structure-mixin'.")
+  parent+acestors+root/smoke
+
+  (ensure-cases (thing expected-parent expected-ancestors expected-root)
+      `((,+struct/simple+                     nil              ()                 ,+struct/simple+)
+        (,(lookup +struct/simple+ :field "a") ,+struct/simple+ (,+struct/simple+) ,+struct/simple+)
+        (,+struct/empty+                      nil              ()                 ,+struct/empty+)
+        (,+struct/recursive+                  nil              ()                 ,+struct/recursive+))
+
+    (ensure-same (parent thing) expected-parent)
+    (ensure-same (ancestors thing :include-self? nil) expected-ancestors
+                 :test #'set-equal)
+    (ensure-same (root thing) expected-root)))
+
+(addtest (structure-mixin-root
+          :documentation
           "Test the `contents' method specialization
 `structure-mixin'.")
   lookup
 
   (ensure-cases (struct args expected)
       `((,+struct/simple+ ("a")                                    ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ((:relative "a"))                        ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ((:absolute "a"))                        ,(first (contents +struct/simple+ :field)))
         (,+struct/simple+ ("a" :if-does-not-exist nil)             ,(first (contents +struct/simple+ :field)))
         (,+struct/simple+ ("no-such-child")                        no-such-child)
+        (,+struct/simple+ ((:relative "no-such-child"))            no-such-child)
+        (,+struct/simple+ ((:absolute "no-such-child"))            no-such-child)
         (,+struct/simple+ ("no-such-child" :if-does-not-exist nil) nil))
     (let+ (((&flet do-it () (apply #'lookup struct :field args))))
       (case expected
