@@ -108,6 +108,45 @@
 
 ;;; Enum types
 
+(defmethod emit/context :around ((node     enum)
+                                 (target   code-generating-target-mixin)
+                                 (language t))
+  ;; We check this so next methods may rely on the fact that there is
+  ;; at least one value.
+  (when (emptyp (contents node :value))
+    (error "~@<Cannot generate code for empty enumeration ~A.~@:>"
+           node))
+  (call-next-method))
+
+(defmethod emit/context ((node     enum)
+                         (target   target-packed-size)
+                         (language t))
+  (let+ ((values (contents node :value))
+         ((&env-r/o source-var))
+         (new-source-var
+          (cond
+            ((not source-var)
+             nil)
+
+            ;; If we are asked to compute the packed size of a
+            ;; constant value, we can look it up now and just use the
+            ;; result at runtime.
+            ((constantp source-var)
+             (value (lookup node :value (string (eval source-var)))))
+
+            ;; If the enum NODE only has one value, we can just use
+            ;; that.
+            ((length= 1 values)
+             (value (first values)))
+
+            ;; Otherwise we generate code to perform the lookup at
+            ;; runtime.
+            (t
+             (generate node :value->code language)))))
+
+    (let+ (((&env (:source-var new-source-var))))
+      (call-next-method))))
+
 (defmethod emit/context ((node     enum)
                          (target   target-pack)
                          (language t))

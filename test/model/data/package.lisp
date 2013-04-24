@@ -28,6 +28,7 @@
    #:+singleton/uint32+
    #:+singleton/float64+
 
+   #:+enum/uint8/empty+
    #:+enum/uint8/simple+
    #:+enum/uint8/one+
    #:+enum/uint32/simple+
@@ -66,6 +67,14 @@
 (defparameter +singleton/float64+
   (make-instance 'singleton :type +float64+ :value 1.0d0)
   "A float64 singleton.")
+
+(defparameter +enum/uint8/empty+
+  (make-instance
+   'enum :name   "simple/empty8"
+         :type   +uint8+
+         :values '()
+         :documentation
+         "A empty uint8 enum."))
 
 (defparameter +enum/uint8/simple+
   (make-instance

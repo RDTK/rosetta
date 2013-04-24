@@ -169,19 +169,25 @@ and compare the result of the function call with EXPECTED-VAR."
                              (:offset-var      offset)
                              (:start-var       start)
                              (:end-var         end))))
-                 (generate type target :lisp))))
-            ;; Put the generated code into a simple context which binds
-            ;; SOURCE, DESTINATION and OFFSET.
-            (,generated-var
-             (compile nil `(lambda (input)
-                             (let* ((,source      input)
-                                    (,destination ,,destination-initform)
-                                    (,offset      0)
-                                    (,start       ,offset)
-                                    (,end         100))
-                               (values ,(generate-code type) ,destination ,offset))))))
-       (iter (for (,input-var . ,expected-var) in inputs-and-expected)
-             (let+ (((&flet do-it () ,@body)))
-               (case ,expected-var
-                 (error (ensure-condition 'error (do-it)))
-                 (t     (do-it))))))))
+                 (generate type target :lisp)))))
+       (case inputs-and-expected
+         (emit-error
+          (ensure-condition 'emit-error (generate-code type)))
+         (t
+          ;; Put the generated code into a simple context which binds
+          ;; SOURCE, DESTINATION and OFFSET.
+          (let ((,generated-var
+                  (compile
+                   nil
+                   `(lambda (input)
+                      (let* ((,source      input)
+                             (,destination ,,destination-initform)
+                             (,offset      0)
+                             (,start       ,offset)
+                             (,end         100))
+                        (values ,(generate-code type) ,destination ,offset))))))
+            (iter (for (,input-var . ,expected-var) in inputs-and-expected)
+                  (let+ (((&flet do-it () ,@body)))
+                    (case ,expected-var
+                      (error (ensure-condition 'error (do-it)))
+                      (t     (do-it)))))))))))

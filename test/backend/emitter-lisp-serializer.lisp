@@ -57,6 +57,7 @@ We do not verify the emitted code, but its behavior.")
                                                             ("ä"    . 3)
                                                             ("äb"   . 4)))
         ;; Enum
+        (,+enum/uint8/empty+ :mock/little-endian-packed-size emit-error)
         (,+enum/uint8/one+ :mock/little-endian-packed-size ((:a . 1)))
         (,+enum/uint32/simple+ :mock/little-endian-packed-size ((:a . 4)
                                                                 (:b . 4))))
@@ -105,6 +106,7 @@ We do not verify the emitted code, but its behavior.")
                                                      ("ä"    . (#x02 #xc3 #xa4))
                                                      ("äb"   . (#x03 #xc3 #xa4 #x62))))
         ;; Enum
+        (,+enum/uint8/empty+ :mock/little-endian-pack emit-error)
         (,+enum/uint8/one+ :mock/little-endian-pack ((:a . (#x01))))
         (,+enum/uint32/simple+ :mock/little-endian-pack ((:a . (#x01 #x00 #x00 #x00))
                                                          (:b . (#x02 #x00 #x00 #x00)))))
@@ -159,6 +161,7 @@ We do not verify the emitted code, but its behavior.")
                                                        ((#x02 #xc3 #xa4)      . "ä")
                                                        ((#x03 #xc3 #xa4 #x62) . "äb")))
         ;; Enum
+        (,+enum/uint8/empty+ :mock/little-endian-unpack emit-error)
         (,+enum/uint8/one+ :mock/little-endian-unpack (((#x01)                . :a)
                                                        #+later ((#x02)                . error))) ;;; TODO(jmoringe, 2012-12-11): we optimize too aggressively to catch this
         (,+enum/uint32/simple+ :mock/little-endian-unpack (((#x01 #x00 #x00 #x00) . :a)
