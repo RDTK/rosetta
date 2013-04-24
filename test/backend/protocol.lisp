@@ -73,6 +73,24 @@
                   (invoke-restart 'use-value :result-instead-of-callback))
                  :result-instead-of-callback)))
 
+;; Test behavior in case of missing `emit' method.
+
+(defclass mock-node/no-emitter () ())
+(defclass mock-target/no-emitter () ())
+(defclass mock-language/no-emitter () ())
+
+(addtest (backend-protocol-root
+          :documentation
+          "Test behavior in case no `emit' method exists.")
+  generate/no-emitter
+
+  (ensure-condition 'emit-error
+    (generate (make-instance 'mock-node/no-emitter) :reference :lisp))
+  (ensure-condition 'emit-error
+    (generate +uint+ (make-instance 'mock-target/no-emitter) :lisp))
+  (ensure-condition 'emit-error
+    (generate +uint+ :reference (make-instance 'mock-language/no-emitter))))
+
 (addtest (backend-protocol-root
           :documentation
           "Smoke test for methods on `make-target-like'.")

@@ -258,15 +258,14 @@ No methods must not be installed on `emit/setup'."))
        `(defmethod ,name ((function (eql (fdefinition 'emit/context)))
                           ,@(when method? '((method t)))
                           &rest args)
+          ;; This cannot be replaced with a (t t t) specialized `emit'
+          ;; method since that method would appear as a valid next
+          ;; method to `next-method-p'.
           (if (compute-applicable-methods (fdefinition 'emit) args)
               (apply #'emit args)
               (error "~@<No emitter for ~{~A~^, ~}.~@:>" args)))))
   (define-delegating-method no-applicable-method)
   (define-delegating-method no-next-method t))
-
-(defmethod emit ((node t) (target t) (language t))
-  (error "~@<No emitter for ~{~A~^, ~}.~@:>"
-         (list node target language)))
 
 ;;; Conversion protocol
 
