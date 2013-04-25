@@ -52,24 +52,46 @@ characters when processing identifiers."))
         (call-next-method language more-legal)
         more-legal)))
 
-;;; `reserved-words-mixin' mixin class
+;;; `name-legalizer-mixin' mixin class
 
-(defclass reserved-words-mixin ()
-  ((reserved-words :initarg  :reserved-words
-                   :type     list
-                   :reader   language-reserved-words
-                   :initform nil
-                   :documentation
-                   "Stores a list of reserved words for a given
-programming language.")
-   (name-legalizer :initarg  :name-legalizer
+(defclass name-legalizer-mixin ()
+  ((name-legalizer :initarg  :name-legalizer
                    :type     (or symbol function)
                    :reader   language-name-legalizer
                    :documentation
                    "Stores a function of one parameter which is called
 to transform reserved words into legal identifiers."))
   (:default-initargs
-   :name-legalizer (missing-required-initarg 'reserved-words-mixin :name-legalizer))
+   :name-legalizer (missing-required-initarg 'name-legalizer-mixin :name-legalizer))
+  (:documentation
+   "This class is intended to be mixed into language classes which
+need to transform identifier names."))
+
+;;; `unconditional-name-legalizer-mixin' mixin class
+
+(defclass unconditional-name-legalizer-mixin (name-legalizer-mixin)
+  ()
+  (:documentation
+   "Like `name-legalizer-mixin' but unconditionally transforms
+names."))
+
+(defmethod legalize-name ((language unconditional-name-legalizer-mixin)
+                          (name     string))
+  (let ((more-legal (funcall (language-name-legalizer language) name)))
+    (if (next-method-p)
+        (call-next-method language more-legal)
+        more-legal)))
+
+;;; `reserved-words-mixin' mixin class
+
+(defclass reserved-words-mixin (name-legalizer-mixin)
+  ((reserved-words :initarg  :reserved-words
+                   :type     list
+                   :reader   language-reserved-words
+                   :initform '()
+                   :documentation
+                   "Stores a list of reserved words for a given
+programming language."))
   (:documentation
    "This class is intended to be mixed into language classes
 representing programming languages with reserved words that cannot be

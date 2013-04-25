@@ -80,10 +80,22 @@
   parent+acestors+root/smoke
 
   (ensure-cases (thing expected-parent expected-ancestors expected-root)
-      `((,+struct/simple+                     nil              ()                 ,+struct/simple+)
-        (,(lookup +struct/simple+ :field "a") ,+struct/simple+ (,+struct/simple+) ,+struct/simple+)
-        (,+struct/empty+                      nil              ()                 ,+struct/empty+)
-        (,+struct/recursive+                  nil              ()                 ,+struct/recursive+))
+      `((,+struct/simple+
+         nil              ()                 ,+struct/simple+)
+        (,(lookup +struct/simple+ :field "a")
+         ,+struct/simple+ (,+struct/simple+) ,+struct/simple+)
+        (,+struct/empty+
+         nil              ()                 ,+struct/empty+)
+        (,+struct/recursive+
+         nil              ()                 ,+struct/recursive+)
+        (,+struct/nested+
+         nil              ()                 ,+struct/nested+)
+        (,(lookup +struct/nested+ :nested "inner")
+         ,+struct/nested+ (,+struct/nested+) ,+struct/nested+)
+        (,+struct/packaged+
+         ,+package/simple+
+         (,+package/simple+ ,+package/root+)
+         ,+package/root+))
 
     (ensure-same (parent thing) expected-parent)
     (ensure-same (ancestors thing :include-self? nil) expected-ancestors
@@ -97,14 +109,22 @@
   lookup
 
   (ensure-cases (struct args expected)
-      `((,+struct/simple+ ("a")                                    ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ((:relative "a"))                        ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ((:absolute "a"))                        ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ("a" :if-does-not-exist nil)             ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ("no-such-child")                        no-such-child)
-        (,+struct/simple+ ((:relative "no-such-child"))            no-such-child)
-        (,+struct/simple+ ((:absolute "no-such-child"))            no-such-child)
-        (,+struct/simple+ ("no-such-child" :if-does-not-exist nil) nil))
+      `((,+struct/simple+ ("a")
+         ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ((:relative "a"))
+         ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ((:absolute "a"))
+         ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ("a" :if-does-not-exist nil)
+         ,(first (contents +struct/simple+ :field)))
+        (,+struct/simple+ ("no-such-child")
+         no-such-child)
+        (,+struct/simple+ ((:relative "no-such-child"))
+         no-such-child)
+        (,+struct/simple+ ((:absolute "no-such-child"))
+         no-such-child)
+        (,+struct/simple+ ("no-such-child" :if-does-not-exist nil)
+         nil))
     (let+ (((&flet do-it () (apply #'lookup struct :field args))))
       (case expected
         (no-such-child (ensure-condition 'no-such-child (do-it)))

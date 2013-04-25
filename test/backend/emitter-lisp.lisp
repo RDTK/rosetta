@@ -59,7 +59,10 @@ target.")
         (,+struct/simple+      (:|b| "foo")    error)     ; no such field
         (,+struct/simple+      (:|a| 5)        error)     ; type
         (,+struct/empty+       ()              :no-error)
-        (,+struct/recursive+   ()              :no-error))
+        (,+struct/recursive+   ()              :no-error)
+        (,+struct/nested+      ()              :no-error)
+        (,+struct/packaged+    ()              :no-error))
+
     (let+ ((initargs (if args
                         `(:instantiate :initargs ,args)
                         :instantiate))
@@ -80,7 +83,11 @@ target.")
         (,+struct/empty+ 0
          "An empty structure.")
         (,+struct/recursive+ 3
-         "A simple recursive structure."))
+         "A simple recursive structure.")
+        (,+struct/nested+ 1
+         "Outer structure.")
+        (,+struct/packaged+ 2
+         "A packaged structure."))
 
     (let* ((class (generate type :class :lisp/compiled))
            (name  (class-name class)))

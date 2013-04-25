@@ -22,8 +22,10 @@ representation and for debugging purposes."))
 (defmethod find-language-class ((spec (eql :lisp)))
   (find-class 'language-lisp))
 
-(defclass language-lisp ()
+(defclass language-lisp (unconditional-name-legalizer-mixin)
   ()
+  (:default-initargs
+   :name-legalizer (rcurry #'normalize-name :transform #'string-upcase))
   (:documentation
    "Common Lisp programming language. S-EXPRs are generated, but not
 compiled.

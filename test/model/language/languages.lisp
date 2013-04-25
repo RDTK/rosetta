@@ -13,8 +13,9 @@
           (class-name (format-symbol *package* "LANGUAGE-~A" name)))
       `(addtest (,suite-name
                  :documentation
-                 ,(format nil "Smoke test for the `~(~A~)' method."
-                          method))
+                 ,(format nil "Smoke test for the `~(~A~)' method for ~
+                               class `~(~A~)'."
+                          method class-name))
          ,case-name
 
          (let ((language (make-instance (find-language-class ,(make-keyword name)))))
@@ -42,7 +43,19 @@
          ,@(mapcar #'process-spec specs)))))
 
 (define-language-test-suite (lisp)
-  (foreign? nil))
+  (foreign? nil)
+
+  (legalize-name
+   '("1foo"     "1FOO")
+   '("foo-bar"  "FOO-BAR")
+   '("foo?"     "FOO?")
+   '("foo bar"  "FOO BAR")
+   '("try"      "TRY")
+   '("template" "TEMPLATE")
+
+   '("foo"      "FOO")
+   '("foo1"     "FOO-1")
+   '("foo_bar"  "FOO-BAR")))
 
 (define-language-test-suite (c++)
   (foreign? t)

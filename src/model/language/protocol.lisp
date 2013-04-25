@@ -17,6 +17,14 @@
    "Return a string which is similar to NAME but a legal name in
 LANGUAGE."))
 
+;; Default behavior
+
+(defmethod legalize-name ((language t) (name list))
+  (if (typep name 'name)
+      (let+ (((kind &rest components) name))
+        (list* kind (mapcar (curry #'legalize-name language) components)))
+      (call-next-method)))
+
 ;;; Identifier character protocol
 
 (defgeneric legal-identifier-char? (language character position)

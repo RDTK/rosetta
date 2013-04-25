@@ -25,6 +25,9 @@
 
   ;; Some simple types
   (:export
+   #:+package/root+
+   #:+package/simple+
+
    #:+singleton/uint32+
    #:+singleton/float64+
 
@@ -36,7 +39,9 @@
 
    #:+struct/simple+
    #:+struct/empty+
-   #:+struct/recursive+)
+   #:+struct/recursive+
+   #:+struct/nested+
+   #:+struct/packaged+)
 
   (:documentation
    "This package contains unit tests for the model.data module."))
@@ -59,6 +64,14 @@
   (error "~@<Mock value validation error.~@:>"))
 
 ;;; Simple data types
+
+(defparameter +package/root+
+  (make-instance 'package1 :name ""))
+
+(defparameter +package/simple+
+  (let ((package (make-instance 'package1 :name "package")))
+    (setf (lookup +package/root+ :structure "package") package)
+    package))
 
 (defparameter +singleton/uint32+
   (make-instance 'singleton :type +uint32+ :value 1)
@@ -129,7 +142,7 @@
           (make-instance
            'base-structure
            :name   "recursive"
-           :fields `("a" (,+uint16+)  "b" (,+utf-8-string+))
+           :fields `("a" (,+uint16+) "b" (,+utf-8-string+))
            :documentation
            "A simple recursive structure.")))
     (setf (lookup struct :field "c")
@@ -138,4 +151,28 @@
                          :type (make-instance 'base-array
                                               :index-type   +int32+
                                               :element-type struct)))
+    struct))
+
+(defparameter +struct/nested+
+  (let* ((inner (make-instance 'base-structure
+                               :name   "inner"
+                               :fields `("a" (,+uint16+))
+                               :documentation
+                               "Inner structure."))
+         (outer (make-instance 'base-structure
+                               :name   "outer"
+                               :fields `("a" (,+uint16+))
+                               :documentation
+                               "Outer structure.")))
+    (setf (lookup outer :nested "inner") inner)
+    outer))
+
+(defparameter +struct/packaged+
+  (let ((struct (make-instance
+                 'base-structure
+                 :name   "packaged"
+                 :fields `("a" (,+uint16+) "b" (,+utf-8-string+))
+                 :documentation
+                 "A packaged structure.")))
+    (setf (lookup +package/simple+ :structure "packaged") struct)
     struct))

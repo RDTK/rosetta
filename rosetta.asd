@@ -132,7 +132,7 @@ See `version/list' for details on keyword parameters."
 
                 (:module     "model-language"
                  :pathname   "src/model/language"
-                 :depends-on ("src")
+                 :depends-on ("src" "model")
                  :serial     t
                  :components ((:file       "package")
                               (:file       "protocol")

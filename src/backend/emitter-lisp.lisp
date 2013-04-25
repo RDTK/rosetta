@@ -29,10 +29,66 @@
 (defmethod emit/context :around ((node     named-mixin)
                                  (target   t)
                                  (language language-lisp))
-  (let+ ((name (normalize-name (name node) :transform #'string-upcase))
-         ((&env (package (find-package :cl-user)) ; TODO(jmoringe, 2012-12-07): package
-                (:name (intern name package)))))
-    (call-next-method)))
+  ;; Determine a package and a name (that is, a symbol in the chosen
+  ;; package) for NODE.
+  (let+ (((&accessors-r/o ancestors name) node)
+         (normalize (curry #'legalize-name language))
+         (ancestor/package (find :package ancestors :key #'kind))
+         ((&flet ensure-symbol-for-node (node package)
+            ;; If NODE is toplevel (i.e. structure, enum, etc.) and is
+            ;; nested within one or more toplevel (but not package)
+            ;; nodes, generate a name of the form
+            ;; OUTERMOST/.../OUTER/NAME-FOR-NODE
+            (let* ((components
+                     (append
+                      (when (typep node 'toplevel-mixin)
+                        (reverse
+                         (iter (for current in (rest ancestors))
+                               (until (eq current ancestor/package))
+                               (collect (name current)))))
+                      (list name)))
+                   (name (format nil "~{~A~^/~}"
+                                        (mapcar normalize components))))
+              (intern name package))))
+         ((&flet ensure-package-for-node (node)
+            ;; Find or create a Lisp package for NODE (which is
+            ;; represents a package).
+            (let ((name
+                    (with-output-to-string (stream)
+                      (print-qname
+                       stream (funcall normalize (qname node))))))
+              (or (find-package name) (make-package name)))))
+         ((&flet invoke-with-symbol (symbol thunk)
+            (let+ (((&env (:name symbol))))
+              (funcall thunk))))
+         ((&flet invoke-with-package (package thunk)
+            (let+ (((&env (:package package))))
+              (invoke-with-symbol
+               (ensure-symbol-for-node node package) thunk))))
+         ((&env-r/o (package nil))))
+    (cond
+      ;; One of NODE's ancestors is a package => make sure a Lisp
+      ;; package of that name exists and install it in the
+      ;; environment. This case handles toplevel objects such as
+      ;; non-nested structures or enums.
+      (ancestor/package
+       (invoke-with-package
+        (ensure-package-for-node ancestor/package) #'call-next-method))
+      ;; None of NODE's ancestors is a package, but a package is
+      ;; already installed in the environment => use it. This should
+      ;; rarely be necessary as things like structure fields and
+      ;; nested structures and enums usually have a transitively
+      ;; containing package.
+      (package
+       (invoke-with-symbol
+        (ensure-symbol-for-node node package) #'call-next-method))
+      ;; None of NODE's ancestors is a package, and no package is
+      ;; installed in the environment which means that NODE is a
+      ;; toplevel object without containing package => place it in the
+      ;; cl-user package.
+      (t
+       (invoke-with-package
+        (find-package '#:cl-user) #'call-next-method)))))
 
 (defmethod emit :after ((node     documentation-mixin)
                         (target   target-class)

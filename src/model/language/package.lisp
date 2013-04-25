@@ -12,7 +12,10 @@
    #:cl
    #:alexandria
    #:let-plus
-   #:more-conditions)
+   #:more-conditions
+
+   #:rosetta
+   #:rosetta.model)
 
   ;; Language protocol
   (:export
@@ -24,6 +27,11 @@
    #:no-such-language-class
    #:find-language-class
    #:language-classes)
+
+  ;; Name legalizer mixins
+  (:export
+   #:name-legalizer-mixin
+   #:unconditional-name-legalizer-mixin)
 
   ;; Reserved words protocol and `reserved-words-mixin'
   (:export
