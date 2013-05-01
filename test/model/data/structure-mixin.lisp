@@ -17,12 +17,14 @@
   construction
 
   (ensure-cases ((args expected))
-      `(((:fields 5)                                       type-error)
-        ((:fields #("bla"))                                type-error)
-        ((:fields ("a" ,+utf-8-string+))                   ("a"))
+      `(((:fields 5)                                            type-error)
+        ((:fields #("bla"))                                     type-error)
+        ((:fields ("a" ,+utf-8-string+))                        ("a"))
         ((:fields (,(make-instance 'base-field
                                    :name "g"
-                                   :type +utf-8-string+))) ("g")))
+                                   :type +utf-8-string+)))      ("g"))
+        ((:nested 5)                                            type-error)
+        ((:nested (,(make-instance 'base-structure :name "a"))) ()))
     (let+ (((&flet do-it ()
               (apply #'make-instance 'structure-mixin args))))
       (case expected
@@ -77,7 +79,7 @@
           :documentation
           "Test method on `parent', `ancestors' and `root' for class
 `structure-mixin'.")
-  parent+acestors+root/smoke
+  parent+ancestors+root/smoke
 
   (ensure-cases (thing expected-parent expected-ancestors expected-root)
       `((,+struct/simple+
@@ -109,23 +111,28 @@
   lookup
 
   (ensure-cases (struct args expected)
-      `((,+struct/simple+ ("a")
+      `((,+struct/simple+ (:field  "a")
          ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ((:relative "a"))
+        (,+struct/simple+ (:field  (:relative "a"))
          ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ((:absolute "a"))
+        (,+struct/simple+ (:field  (:absolute "a"))
          ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ("a" :if-does-not-exist nil)
+        (,+struct/simple+ (:field  "a" :if-does-not-exist nil)
          ,(first (contents +struct/simple+ :field)))
-        (,+struct/simple+ ("no-such-child")
+        (,+struct/simple+ (:field  "no-such-child")
          no-such-child)
-        (,+struct/simple+ ((:relative "no-such-child"))
+        (,+struct/simple+ (:field  (:relative "no-such-child"))
          no-such-child)
-        (,+struct/simple+ ((:absolute "no-such-child"))
+        (,+struct/simple+ (:field  (:absolute "no-such-child"))
          no-such-child)
-        (,+struct/simple+ ("no-such-child" :if-does-not-exist nil)
+        (,+struct/simple+ (:field  "no-such-child" :if-does-not-exist nil) nil)
+        (,+struct/nested+ (:nested (:relative "inner"))
+         ,(first (contents +struct/nested+ :nested)))
+        (,+struct/nested+ (:nested (:relative "no-such-child"))
+         no-such-child)
+        (,+struct/nested+ (:nested (:relative "no-such-child") :if-does-not-exist nil)
          nil))
-    (let+ (((&flet do-it () (apply #'lookup struct :field args))))
+    (let+ (((&flet do-it () (apply #'lookup struct args))))
       (case expected
         (no-such-child (ensure-condition 'no-such-child (do-it)))
         (t             (ensure-same (do-it) expected :test #'eq))))))
@@ -138,6 +145,8 @@
   (ensure-cases (type expected)
       `((,+struct/simple+    (,+utf-8-string+))
         (,+struct/empty+     ())
-        #+later (,+struct/recursive+ (,+uint16+ ,+utf-8-string+ ,THE-ARRAY)))
+        #+later (,+struct/recursive+ (,+uint16+ ,+utf-8-string+ ,THE-ARRAY))
+        (,+struct/nested+    (,(lookup +struct/nested+ :nested '(:relative "inner"))
+                              ,+uint16+)))
 
     (ensure-same (direct-dependencies type) expected :test #'set-equal)))

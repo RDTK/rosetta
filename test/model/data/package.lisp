@@ -161,10 +161,10 @@
                                "Inner structure."))
          (outer (make-instance 'base-structure
                                :name   "outer"
+                               :nested `(,inner)
                                :fields `("a" (,+uint16+))
                                :documentation
                                "Outer structure.")))
-    (setf (lookup outer :nested "inner") inner)
     outer))
 
 (defparameter +struct/packaged+

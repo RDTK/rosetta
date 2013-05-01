@@ -223,6 +223,14 @@ with KIND `t'. The returned value is compared to the KEY of the
 (define-composite-mixin nested
   :class-name nesting-mixin)
 
+(defmethod shared-initialize :after ((instance   nesting-mixin)
+                                     (slot-names t)
+                                     &key
+                                     (nested nil nested-supplied?))
+  (when nested-supplied?
+    (iter (for thing each nested)
+          (setf (lookup instance :nested (name thing)) thing))))
+
 (defmethod direct-dependencies append ((thing nesting-mixin))
   (contents thing :nested))
 
