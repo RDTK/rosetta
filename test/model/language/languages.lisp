@@ -36,7 +36,7 @@
          (deftestsuite ,suite-name (rosetta.model.language-root)
            ()
            (:documentation
-            ,(format nil "Unit tests for the `~(~A~)' language
+            ,(format nil "Unit tests for the `~(~A~)' language ~
                           class."
                      class-name)))
 

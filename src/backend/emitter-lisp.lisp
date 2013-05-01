@@ -1,4 +1,4 @@
-;;;; target-class.lisp --- Generate Lisp classes data type definitions.
+;;;; emitter-lisp.lisp --- Generate Lisp classes data type definitions.
 ;;;;
 ;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;
@@ -324,7 +324,8 @@
              node initargs
              (make-condition 'simple-error
                              :format-control   "~@<The supplied initarg ~
-~S does not name a field of ~A.~@:>"
+                                                ~S does not name a ~
+                                                field of ~A.~@:>"
                              :format-arguments (list key node)))))
 
     ;; Emit instantiation code.

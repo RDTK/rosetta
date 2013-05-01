@@ -226,9 +226,9 @@
                                  (language t))
   (let+ (((&env-r/o (instance-var nil) (source-var nil))))
     (unless (or instance-var source-var)
-      (error "~@<Exactly? one of ~S (~:[not supplied~;~:*~A supplied~]) ~
-and ~S (~:[not supplied~;~:*~A supplied~]) has to be supplied for ~
-~A~@:>"
+      (error "~@<Exactly? one of ~S (~:[not supplied~;~:*~A ~
+              supplied~]) and ~S (~:[not supplied~;~:*~A supplied~]) ~
+              has to be supplied for ~A~@:>"
              :instance-var instance-var
              :source-var   source-var
              node))))

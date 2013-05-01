@@ -81,9 +81,10 @@ to detect and process recursive types.")
               (function
                (restart-case
                    (funcall if-invalid (make-error cause))
-                 (continue ()
+                 (continue (&optional condition)
                    :report (lambda (stream)
                              (format stream "~@<Ignore the incompatibility.~@:>"))
+                   (declare (ignore condition))
                    t)))))))
 
     ;; If we already processed TYPE or are currently processing TYPE

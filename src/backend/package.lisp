@@ -71,6 +71,10 @@
    #:emit/context
    #:emit)
 
+  ;; Conversion generation protocol
+  (:export
+   #:emit-conversion)
+
   ;; Context protocol
   (:export
    #:context-stack
