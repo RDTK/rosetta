@@ -236,11 +236,14 @@ allowed:
                                   (container  t)
                                   (kind       t)
                                   (key        t)
+                                  &rest args
                                   &key
                                   (if-exists #'error)
                                   &allow-other-keys)
-  (when-let ((existing (lookup container kind key
-                               :if-does-not-exist nil)))
+  (when-let ((existing (apply #'lookup container kind key
+                              :if-does-not-exist nil
+                              (remove-from-plist
+                               args :if-exists :if-does-not-exist))))
     (etypecase if-exists
       ((eql :keep)
        (return-from lookup existing))
