@@ -68,9 +68,9 @@
    '("try"      nil) ; reserved word
    '("template" nil) ; likewise
 
-   '("foo"      t)
-   '("foo1"     t)
-   '("foo_bar"  t))
+   '("foo"      t)   '("Foo"      t)   '("FOO"      t)
+   '("foo1"     t)   '("Foo1"     t)   '("FOO1"     t)
+   '("foo_bar"  t)   '("Foo_Bar"  t)   '("FOO_BAR"  t))
 
   (legalize-name
    '("1foo"     "digit_onefoo")
@@ -80,9 +80,9 @@
    '("try"      "try_")
    '("template" "template_")
 
-   '("foo"      "foo")
-   '("foo1"     "foo1")
-   '("foo_bar"  "foo_bar")))
+   '("foo"      "foo")     '("Foo"      "Foo")     '("FOO"      "FOO")
+   '("foo1"     "foo1")    '("Foo1"     "Foo1")    '("FOO1"     "FOO1")
+   '("foo_bar"  "foo_bar") '("Foo_Bar"  "Foo_Bar") '("FOO_BAR"  "FOO_BAR")))
 
 (define-language-test-suite (python)
   (foreign? t)
@@ -95,9 +95,9 @@
    '("try"     nil) ; reserved word
    '("class"   nil) ; likewise
 
-   '("foo"     t)
-   '("foo1"    t)
-   '("foo_bar" t))
+   '("foo"      t)   '("Foo"      t)   '("FOO"      t)
+   '("foo1"     t)   '("Foo1"     t)   '("FOO1"     t)
+   '("foo_bar"  t)   '("Foo_Bar"  t)   '("FOO_BAR"  t))
 
   (legalize-name
    '("1foo"    "digit_onefoo")
@@ -107,9 +107,9 @@
    '("try"     "try_")
    '("class"   "class_")
 
-   '("foo"     "foo")
-   '("foo1"    "foo1")
-   '("foo_bar" "foo_bar")))
+   '("foo"      "foo")     '("Foo"      "Foo")     '("FOO"      "FOO")
+   '("foo1"     "foo1")    '("Foo1"     "Foo1")    '("FOO1"     "FOO1")
+   '("foo_bar"  "foo_bar") '("Foo_Bar"  "Foo_Bar") '("FOO_BAR"  "FOO_BAR")))
 
 (define-language-test-suite (java)
   (foreign? t)
@@ -122,9 +122,9 @@
    '("try"      nil) ; reserved word
    '("final"    nil) ; likewise
 
-   '("foo"      t)
-   '("foo1"     t)
-   '("foo_bar"  t))
+   '("foo"      t)   '("Foo"      t)   '("FOO"      t)
+   '("foo1"     t)   '("Foo1"     t)   '("FOO1"     t)
+   '("foo_bar"  t)   '("Foo_Bar"  t)   '("FOO_BAR"  t))
 
   (legalize-name
    '("1foo"    "digit_onefoo")
@@ -134,6 +134,6 @@
    '("try"     "try_")
    '("final"   "final_")
 
-   '("foo"     "foo")
-   '("foo1"    "foo1")
-   '("foo_bar" "foo_bar")))
+   '("foo"      "foo")     '("Foo"      "Foo")     '("FOO"      "FOO")
+   '("foo1"     "foo1")    '("Foo1"     "Foo1")    '("FOO1"     "FOO1")
+   '("foo_bar"  "foo_bar") '("Foo_Bar"  "Foo_Bar") '("FOO_BAR"  "FOO_BAR")))

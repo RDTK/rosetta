@@ -63,7 +63,7 @@ See `language-lisp'."))
 (defmethod legal-identifier-char? ((language common-imperative-language)
                                    (char     character)
                                    (position integer))
-  (or (char<= #\a char #\z) (char<= #\A char #\A)
+  (or (char<= #\a char #\z) (char<= #\A char #\Z)
       (char= char #\_)
       (and (plusp position) (char<= #\0 char #\9))))
 
