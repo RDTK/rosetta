@@ -77,8 +77,8 @@ the rosetta.model.data package."))
                    (find-symbol (format nil "+~:[U~;~]INT~@[~D~]+"
                                         signed? width)
                                 :rs.m.d))
-                  (error "~:<There is no ~:[un~;~]signed integer ~
-                          type~@[ with width ~D~].~@>"
+                  (error "~@<There is no ~:[un~;~]signed integer ~
+                          type~@[ with width ~D~].~@:>"
                          signed? width)))
     (:float  (ecase width
                (32 +float32+)
