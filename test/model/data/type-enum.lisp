@@ -121,6 +121,7 @@
     (ensure-cases (value expected)
         '(;; These are not valid.
           (:|c| nil)
+          (1    nil)
 
           ;; These are valid.
           (:|a| t)

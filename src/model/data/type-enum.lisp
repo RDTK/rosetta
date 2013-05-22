@@ -101,12 +101,15 @@ One example of a class representing such values is `enum-value'."))
 
 (defmethod validate-value ((type enum) (value t)
                            &key &allow-other-keys)
-  (unless (lookup type :value (string value) :if-does-not-exist nil)
-    (let ((values (mapcar #'name (contents type :value))))
+  (unless (and (typep value '(or symbol string))
+               (lookup type :value (string value) :if-does-not-exist nil))
+    (let ((value-info (mapcar (lambda (value)
+                                (list (name value) (value value)))
+                              (contents type :value))))
       (error "~@<~S is not one of the valid values of ~A. ~[There are ~
               no valid values~;The only valid value is ~:;Valid values ~
-              are ~]~{~S~^, ~}.~@:>"
-             value type (length values) values)))
+              are ~]~{~{~S (~D)~}~^, ~}.~@:>"
+             value type (length value-info) value-info)))
   t)
 
 ;; Hint for generic builders
