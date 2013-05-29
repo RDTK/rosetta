@@ -131,10 +131,10 @@ described by FORMAT."))
 ;; 5. Dispatch to `parse'
 
 (defmethod process ((format t) (source t) (builder t)
-                    &key &allow-other-keys)
+                    &rest args &key &allow-other-keys)
   (iter
     (restart-case
-        (return (parse format source builder))
+        (return (apply #'parse format source builder args))
       (retry ()
         :report (lambda (stream)
                   (format stream "~@<Retry processing ~S in format ~S ~
