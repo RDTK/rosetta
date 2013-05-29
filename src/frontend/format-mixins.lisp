@@ -14,20 +14,28 @@
    "This class is intended to be mixed into format classes for binary
 formats."))
 
-(defmethod parse ((format  binary-format-mixin)
-                  (source  pathname)
-                  (builder t)
-                  &rest args &key &allow-other-keys)
-  "Open a binary input stream for the file designated by SOURCE and
-call a method specialized on streams."
+(defmethod parse :around ((format  binary-format-mixin)
+                          (source  pathname)
+                          (builder t)
+                          &key)
+  "Augment conditions signaled from next methods location information
+based on SOURCE."
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
                             ((&accessors (source1 source)) location))
                        (unless (pathnamep source1)
                          (setf source1 source))))))
-    (with-input-from-file (stream source :element-type '(unsigned-byte 8))
-      (apply #'parse format stream builder args))))
+    (call-next-method)))
+
+(defmethod parse ((format  binary-format-mixin)
+                  (source  pathname)
+                  (builder t)
+                  &rest args &key &allow-other-keys)
+  "Open a binary input stream for the file designated by SOURCE and
+call a method specialized on streams."
+  (with-input-from-file (stream source :element-type '(unsigned-byte 8))
+    (apply #'parse format stream builder args)))
 
 ;;; `text-format-mixin' mixin class
 
@@ -37,12 +45,12 @@ call a method specialized on streams."
    "This class is intended to be mixed into format classes that
 operate on textual input data."))
 
-(defmethod parse ((format  text-format-mixin)
-                  (source  pathname)
-                  (builder t)
-                  &rest args &key &allow-other-keys)
-  "Open a character input stream for the file designated by SOURCE and
-call a method specialized on streams."
+(defmethod parse :around ((format  text-format-mixin)
+                          (source  pathname)
+                          (builder t)
+                          &key)
+  "Augment conditions signaled from next methods location information
+based on SOURCE."
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
@@ -52,15 +60,23 @@ call a method specialized on streams."
                        (unless source-content
                          (setf source-content
                                (read-file-into-string source)))))))
-    (with-input-from-file (stream source)
-      (apply #'parse format stream builder args))))
+    (call-next-method)))
 
 (defmethod parse ((format  text-format-mixin)
-                  (source  string)
+                  (source  pathname)
                   (builder t)
                   &rest args &key &allow-other-keys)
-  "Create an input stream for the content of SOURCE and call a method
-specialized on streams."
+  "Open a character input stream for the file designated by SOURCE and
+call a method specialized on streams."
+  (with-input-from-file (stream source)
+    (apply #'parse format stream builder args)))
+
+(defmethod parse :around ((format  text-format-mixin)
+                          (source  string)
+                          (builder t)
+                          &key)
+  "Augment conditions signaled from next methods location information
+based on SOURCE."
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
@@ -69,5 +85,13 @@ specialized on streams."
                          (setf source1 source))
                        (unless source-content
                          (setf source-content source))))))
-    (with-input-from-string (stream source)
-      (apply #'parse format stream builder args))))
+    (call-next-method)))
+
+(defmethod parse ((format  text-format-mixin)
+                  (source  string)
+                  (builder t)
+                  &rest args &key &allow-other-keys)
+  "Create an input stream for the content of SOURCE and call a method
+specialized on streams."
+  (with-input-from-string (stream source)
+    (apply #'parse format stream builder args)))

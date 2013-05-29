@@ -16,8 +16,8 @@
          (mock-name  (format-symbol *package* "~A-MOCK-FORMAT" class))
          ((&plist-r/o (initargs :initargs)) (reduce #'append options)))
    `(progn
-      (defclass ,mock-name (,class
-                            format-mock)
+      (defclass ,mock-name (format-mock
+                            ,class)
         ())
 
       (deftestsuite ,suite-name (format-mixins-root)
