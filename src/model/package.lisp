@@ -32,7 +32,8 @@
    #:kind
 
    #:name
-   #:qname)
+   #:qname
+   #:qname/kind)
 
   ;; Utility functions
   (:export

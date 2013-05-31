@@ -81,10 +81,16 @@ items."
    "This class is intended to be mixed into classes that have an
 associated parent object."))
 
-(defmethod qname ((type parented-mixin))
-  (if-let ((parent (parent type)))
-    (append (qname parent) (list (name type)))
-    (list :absolute (name type))))
+(defmethod qname ((thing parented-mixin))
+  (if-let ((parent (parent thing)))
+    (append (qname parent) (list (name thing)))
+    (list :absolute (name thing))))
+
+(defmethod qname/kind ((thing parented-mixin))
+  (let ((cell (cons (name thing) (kind thing))))
+    (if-let ((parent (parent thing)))
+      (append (qname/kind parent) (list cell))
+      (list :absolute cell))))
 
 (defmethod (setf parent) :before ((new-value t)
                                   (thing     parented-mixin))

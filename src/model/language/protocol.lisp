@@ -20,10 +20,17 @@ LANGUAGE."))
 ;; Default behavior
 
 (defmethod legalize-name ((language t) (name list))
-  (if (typep name 'name)
-      (let+ (((kind &rest components) name))
-        (list* kind (mapcar (curry #'legalize-name language) components)))
-      (call-next-method)))
+  (typecase name
+    (name
+     (let+ (((anchor &rest components) name))
+       (list* anchor (mapcar (curry #'legalize-name language) components))))
+    ((cons (member :relative :absolute) (cons (cons string keyword))) ; qname/kind
+     (let+ (((anchor &rest components) name))
+       (list* anchor (mapcar (lambda+ ((component . kind))
+                               (cons (legalize-name language component) kind))
+                             components))))
+    (t
+     (call-next-method))))
 
 ;;; Identifier character protocol
 

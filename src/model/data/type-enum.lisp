@@ -20,6 +20,9 @@
    "Instances of this class represent enumeration values consisting of
 a name and an associated, usually numeric, value."))
 
+(defmethod kind ((type enum-value))
+  :value)
+
 ;;; `enum' class
 
 (define-composite-mixin value

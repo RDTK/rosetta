@@ -52,6 +52,27 @@
 
 (addtest (model-data-enum-root
           :documentation
+          "Tests methods on `name', `qname' and `qname/kind' for class
+`enum'.")
+  name+qname+qname/kind
+
+  (ensure-cases (thing expected-name expected-qname expected-qname/kind)
+      `((,+enum/uint32/simple+
+         "simple/uint32"
+         (:absolute "simple/uint32")
+         (:absolute ("simple/uint32" . :enum)))
+
+        (,(lookup +enum/uint32/simple+ :value "A")
+         "A"
+         (:absolute "simple/uint32" "A")
+         (:absolute ("simple/uint32" . :enum) ("A" . :value))))
+
+    (ensure-same (name thing)       expected-name       :test #'string=)
+    (ensure-same (qname thing)      expected-qname      :test #'equal)
+    (ensure-same (qname/kind thing) expected-qname/kind :test #'equal)))
+
+(addtest (model-data-enum-root
+          :documentation
           "Test methods on `lookup' for class `enum'.")
   lookup
 

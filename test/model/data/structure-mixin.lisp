@@ -77,7 +77,38 @@
 
 (addtest (structure-mixin-root
           :documentation
-          "Test method on `parent', `ancestors' and `root' for class
+          "Tests methods on `name', `qname' and `qname/kind' for class
+`structure-mixin'.")
+  name+qname+qname/kind
+
+  (ensure-cases (thing expected-name expected-qname expected-qname/kind)
+      `((,+struct/simple+
+         "simple"
+         (:absolute "simple")
+         (:absolute ("simple" . :structure)))
+
+        (,(lookup +struct/simple+ :field "a")
+         "a"
+         (:absolute "simple" "a")
+         (:absolute ("simple" . :structure) ("a" . :field)))
+
+        (,(lookup +struct/nested+ :nested "inner")
+         "inner"
+         (:absolute "outer" "inner")
+         (:absolute ("outer" . :structure) ("inner" . :structure)))
+
+        (,+struct/packaged+
+         "packaged"
+         (:absolute "package" "packaged")
+         (:absolute ("package" . :package) ("packaged" . :structure))))
+
+    (ensure-same (name thing)       expected-name       :test #'string=)
+    (ensure-same (qname thing)      expected-qname      :test #'equal)
+    (ensure-same (qname/kind thing) expected-qname/kind :test #'equal)))
+
+(addtest (structure-mixin-root
+          :documentation
+          "Test methods on `parent', `ancestors' and `root' for class
 `structure-mixin'.")
   parent+ancestors+root/smoke
 

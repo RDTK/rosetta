@@ -20,6 +20,16 @@
   (:documentation
    "Return the fully qualified name of THING."))
 
+(defgeneric qname/kind (thing)
+  (:documentation
+   "Return the fully qualified name of THING with components of the
+form
+
+  (NAME-COMPONENT . KIND)
+
+where NAME-COMPONENT is a string and KIND is the `kind' of the object
+corresponding to NAME-COMPONENT."))
+
 ;;; Printing qnames
 
 (declaim (ftype (function (stream name &optional t t character)

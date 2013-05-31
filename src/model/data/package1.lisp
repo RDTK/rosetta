@@ -24,6 +24,11 @@ containers for data types."))
     (call-next-method)
     (list :absolute)))
 
+(defmethod qname/kind ((package package1))
+  (if-let ((parent (parent package)))
+    (call-next-method)
+    (list :absolute)))
+
 (defmethod contents/plist ((package package1))
   (hash-table-plist (%nested package)))
 
