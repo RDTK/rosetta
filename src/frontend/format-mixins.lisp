@@ -58,8 +58,9 @@ based on SOURCE."
                        (unless (pathnamep source1)
                          (setf source1 source))
                        (unless source-content
-                         (setf source-content
-                               (read-file-into-string source)))))))
+                         (ignore-errors
+                          (setf source-content
+                                (read-file-into-string source))))))))
     (call-next-method)))
 
 (defmethod parse ((format  text-format-mixin)
