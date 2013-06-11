@@ -96,3 +96,12 @@ based on SOURCE."
 specialized on streams."
   (with-input-from-string (stream source)
     (apply #'parse format stream builder args)))
+
+(defmethod parse ((format  text-format-mixin)
+                  (source  stream)
+                  (builder t)
+                  &rest args &key &allow-other-keys)
+  "Read the content of SOURCE into a string and call a method
+specialized on strings."
+  (let ((content (read-stream-content-into-string source)))
+    (apply #'parse format content builder args)))
