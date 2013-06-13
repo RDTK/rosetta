@@ -119,32 +119,14 @@
   (:export
    #:ensure-package)
 
-  ;; `location-attach-mixin' mixin class
+  ;; Builder mixins
   (:export
-   #:location-attaching-mixin)
-
-  ;; `comment-attaching-mixin' mixin class
-  (:export
-   #:comment-attaching-mixin)
-
-  ;; `root-package-creating-mixin' mixin class
-  (:export
-   #:root-package-creating-mixin)
-
-  ;; `lazy-resolver-mixin' mixin class
-  (:export
-   #:lazy-resolver-mixin)
-
-  ;; `dependency-delegating-mixin' mixin class
-  (:export
-   #:dependency-delegating-mixin)
-
-  ;; `source-level-caching-mixin' mixin class
-  (:export
-   #:source-level-caching-mixin)
-
-  ;; `name-normalizing-mixin' mixin class
-  (:export
+   #:location-attaching-mixin
+   #:comment-attaching-mixin
+   #:root-package-creating-mixin
+   #:lazy-resolver-mixin
+   #:dependency-delegating-mixin
+   #:source-level-caching-mixin
    #:name-normalizing-mixin)
 
   (:documentation

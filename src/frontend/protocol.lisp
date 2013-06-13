@@ -73,23 +73,25 @@ if there is no such information."))
 NEW-VALUE."))
 
 ;;; Processing protocol
-;; The protocol consists of the following cascade of method calls:
-;; 1. client calls `process'
-;;    a) `process' performs builder lookup and instantiation, if
-;;       necessary (the constructed builder instance is used in all
-;;       subsequent operations)
-;;    b) `process' iterates over sequences of sources
-;;    c) `process' performs format guessing, if requested
-;;    d) `process' performs format lookup and instantiation, if
-;;       necessary
-;; 2. `process' establishes restarts and calls `parse'
-;; 3. Methods `parse' on do the actual work
-;; 4. And :around method on `parse' performs condition translation, if
-;;    necessary
-;;
-;; Methods on `process' should be added very carefully since the
-;; behavior described above can easily be disturbed by additional
-;; methods.
+;;;
+;;; The protocol consists of the following cascade of method calls:
+;;; 1. client calls `process'
+;;;    a) `process' performs builder lookup and instantiation, if
+;;;       necessary (the constructed builder instance is used in all
+;;;       subsequent operations)
+;;;    b) `process' iterates over sequences of sources
+;;;    c) `process' performs format guessing by calling
+;;;       `guess-format', if requested
+;;;    d) `process' performs format lookup and instantiation, if
+;;;       necessary
+;;; 2. `process' establishes restarts and calls `parse'
+;;; 3. Methods `parse' on do the actual work
+;;; 4. An :around method on `parse' performs condition translation, if
+;;;    necessary
+;;;
+;;; Methods on `process' should be added very carefully since the
+;;; behavior described above can easily be disturbed by additional
+;;; methods.
 
 (defgeneric process (format source builder
                      &key &allow-other-keys)
@@ -124,11 +126,11 @@ described by FORMAT."))
    :builder  builder))
 
 ;;; Default behavior for `process'
-;; 1. Maybe resolve builder class
-;; 2. Iterate over sources
-;; 3. Maybe guess format
-;; 4. Maybe resolve format class
-;; 5. Dispatch to `parse'
+;;; 1. Maybe resolve builder class
+;;; 2. Iterate over sources
+;;; 3. Maybe guess format
+;;; 4. Maybe resolve format class
+;;; 5. Dispatch to `parse'
 
 (defmethod process ((format t) (source t) (builder t)
                     &rest args &key &allow-other-keys)
@@ -154,25 +156,24 @@ described by FORMAT."))
 
 (defmethod process ((format t) (source sequence) (builder t)
                     &rest args &key &allow-other-keys)
-  (typecase source
-    (string
-     (call-next-method))
-    (t
-     (iter (for source1 each source)
-           (when-let ((result
-                       (restart-case
-                           (apply #'process format source1 builder args)
-                         (continue (&optional condition)
-                           :report (lambda (stream)
-                                     (format stream "~@<Skip ~S and ~
-                                                     continue with the ~
-                                                     next source.~@:>"
-                                             (maybe-shorten source1)))
-                           (declare (ignore condition))))))
-             (collect result))))))
+  "Process a collection of sources."
+  (when (stringp source)
+    (return-from process (call-next-method)))
+
+  (iter (for source1 each source)
+        (restart-case
+            (collect (apply #'process format source1 builder args))
+          (continue (&optional condition)
+            :report (lambda (stream)
+                      (format stream "~@<Skip ~S and ~
+                                                  continue with the ~
+                                                  next source.~@:>"
+                              (maybe-shorten source1)))
+            (declare (ignore condition))))))
 
 (defmethod process ((format t) (source pathname) (builder t)
                     &rest args &key &allow-other-keys)
+  "Process wild pathnames."
   (if (wild-pathname-p source)
       (apply #'process format (directory source) builder args)
       (call-next-method)))
