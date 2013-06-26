@@ -193,7 +193,7 @@ described by FORMAT."))
                     &rest args &key &allow-other-keys)
   (apply #'process (guess-format source) source builder args))
 
-(defmethod process ((format t) (source t) (builder list)
+(defmethod process ((format t) (source t) (builder cons)
                     &rest args &key &allow-other-keys)
   (let+ (((name &rest initargs) builder)
          (class    (find-builder-class name))

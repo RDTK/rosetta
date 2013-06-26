@@ -523,6 +523,8 @@ ARGS."))
   (:documentation
    "Use BUILDER to add CHILD to PARENT. Return the modified PARENT."))
 
+;; Default behavior
+
 (defmethod find-node :around ((builder t) (kind t)
                               &key
                               qname
@@ -541,6 +543,15 @@ ARGS."))
                                       :key  (list kind qname))) ; TODO condition
            (use-value (value)
              value))))))
+
+(defmethod find-node ((builder (eql nil)) (kind t) &key)
+  t)
+
+(defmethod make-node ((builder (eql nil)) (kind t) &key)
+  nil)
+
+(defmethod add-child ((builder (eql nil)) (parent t) (chidl t))
+  nil)
 
 ;;; Builder class family
 
