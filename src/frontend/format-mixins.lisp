@@ -6,41 +6,76 @@
 
 (cl:in-package #:rosetta.frontend)
 
-;;; `binary-format-mixin' mixin class
+;;; `source-attaching-mixin' mixin class
 
-(defclass binary-format-mixin ()
+(defclass source-attaching-mixin ()
   ()
   (:documentation
-   "This class is intended to be mixed into format classes for binary
-formats."))
+   "This class is intended to be mixed into format classes for which
+it is appropriate to attach source information to signaled
+`location-condition's."))
 
-(defmethod parse :around ((format  binary-format-mixin)
-                          (source  pathname)
-                          (builder t)
-                          &key)
-  "Augment conditions signaled from next methods location information
-based on SOURCE."
-  (handler-bind ((location-condition
-                   (lambda (condition)
-                     (let+ (((&accessors-r/o location) condition)
-                            ((&accessors (source1 source)) location))
-                       (unless (pathnamep source1)
-                         (setf source1 source))))))
-    (call-next-method)))
+(macrolet
+    ((define-source-attaching-method (source-class replace-predicate)
+       `(defmethod parse :around ((format  source-attaching-mixin)
+                                  (source  ,source-class)
+                                  (builder t)
+                                  &key)
+          "Augment conditions signaled from next methods location
+information based on SOURCE."
+        (handler-bind ((location-condition
+                         (lambda (condition)
+                           (let+ (((&accessors-r/o location) condition)
+                                  ((&accessors (source1 source)) location))
+                             (unless (,replace-predicate source1)
+                               (setf source1 source))))))
+          (call-next-method)))))
 
-(defmethod parse ((format  binary-format-mixin)
+  (define-source-attaching-method pathname pathnamep))
+
+;;; `common-sources-mixin' mixin class
+
+(defclass common-sources-mixin ()
+  ((element-type :initarg  :element-type
+                 :reader   format-element-type
+                 :documentation
+                 "Stores the desired element type of the format."))
+  (:default-initargs
+   :element-type (missing-required-initarg
+                  'common-sources-mixin :element-type))
+  (:documentation
+   "This class is intended to be mixed into format classes which
+operate on streams with particular element types and should support
+obtaining such streams from common kinds of sources."))
+
+(defmethod parse ((format  common-sources-mixin)
                   (source  pathname)
                   (builder t)
                   &rest args &key &allow-other-keys)
   "Open a binary input stream for the file designated by SOURCE and
 call a method specialized on streams."
-  (with-input-from-file (stream source :element-type '(unsigned-byte 8))
+  (with-input-from-file (stream source
+                         :element-type (format-element-type format))
     (apply #'parse format stream builder args)))
+
+;;; `binary-format-mixin' mixin class
+
+(defclass binary-format-mixin (source-attaching-mixin
+                               common-sources-mixin)
+  ()
+  (:default-initargs
+   :element-type '(unsigned-byte 8))
+  (:documentation
+   "This class is intended to be mixed into format classes for binary
+formats."))
 
 ;;; `text-format-mixin' mixin class
 
-(defclass text-format-mixin ()
+(defclass text-format-mixin (source-attaching-mixin
+                             common-sources-mixin)
   ()
+  (:default-initargs
+   :element-type 'character)
   (:documentation
    "This class is intended to be mixed into format classes that
 operate on textual input data."))
@@ -54,23 +89,12 @@ based on SOURCE."
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
-                            ((&accessors (source1 source) source-content) location))
-                       (unless (pathnamep source1)
-                         (setf source1 source))
+                            ((&accessors source-content) location))
                        (unless source-content
                          (ignore-errors
                           (setf source-content
                                 (read-file-into-string source))))))))
     (call-next-method)))
-
-(defmethod parse ((format  text-format-mixin)
-                  (source  pathname)
-                  (builder t)
-                  &rest args &key &allow-other-keys)
-  "Open a character input stream for the file designated by SOURCE and
-call a method specialized on streams."
-  (with-input-from-file (stream source)
-    (apply #'parse format stream builder args)))
 
 (defmethod parse :around ((format  text-format-mixin)
                           (source  string)

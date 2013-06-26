@@ -87,12 +87,11 @@
    #:find-format-class
    #:format-classes)
 
-  ;; `binary-format-mixin' mixin class
+  ;; format mixin classes
   (:export
-   #:binary-format-mixin)
-
-  ;; `text-format-mixin' mixin class
-  (:export
+   #:source-attaching-mixin
+   #:common-sources-mixin
+   #:binary-format-mixin
    #:text-format-mixin)
 
 ;;; Builder-related stuff
