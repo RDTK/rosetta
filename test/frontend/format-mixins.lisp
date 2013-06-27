@@ -100,7 +100,9 @@ conditions signaled during `parse'.")
                                        :source-content "source")))
          `(,this-file (,(make-instance 'location-info
                                        :source         this-file
-                                       :source-content this-file-content))))
+                                       :source-content this-file-content)))
+          (let ((uri (puri:uri (format nil "file://~A" this-file))))
+            `(,uri (,(make-instance 'location-info :source uri)))))
 
       (ensure-same (length conditions) (length expected)
                    :test #'=)

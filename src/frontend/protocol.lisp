@@ -178,6 +178,18 @@ described by FORMAT."))
       (apply #'process format (directory source) builder args)
       (call-next-method)))
 
+(defmethod process ((format t) (source puri:uri) (builder t)
+                    &rest args &key &allow-other-keys)
+  (case (puri:uri-scheme source)
+    (:file
+     (when-let ((query (puri:uri-query source)))
+       (warn "~@<Ignoring query part ~S of ~S URI ~S.~@:>"
+             query :file source))
+     (let ((file (parse-namestring (puri:uri-path source))))
+       (apply #'process format file builder args)))
+    (t
+     (call-next-method))))
+
 (defmethod process ((format list) (source t) (builder t)
                     &rest args &key &allow-other-keys)
   (let+ (((name &rest initargs) format)
@@ -189,7 +201,7 @@ described by FORMAT."))
                     &rest args &key &allow-other-keys)
   (apply #'process (list format) source builder args))
 
-(defmethod process ((format (eql :guess)) (source pathname) (builder t)
+(defmethod process ((format (eql :guess)) (source t) (builder t)
                     &rest args &key &allow-other-keys)
   (apply #'process (guess-format source) source builder args))
 
@@ -353,6 +365,23 @@ dependencies."))
   (:documentation
    "Set the policy RESOLVER applies when encountering ambiguous
 dependencies to NEW-VALUE."))
+
+(defgeneric merge-locations (builder location base)
+  (:documentation
+   "Like `cl:merge-pathnames' or `puri:merge-uris', return the result
+of merging LOCATION and BASE in a way suitable for BUILDER."))
+
+(defgeneric probe-location (builder location)
+  (:documentation
+   "Return non-nil if BUILDER can determine that LOCATION refers to an
+existing entity (e.g. LOCATION is a pathname referring to an existing
+file or a URI referring to an existing resource)."))
+
+;; Default behavior
+
+(defmethod probe-location ((builder t) (location t))
+  "Default behavior consists in failing to probe LOCATION."
+  nil)
 
 ;;; Ensure package protocol
 

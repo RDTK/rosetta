@@ -54,6 +54,13 @@ location information to elements."))
   (define-method make-node))
 
 (defmethod parse :around ((format  t)
+                          (source  puri:uri)
+                          (builder location-attaching-mixin)
+                          &key &allow-other-keys)
+  (let ((*source* source))
+    (call-next-method)))
+
+(defmethod parse :around ((format  t)
                           (source  pathname)
                           (builder location-attaching-mixin)
                           &key &allow-other-keys)
@@ -66,6 +73,8 @@ location information to elements."))
                           (source  string)
                           (builder location-attaching-mixin)
                           &key &allow-other-keys)
+  ;; Only bind `*source*' if it is not already bound to a "better"
+  ;; source.
   (let ((*source*         (if (and *source* (not (stringp *source*)))
                               *source*
                               source))
@@ -364,6 +373,7 @@ cache parsing results."))
   ;; parse. If SOURCE is a pathname, but does not have a truename,
   ;; disable caching.
   (let ((key (typecase source
+               (puri:uri (cons format (puri:intern-uri source)))
                (pathname (unless (wild-pathname-p source)
                            (when-let ((truename (probe-file source)))
                              (cons format truename))))

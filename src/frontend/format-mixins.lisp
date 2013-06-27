@@ -31,7 +31,8 @@ information based on SOURCE."
                                (setf source1 source))))))
           (call-next-method)))))
 
-  (define-source-attaching-method pathname pathnamep))
+  (define-source-attaching-method pathname pathnamep)
+  (define-source-attaching-method puri:uri puri:uri-p))
 
 ;;; `common-sources-mixin' mixin class
 
@@ -57,6 +58,30 @@ call a method specialized on streams."
   (with-input-from-file (stream source
                          :element-type (format-element-type format))
     (apply #'parse format stream builder args)))
+
+(defmethod parse ((format  common-sources-mixin)
+                  (source  puri:uri)
+                  (builder t)
+                  &rest args &key &allow-other-keys)
+  (if (member (puri:uri-scheme source) '(:http :https))
+      (let+ (((&values stream code &ign &ign &ign close?)
+              (drakma:http-request source :want-stream t)))
+        (unwind-protect
+             (cond
+               ((not (<= 200 code 300))
+                (error "~@<Could not download from source ~A. HTTP ~
+                        result code ~D.~@:>"
+                       source code))
+               ((not (subtypep (stream-element-type stream)
+                               (format-element-type format)))
+                (error "~@<The resource designated by ~A consists of ~
+                        ~S elements, but ~A requires ~S elements.~@:>"
+                       source (stream-element-type stream)
+                       format (format-element-type format)))
+               (t
+                (apply #'parse format stream builder args)))
+          (when close? (close stream))))
+      (call-next-method)))
 
 ;;; `binary-format-mixin' mixin class
 

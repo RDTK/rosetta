@@ -29,14 +29,18 @@
 designated by PATHNAME. Return two values: the name of the format and
 a boolean indicating whether a format class exists. When PATHNAME does
 not have a type, return nil."
-  (when-let* ((type (pathname-type pathname))
-              (key  (string-upcase type)))
-    (unless (emptyp key)
-      (if-let ((spec (car (find key (rs.f:format-classes)
-                                :test #'search
-                                :key  (compose #'symbol-name #'car)))))
-        (values spec               t)
-        (values (make-keyword key) nil)))))
+  (cond
+    ((and (puri:uri-p pathname) (puri:uri-path pathname))
+     (guess-format (parse-namestring (puri:uri-path pathname))))
+    ((pathnamep pathname)
+     (when-let* ((type (pathname-type pathname))
+                 (key  (string-upcase type)))
+       (unless (emptyp key)
+         (if-let ((spec (car (find key (rs.f:format-classes)
+                                   :test #'search
+                                   :key  (compose #'symbol-name #'car)))))
+           (values spec               t)
+           (values (make-keyword key) nil)))))))
 
 ;; Local Variables:
 ;; coding: utf-8

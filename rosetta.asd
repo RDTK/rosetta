@@ -77,6 +77,9 @@ See `version/list' for details on keyword parameters."
                 (:version :let-plus "0.2")
                 :more-conditions
                 :cl-dynamic-classes
+
+                :puri
+                (:version :drakma   "1.3.2")
                 :flexi-streams
 
                 :nibbles)

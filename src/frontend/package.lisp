@@ -112,6 +112,9 @@
    #:search-path
    #:if-ambiguous
 
+   #:merge-locations
+   #:probe-location
+
    #:search-path-resolver)
 
   ;; Recursive package creation protocol
