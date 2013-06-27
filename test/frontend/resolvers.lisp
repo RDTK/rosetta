@@ -13,11 +13,6 @@
   (make-pathname
    :directory nil :defaults +absolute-pathname-of-this-file+))
 
-(defvar +format-of-this-file+
-  (make-keyword
-   (string-upcase
-    (pathname-type +relative-pathname-of-this-file+))))
-
 (defvar +directory-of-this-file+
   (make-pathname
    :name nil :type nil :defaults +absolute-pathname-of-this-file+))
@@ -56,11 +51,11 @@ searchpath-based resolver.")
         ;; These ones should be found.
         ((search-path-resolver)
          (nil ,+absolute-pathname-of-this-file+)
-         (,+format-of-this-file+ ,+absolute-pathname-of-this-file+))
+         (,:mock ,+absolute-pathname-of-this-file+))
 
         ((search-path-resolver :search-path (,+directory-of-this-file+))
          (nil ,+relative-pathname-of-this-file+)
-         (,+format-of-this-file+ ,+absolute-pathname-of-this-file+))
+         (,:mock ,+absolute-pathname-of-this-file+))
 
         ((search-path-resolver :search-path (,+directory-of-this-file+))
          (:foo ,+relative-pathname-of-this-file+)
@@ -68,7 +63,7 @@ searchpath-based resolver.")
 
         ((search-path-resolver :search-path (,+directory-of-this-file+))
          (nil (or #P"distractor.proto" ,+relative-pathname-of-this-file+))
-         (,+format-of-this-file+ ,+absolute-pathname-of-this-file+))
+         (:mock ,+absolute-pathname-of-this-file+))
 
         ;; Ambiguity: test error, using first candidate and continue
         ;; restart.
@@ -81,13 +76,13 @@ searchpath-based resolver.")
                                              ,+directory-of-this-file+)
                                :if-ambiguous :first)
          (nil ,+relative-pathname-of-this-file+)
-         (,+format-of-this-file+ ,+absolute-pathname-of-this-file+))
+         (:mock ,+absolute-pathname-of-this-file+))
 
         ((search-path-resolver :search-path (,+directory-of-this-file+
                                              ,+directory-of-this-file+)
                                :if-ambiguous ,#'continue)
          (nil ,+relative-pathname-of-this-file+)
-         (,+format-of-this-file+ ,+absolute-pathname-of-this-file+)))
+         (:mock ,+absolute-pathname-of-this-file+)))
 
     (let+ (((&flet make-resolver ()
               (case resolver-spec

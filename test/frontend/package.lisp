@@ -40,6 +40,32 @@
 
 ;;; `format-mock' mock class
 
+(service-provider:register-provider/function
+ 'guess-format/string :mock
+ :function (lambda (source &rest args)
+             (declare (ignore args))
+             (when (search "mock" source)
+               :mock)))
+
+(service-provider:register-provider/function
+ 'guess-format/pathname-type :mock
+ :function (lambda (source &rest args)
+             (declare (ignore args))
+             (when (string= (pathname-type source) "mock")
+               :mock)))
+
+(service-provider:register-provider/function
+ 'guess-format/pathname-type :lisp
+ :function (lambda (source &rest args)
+             (declare (ignore args))
+             :mock))
+
+(service-provider:register-provider/function
+ 'guess-format/uri-scheme :mock
+ :function (lambda (source &rest args)
+             (declare (ignore args))
+             :mock))
+
 (defmethod find-format-class ((spec (eql :mock)))
   (find-class 'format-mock))
 

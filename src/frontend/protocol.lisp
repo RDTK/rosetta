@@ -93,6 +93,30 @@ NEW-VALUE."))
 ;;; behavior described above can easily be disturbed by additional
 ;;; methods.
 
+(defgeneric guess-format (source
+                          &key
+                          if-not-guessable
+                          read-file?
+                          &allow-other-keys)
+  (:documentation
+   "Try to guess the format of content in SOURCE. Return the name of
+the format.
+
+IF-NOT-GUESSABLE controls the behavior in case the format of SOURCE
+cannot be guessed. The following values are allowed:
+
+  a function
+
+    Make a `format-guessing-error' error and call IF-NOT-GUESSABLE
+    with it as the sole argument.
+
+  nil
+
+    Return nil.
+
+READ-FILE? controls whether the contents of files may be read if that
+seems necessary to determine the format."))
+
 (defgeneric process (format source builder
                      &key &allow-other-keys)
   (:argument-precedence-order builder source format)
@@ -112,6 +136,37 @@ described by FORMAT."))
 
 ;; error handling
 
+(defmethod guess-format :around ((source t)
+                                 &key
+                                 (if-not-guessable #'error))
+  (tagbody
+   :start
+     (let+ (((&flet handle-fail (&optional cause)
+               (return-from guess-format
+                 (error-behavior-restart-case
+                     (if-not-guessable
+                      (format-guessing-error
+                       :location (make-instance 'location-info
+                                                :source source)
+                       :cause    cause)
+                      :warning-condition nil)
+                   (retry ()
+                     :report (lambda (stream)
+                               (format stream "~@<Retry guessing the ~
+                                               format of ~A.~@:>"
+                                       source))
+                     (go :start))
+                   (use-value (value)
+                     :report (lambda (stream)
+                               (format stream "~@<Supply a format for ~
+                                               ~A.~@:>"
+                                       source))
+                     value))))))
+       (return-from guess-format
+         (or (handler-bind ((error #'handle-fail))
+               (call-next-method))
+             (handle-fail))))))
+
 (define-condition-translating-method
     parse ((format t) (source t) (builder t)
            &key &allow-other-keys)
@@ -126,6 +181,7 @@ described by FORMAT."))
    :builder  builder))
 
 ;;; Default behavior for `process'
+;;;
 ;;; 1. Maybe resolve builder class
 ;;; 2. Iterate over sources
 ;;; 3. Maybe guess format
@@ -219,6 +275,31 @@ described by FORMAT."))
       (call-next-method)))
 
 ;;; Formats
+
+(service-provider:define-service guess-format/string
+  (:documentation
+   "Providers of this service guess the format of a string.
+
+Each provider of the service is called with the source string and
+potentially other arguments and should return the name of the guessed
+format or nil."))
+
+(service-provider:define-service guess-format/pathname-type
+  (:documentation
+   "Providers of this service guess the format of a source file by
+looking at the type of its pathname.
+
+If a provider is registered for the pathname type, converted into a
+keyword, it is called with the pathname object and should return the
+name of the guessed format or nil."))
+
+(service-provider:define-service guess-format/uri-scheme
+  (:documentation
+   "Providers of this service guess the format of a source based on
+the scheme of the source URI.
+
+If a provider is registered for the URI scheme, it is called with the
+URI object and should return name of the guessed format or nil."))
 
 (intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:format)
 

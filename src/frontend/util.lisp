@@ -24,23 +24,46 @@
 
 ;;; File-format utilities
 
-(defun guess-format (pathname)
-  "Try to guess the format of the data definition in the file
-designated by PATHNAME. Return two values: the name of the format and
-a boolean indicating whether a format class exists. When PATHNAME does
-not have a type, return nil."
-  (cond
-    ((and (puri:uri-p pathname) (puri:uri-path pathname))
-     (guess-format (parse-namestring (puri:uri-path pathname))))
-    ((pathnamep pathname)
-     (when-let* ((type (pathname-type pathname))
-                 (key  (string-upcase type)))
-       (unless (emptyp key)
-         (if-let ((spec (car (find key (rs.f:format-classes)
-                                   :test #'search
-                                   :key  (compose #'symbol-name #'car)))))
-           (values spec               t)
-           (values (make-keyword key) nil)))))))
+(defmethod guess-format ((source string) &rest args &key)
+  ;; Try all providers of the `guess-format/string' service on
+  ;; SOURCE. The first successful providers determines the format.
+  (let ((service (find-service 'guess-format/string)))
+    (iter (for provider in (service-providers service))
+          (when-let ((result (apply #'make-provider service provider
+                                    source args)))
+            (return result)))))
+
+(defmethod guess-format ((source pathname) &rest args
+                         &key
+                         (read-file? t))
+  ;; 1. Guess based on (pathname-type SOURCE)
+  ;; 2. When permitted by READ-FILE?, read contents of SOURCE and
+  ;;    guess based on that.
+  (or (when-let* ((type (pathname-type source))
+                  (key  (string-upcase type)))
+        (unless (emptyp key)
+          (apply #'%make-provider-if-exists
+                 'guess-format/pathname-type (make-keyword key)
+                 source args)))
+
+      (when read-file?
+        (when-let ((content (read-file-into-string source)))
+          (apply #'guess-format content args)))))
+
+(defmethod guess-format ((source puri:uri) &rest args &key)
+  ;; 1. Guess based on (puri:uri-scheme SOURCE)
+  ;; 2. Guess based on (pathname-type (puri:uri-path SOURCE))
+  (or (when-let* ((scheme (puri:uri-scheme source)))
+        (apply #'%make-provider-if-exists
+               'guess-format/uri-scheme scheme
+               source args))
+
+      (apply #'guess-format (parse-namestring (puri:uri-path source))
+             :read-file? nil args)))
+
+(defun %make-provider-if-exists (service provider &rest args)
+  (and (find-provider service provider :if-does-not-exist nil)
+       (apply #'make-provider service provider args)))
 
 ;; Local Variables:
 ;; coding: utf-8

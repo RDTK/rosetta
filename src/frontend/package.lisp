@@ -19,10 +19,18 @@
    #:rosetta.model
    #:rosetta.model.data)
 
+  (:import-from #:service-provider
+   #:find-service
+   #:service-providers
+   #:find-provider
+   #:make-provider)
+
   ;; Conditions
   (:export
    #:location-condition
    #:location
+
+   #:format-guessing-error
 
    #:builder-condition
    #:builder
@@ -78,8 +86,16 @@
 
   ;; Processing protocol
   (:export
+   #:guess-format
+
    #:process
    #:parse)
+
+  ;; Format guessing services
+  (:export
+   #:guess-format/string
+   #:guess-format/pathname-type
+   #:guess-format/uri-scheme)
 
   ;; Format class family
   (:export
@@ -135,6 +151,7 @@
    "This package contains frontend-related protocols and
 infrastructure of the rosetta compiler.
 
+* `guess-format'                    [generic function]
 * `process'                         [generic function]
 * `parse'                           [generic function]
 

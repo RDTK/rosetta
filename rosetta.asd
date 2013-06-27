@@ -74,12 +74,13 @@ See `version/list' for details on keyword parameters."
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
                 :split-sequence
-                (:version :let-plus "0.2")
+                (:version :let-plus                      "0.2")
                 :more-conditions
                 :cl-dynamic-classes
+                (:version :architecture.service-provider "0.1")
 
                 :puri
-                (:version :drakma   "1.3.2")
+                (:version :drakma                        "1.3.2")
                 :flexi-streams
 
                 :nibbles)

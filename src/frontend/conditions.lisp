@@ -35,6 +35,20 @@ have an associated location in some source."))
   (define-delegation line (&key (of :start)))
   (define-delegation column (&key (of :start))))
 
+(define-condition format-guessing-error (error
+                                         location-condition
+                                         chainable-condition)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Could not guess format of ~
+                     ~:/rosetta.frontend:format-location/~
+                     ~/more-conditions:maybe-print-cause/~@:>"
+             (location condition) condition)))
+  (:documentation
+   "This error is signaled when the format of a source cannot be
+guessed."))
+
 (define-condition builder-condition (condition)
   ((builder :initarg  :builder
             :reader   builder
