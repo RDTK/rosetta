@@ -154,13 +154,14 @@ described by FORMAT."))
                      :report (lambda (stream)
                                (format stream "~@<Retry guessing the ~
                                                format of ~A.~@:>"
-                                       source))
+                                       (maybe-shorten source)))
                      (go :start))
                    (use-value (value)
                      :report (lambda (stream)
                                (format stream "~@<Supply a format for ~
                                                ~A.~@:>"
-                                       source))
+                                       (maybe-shorten source)))
+                     :interactive read-value
                      value))))))
        (return-from guess-format
          (or (handler-bind ((error #'handle-fail))
@@ -204,10 +205,7 @@ described by FORMAT."))
                                   processing ~S in format ~S with ~
                                   builder ~A.~@:>"
                           (maybe-shorten source) format builder))
-        :interactive (lambda ()
-                       (format *query-io* "Value (evaluated): ")
-                       (finish-output *query-io*)
-                       (list (eval (read *query-io*))))
+        :interactive read-value
         (return value)))))
 
 (defmethod process ((format t) (source sequence) (builder t)
@@ -382,26 +380,42 @@ are allowed:
 (defmethod resolve :around ((resolver t) (format t) (location t)
                             &key
                             (if-does-not-exist #'error))
-  (let+ (((&flet handle-does-not-exist (&optional condition candidates)
-            (etypecase if-does-not-exist
-              (null
-               (return-from resolve (values nil nil candidates)))
-              (function
-               (funcall if-does-not-exist
-                        (make-condition
-                         'cannot-resolve-dependency
-                         :dependency location
-                         :locations  (if (typep condition 'cannot-resolve-dependency)
-                                         (dependency-error-locations condition)
-                                         candidates)))))))
-         ((&values format location candidates)
-          (handler-bind
-              (((or simple-error cannot-resolve-dependency)
-                 #'handle-does-not-exist))
-            (call-next-method))))
-    (if location
-        (values format location)
-        (handle-does-not-exist nil candidates))))
+  (tagbody
+   :start
+     (let+ (((&flet handle-fail (&optional condition candidates)
+               (error-behavior-restart-case
+                   (if-does-not-exist
+                    (cannot-resolve-dependency
+                     :dependency location
+                     :locations  (if (typep condition 'cannot-resolve-dependency)
+                                     (dependency-error-locations condition)
+                                     candidates)))
+                 (retry ()
+                   :report (lambda (stream)
+                             (format stream "~@<Retry resolving the ~
+                                             dependency ~A~@[ in ~
+                                             format ~A~].~@:>"
+                                     location format))
+                   (go :start))
+                 (use-value (format location)
+                   :report (lambda (stream)
+                             (format stream "~@<Supply a value for ~
+                                             dependency ~A~@[ in ~
+                                             format ~A~].~@:>"
+                                     location format))
+                   :interactive (lambda ()
+                                  (list (read-value :prompt "Format")
+                                        (read-value :prompt "Location")))
+                   (values format location)))))
+            ((&values format location candidates)
+             (handler-bind
+                 (((or simple-error cannot-resolve-dependency)
+                    #'handle-fail))
+               (call-next-method))))
+       (return-from resolve
+         (if location
+             (values format location)
+             (handle-fail nil candidates))))))
 
 (defmethod resolve ((resolver t) (format t) (location list)
                     &key

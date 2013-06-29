@@ -186,7 +186,13 @@
 ;;; `mock-resolver' mock class
 
 (defclass mock-resolver ()
-  ((calls :initarg  :calls
+  ((fail? :initarg  :fail?
+          :type     boolean
+          :reader   fail?
+          :initform nil
+          :documentation
+          "Controls whether `resolve' calls should fail.")
+   (calls :initarg  :calls
           :type     list
           :accessor calls
           :initform nil
@@ -204,4 +210,6 @@ calls."))
   (declare (ignore if-does-not-exist))
 
   (push (list format location) (calls resolver))
-  (values format location))
+  (if (fail? resolver)
+      (values nil nil '())
+      (values format location)))

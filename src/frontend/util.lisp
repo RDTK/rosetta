@@ -22,6 +22,17 @@
     (t
      source)))
 
+;;; Interaction utilities
+
+(defun read-value (&key
+                   (prompt     "Value")
+                   (evaluated? t)
+                   (stream     *query-io*))
+  (format stream "~A ~:[~:;(evaluated)~]: " prompt evaluated?)
+  (finish-output stream)
+  (let ((raw (read stream)))
+    (if evaluated? (eval raw) raw)))
+
 ;;; File-format utilities
 
 (defmethod guess-format ((source string) &rest args &key)

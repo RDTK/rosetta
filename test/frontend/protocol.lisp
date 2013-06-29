@@ -83,6 +83,8 @@
      (handler-bind ((format-guessing-error
                       (lambda (condition)
                         (let ((spec (ensure-list (pop restart-specs))))
+                          ;; Make sure the condition prints properly.
+                          (princ-to-string condition)
                           ;; Make sure the restart prints properly.
                           (princ-to-string (find-restart (first spec)))
                           ;; Invoke it.
@@ -146,8 +148,47 @@
 
     (ensure-same
      (handler-bind ((error (lambda (condition)
-                             (apply #'invoke-restart
-                                    (ensure-list (pop restart-specs))))))
+                             (let ((spec (ensure-list (pop restart-specs))))
+                               ;; Make sure the condition prints properly.
+                               (princ-to-string condition)
+                               ;; Make sure the restart prints properly.
+                               (princ-to-string (find-restart (first spec)))
+                               ;; Invoke it.
+                               (apply #'invoke-restart spec)))))
        (process :mock sources :error))
      expected
+     :test #'equal)))
+
+(addtest (rosetta.frontend.protocol-root
+          :documentation
+          "Test the restarts established by `resolve'.")
+  resolve/restarts
+
+
+  ;; Restarts specs in RESTART-SPECS are processed and consumed
+  ;; sequentially.
+  (ensure-cases (format pathname  restart-specs expected)
+      `((nil   ,#P"does-not-matter" ((use-value :foo :bar))       (:foo :bar))
+        (nil   ,#P"does-not-matter" (retry (use-value :foo :bar)) (:foo :bar))
+
+        (:mock ,#P"does-not-matter" ((use-value :foo :bar))       (:foo :bar))
+        (:mock ,#P"does-not-matter" (retry (use-value :foo :bar)) (:foo :bar))
+
+        (nil   (or ,#P"1" ,#P"2")   ((use-value :foo :bar))       (:foo :bar))
+        (nil   (or ,#P"1" ,#P"2")   (retry (use-value :foo :bar)) (:foo :bar))
+
+        (:mock (or ,#P"1" ,#P"2")   ((use-value :foo :bar))       (:foo :bar))
+        (:mock (or ,#P"1" ,#P"2")   (retry (use-value :foo :bar)) (:foo :bar)))
+
+    (ensure-same
+     (handler-bind ((error (lambda (condition)
+                             (let ((spec (ensure-list (pop restart-specs))))
+                               ;; Make sure the condition prints properly.
+                               (princ-to-string condition)
+                               ;; Make sure the restart prints properly.
+                               (princ-to-string (find-restart (first spec)))
+                               ;; Invoke it.
+                               (apply #'invoke-restart spec)))))
+       (resolve (make-instance 'mock-resolver :fail? t) format pathname))
+     (apply #'values expected)
      :test #'equal)))
