@@ -495,6 +495,11 @@ class to the class of OTHER and copying all slot values from OTHER to
 INSTANCE."))
 
 ;;; Builder protocol
+;;;
+;;; As a general convention throughout the protocol, the value nil can
+;;; be used to indicate a node which should be ignored. For example,
+;;; the default behavior of `add-child' is to ignore nil and return
+;;; the unmodified parent.
 
 (defgeneric find-node (builder kind
                        &rest args
@@ -544,13 +549,16 @@ ARGS."))
            (use-value (value)
              value))))))
 
+(defmethod add-child ((builder t) (parent t) (child (eql nil)))
+  parent)
+
 (defmethod find-node ((builder (eql nil)) (kind t) &key)
   t)
 
 (defmethod make-node ((builder (eql nil)) (kind t) &key)
   nil)
 
-(defmethod add-child ((builder (eql nil)) (parent t) (chidl t))
+(defmethod add-child ((builder (eql nil)) (parent t) (child t))
   nil)
 
 ;;; Builder class family
