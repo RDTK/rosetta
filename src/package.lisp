@@ -13,8 +13,10 @@
 
   ;; Utilities
   (:export
+   #:digit-boundary?
    #:camel-case-boundary?
-   #:underscore-boundary?
+   #:separator-boundary?
+
    #:normalize-name)
 
   (:documentation

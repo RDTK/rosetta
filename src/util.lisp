@@ -36,28 +36,28 @@ boundary position is of the form
           (lower-case-p (aref string position))
           (upper-case-p (aref string (1+ position))))
      (list (1+ position) (1+ position)))
-    ;; For cases like XOP|Data and Vec2D|Double
-    ((and (< (+ position 2) (length string))
+    ;; For cases like XOP|Data and Vec2D|Double, but not XO|Ps
+    ;; (therefore position + 3).
+    ((and (< (+ position 3) (length string))
           (upper-case-p (aref string (1+ position)))
           (lower-case-p (aref string (+ position 2))))
      (list (1+ position) (1+ position)))))
 
-(defun underscore-boundary? (string position)
+(defun separator-boundary? (string position &optional (separators '(#\_ #\-)))
   "Return a boundary position when there is a '_' in STRING at
 POSITION. The returned boundary position is of the form
 
   (START END)
 
 ."
-  (when (char= (aref string position) #\_)
+  (when (member (aref string position) separators :test #'char=)
     (list position (1+ position))))
 
 (defun normalize-name (name
                        &key
-                       (boundary? (disjoin #'underscore-boundary?
+                       (boundary? (disjoin #'separator-boundary?
                                            #'camel-case-boundary?
-                                           #'digit-boundary?
-                                           ))
+                                           #'digit-boundary?))
                        (transform #'string-downcase)
                        (separator #\-))
   "Normalize NAME to the form
@@ -80,13 +80,13 @@ if there is a boundary in the string at the indicated position.
 TRANSFORM is a function that has to take a string and return a
 transformed string such as `cl:string-downcase'.
 
-When SEPARATOR is a character it is used as explained above. When
-SEPARATOR is nil, components are simply concatenated."
+When SEPARATOR is a `character' or `string' it is used as explained
+above. When SEPARATOR is nil, components are simply concatenated."
   (with-output-to-string (stream)
     (let+ (((&flet component (string &optional first?)
               "Add component STRING, potentially with a separator."
               (when (and (not first?) separator)
-                (write-char separator stream))
+                (princ separator stream))
               (write-string (funcall transform string) stream)))
            (first? t))
       ;; Go through NAME, testing each position for being a boundary.
