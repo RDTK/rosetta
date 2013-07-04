@@ -57,19 +57,44 @@
 function.")
   default-behavior
 
-  ;; Default behavior consists in considering every value invalid and
-  ;; signaling an error.
-  (ensure-condition 'value-invalid-for-type
-    (validate-value :does-not-matter :does-not-matter))
+  (ensure-cases (type value)
+      `((:does-not-matter      :does-not-matter)
+        ;; This second case is necessary to test the behavior in case
+        ;; of nested `validate-value' calls.
+        (,+enum/uint32/simple+ "C"))
 
-  ;; Test returning nil instead of signaling an error.
-  (ensure-null (validate-value :does-not-matter :does-not-matter
-                               :if-invalid nil))
+    ;; Default behavior consists in considering every value invalid and
+    ;; signaling an error.
+    (ensure-condition 'value-invalid-for-type
+      (validate-value type value))
 
-  ;; Test continuing despite an invalid value.
-  (ensure-same (validate-value :does-not-matter :does-not-matter
-                               :if-invalid #'continue)
-               t))
+    ;; Test returning nil instead of signaling an error.
+    (ensure-null (validate-value type value :if-invalid nil))
+
+    ;; Test continuing despite an invalid value.
+    (ensure-same (validate-value type value :if-invalid #'continue) t)))
+
+(addtest (validate-value-root
+          :documentation
+          "Test the `continue' restart established by
+the `validate-value' generic function.")
+  restarts
+
+  (ensure-cases (type value)
+      `((:does-not-matter      :does-not-matter)
+        ;; This second case is necessary to test the behavior in case
+        ;; of nested `validate-value' calls.
+        (,+enum/uint32/simple+ "C"))
+
+    (handler-bind ((value-invalid-for-type
+                     (lambda (condition)
+                       ;; Make sure the condition prints properly.
+                       (princ-to-string condition)
+                       ;; Make sure the restart prints properly.
+                       (princ-to-string (find-restart 'continue))
+                       ;; Invoke it.
+                       (invoke-restart 'continue))))
+      (ensure-same (validate-value type value) t))))
 
 (addtest (validate-value-root
           :documentation

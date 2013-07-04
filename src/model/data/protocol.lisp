@@ -333,17 +333,18 @@ a function, a `cl:continue' restart is established around the call."))
                    (when cause
                      (list :cause cause)))))
          ((&flet handle-invalid (&optional cause)
-            (etypecase if-invalid
-              (null
-               (return-from validate-value (values nil (make-error cause))))
-              (function
-               (restart-case
-                   (funcall if-invalid (make-error cause))
-                 (continue ()
-                   :report (lambda (stream)
-                             (format stream "~@<Ignore the ~
-                                             incompatibility.~@:>"))
-                   t)))))))
+            (return-from validate-value
+              (etypecase if-invalid
+                (null
+                 (values nil (make-error cause)))
+                (function
+                 (restart-case
+                     (funcall if-invalid (make-error cause))
+                   (continue ()
+                     :report (lambda (stream)
+                               (format stream "~@<Ignore the ~
+                                               incompatibility.~@:>"))
+                     t))))))))
     (or (handler-bind
             (((or simple-error value-invalid-for-type) #'handle-invalid))
           (call-next-method))
