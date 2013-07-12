@@ -406,7 +406,10 @@ are allowed:
                    :interactive (lambda ()
                                   (list (read-value :prompt "Format")
                                         (read-value :prompt "Location")))
-                   (values format location)))))
+                   (values format location))
+                 (continue (&optional condition)
+                   (declare (ignore condition))
+                   nil))))
             ((&values format location candidates)
              (handler-bind
                  (((or simple-error cannot-resolve-dependency)

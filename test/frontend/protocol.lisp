@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Unit tests for the protocol of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -164,21 +164,28 @@
           "Test the restarts established by `resolve'.")
   resolve/restarts
 
-
   ;; Restarts specs in RESTART-SPECS are processed and consumed
   ;; sequentially.
   (ensure-cases (format pathname  restart-specs expected)
       `((nil   ,#P"does-not-matter" ((use-value :foo :bar))       (:foo :bar))
         (nil   ,#P"does-not-matter" (retry (use-value :foo :bar)) (:foo :bar))
+        (nil   ,#P"does-not-matter" (continue)                    nil)
+        (nil   ,#P"does-not-matter" (retry continue)              nil)
 
         (:mock ,#P"does-not-matter" ((use-value :foo :bar))       (:foo :bar))
         (:mock ,#P"does-not-matter" (retry (use-value :foo :bar)) (:foo :bar))
+        (:mock ,#P"does-not-matter" (continue)                    nil)
+        (:mock ,#P"does-not-matter" (retry continue)              nil)
 
         (nil   (or ,#P"1" ,#P"2")   ((use-value :foo :bar))       (:foo :bar))
         (nil   (or ,#P"1" ,#P"2")   (retry (use-value :foo :bar)) (:foo :bar))
+        (nil   (or ,#P"1" ,#P"2")   (continue)                    nil)
+        (nil   (or ,#P"1" ,#P"2")   (retry continue)              nil)
 
         (:mock (or ,#P"1" ,#P"2")   ((use-value :foo :bar))       (:foo :bar))
-        (:mock (or ,#P"1" ,#P"2")   (retry (use-value :foo :bar)) (:foo :bar)))
+        (:mock (or ,#P"1" ,#P"2")   (retry (use-value :foo :bar)) (:foo :bar))
+        (:mock (or ,#P"1" ,#P"2")   (continue)                    nil)
+        (:mock (or ,#P"1" ,#P"2")   (retry continue)              nil))
 
     (ensure-same
      (handler-bind ((error (lambda (condition)
