@@ -90,9 +90,9 @@ above. When SEPARATOR is nil, components are simply concatenated."
               (write-string (funcall transform string) stream)))
            (first? t))
       ;; Go through NAME, testing each position for being a boundary.
-      (iter (for  char     each     name :with-index i)
-            (for  previous previous char)
-            (with start    =        0)
+      (iter (for  char     in-vector name :with-index i)
+            (for  previous previous  char)
+            (with start    =         0)
 
             ;; Once a component is detected, collect it. Only collect
             ;; non-empty components.

@@ -61,7 +61,7 @@ One example of a class representing such values is `enum-value'."))
                         :value (ensure-list value-and-initargs)))))
     ;; Values are provided as a sequence of `enum-value' objects.
     (sequence
-     (iter (for value each values)
+     (iter (for value in-sequence values)
            (setf (lookup instance :value (name value)) value)))))
 
 (defmethod kind ((type enum))

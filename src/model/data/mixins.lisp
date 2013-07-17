@@ -236,7 +236,7 @@ with KIND `t'. The returned value is compared to the KEY of the
                                      &key
                                      (nested nil nested-supplied?))
   (when nested-supplied?
-    (iter (for thing each nested)
+    (iter (for thing in-sequence nested)
           (setf (lookup instance :nested (name thing)) thing))))
 
 (defmethod direct-dependencies append ((thing nesting-mixin))
@@ -355,7 +355,7 @@ consist of a collection of named fields."))
                         :type  (ensure-list type-and-initargs)))))
     ;; Fields are provided as a sequence of `field-mixin' objects.
     (sequence
-     (iter (for field each fields)
+     (iter (for field in-sequence fields)
            (check-type field field-mixin)
            (setf (lookup instance :field (name field)) field)))))
 

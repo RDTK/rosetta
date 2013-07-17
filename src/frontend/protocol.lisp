@@ -214,7 +214,7 @@ described by FORMAT."))
   (when (stringp source)
     (return-from process (call-next-method)))
 
-  (iter (for source1 each source)
+  (iter (for source1 in-sequence source)
         (restart-case
             (collect (apply #'process format source1 builder args))
           (continue (&optional condition)
