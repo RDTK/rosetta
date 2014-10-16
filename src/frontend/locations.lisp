@@ -136,18 +136,22 @@ narrowed to that bounds. Otherwise return the full source of INFO."
 
 (defun format-content-with-delimiters (stream info &optional colon? at?)
   "Use `format-content' to print the content of INFO and add
-indicators delimiting the region of interest within the printed
-content."
+   indicators delimiting the region of interest within the printed
+   content."
   (declare (ignore at?))
 
-  (let ((start-column   (column info :of :start))
-        (end-column     (column info :of :end))
-        (*print-pretty* t))
+  (let ((start-column (column info :of :start))
+        (end-column   (column info :of :end)))
     (cond
       ((source-content info)
-       (format stream "~@[  ~V@Tv~&~]~
-                       ~<| ~@;~/rosetta.frontend::format-content/~:>~
-                       ~@[~&  ~V@T^~]"
+       (format stream (if (and #+sbcl (sb-pretty:pretty-stream-p stream)
+                               *print-pretty*)
+                          "~@[  ~V@Tv~@:_~]~
+                           ~<| ~@;~/rosetta.frontend:format-content/~:>~
+                           ~@[~@:_  ~V@T^~]"
+                          "~@[  ~V@Tv~&~]~
+                           ~<| ~@;~/rosetta.frontend:format-content/~:>~
+                           ~@[~&  ~V@T^~]")
                start-column (list info) end-column))
       ((not colon?)
        (format-content stream info)))))

@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the frontend module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,12 +14,12 @@
              :reader   location
              :documentation
              "Stores the location at which the condition
-originated."))
+              originated."))
   (:default-initargs
    :location (missing-required-initarg 'location-condition :location))
   (:documentation
    "This class is intended to be mixed into condition classes which
-have an associated location in some source."))
+    have an associated location in some source."))
 
 (macrolet ((define-delegation (name &optional args)
              (let ((value
@@ -47,7 +47,7 @@ have an associated location in some source."))
              (location condition) condition)))
   (:documentation
    "This error is signaled when the format of a source cannot be
-guessed."))
+    guessed."))
 
 (define-condition builder-condition (condition)
   ((builder :initarg  :builder
@@ -55,10 +55,26 @@ guessed."))
             :initform nil
             :documentation
             "Stores the builder (if available) that was being used
-when the condition occurred."))
+             when the condition occurred."))
   (:documentation
    "This class is intended to be mixed into condition classes which
-have an associated builder object."))
+    have an associated builder object."))
+
+(defun frontend-condition-report (stream context
+                                  source-content location builder condition)
+  (format stream "~@<When ~A ~
+                  ~:/rosetta.frontend:format-location/~
+                  ~:[~
+                    ~*~
+                  ~:; ~
+                    which is~
+                    ~@:_~@:_~
+                    ~/rosetta.frontend:format-content-with-delimiters/~
+                    ~@:_~@:_~
+                  ~]~
+                  ~:[.~:;~:*with builder ~A ~]~
+                  ~/more-conditions:maybe-print-cause/~@:>"
+          context location source-content location builder condition))
 
 (define-condition parsing-condition (location-condition
                                      chainable-condition)
@@ -66,16 +82,11 @@ have an associated builder object."))
   (:report
    (lambda (condition stream)
      (let+ (((&accessors-r/o location source-content) condition))
-       (format stream "~<When parsing ~
-                       ~:/rosetta.frontend::format-location/~@:> ~:[~*~; which is~
-                       ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
-                       ~@<~/more-conditions::maybe-print-cause/~@:>"
-               (list location)
-               source-content location
-               condition))))
+       (frontend-condition-report stream "parsing"
+                                  source-content location nil condition))))
   (:documentation
    "Instances of subclasses of this condition are signaled during
-parsing the contents of a source."))
+    parsing the contents of a source."))
 
 (define-condition processing-condition (location-condition
                                         builder-condition
@@ -84,17 +95,11 @@ parsing the contents of a source."))
   (:report
    (lambda (condition stream)
      (let+ (((&accessors-r/o location source-content builder) condition))
-       (format stream "~<When processing ~
-                       ~:/rosetta.frontend::format-location/~@:>~:[~*~; which is~
-                       ~2&~/rosetta.frontend::format-content-with-delimiters/~&~]~
-                       ~@<~@[with builder
-                       ~A~].~/more-conditions::maybe-print-cause/~@:>"
-               (list location)
-               source-content location
-               builder condition))))
+       (frontend-condition-report stream "processing"
+                                  source-content location builder condition))))
   (:documentation
    "Instances of subclasses of this conditions are signaled during
-processing the contents of a source after or during parsing."))
+      processing the contents of a source after or during parsing."))
 
 (macrolet
     ((define-frontend-conditions
@@ -141,7 +146,7 @@ processing the contents of a source after or during parsing."))
              (dependency-error-dependency condition))))
   (:documentation
    "This error and subclasses are signaled when a dependency causes an
-error."))
+    error."))
 
 (define-condition cannot-resolve-dependency (dependency-error)
   ((locations :initarg  :locations
@@ -150,7 +155,7 @@ error."))
               :initform nil
               :documentation
               "Locations that have been consulted when trying to
-resolve the dependency."))
+               resolve the dependency."))
   (:report
    (lambda (condition stream)
      (format stream "~@<The dependency ~S could not be resolved. ~:[No ~
@@ -164,7 +169,7 @@ resolve the dependency."))
 
 (defun cannot-resolve-dependency (dependency &optional locations)
   "Convenience function for signaling `cannot-resolve-dependency'
-errors."
+   errors."
   (error 'cannot-resolve-dependency
          :dependency dependency
          :locations  locations))
@@ -184,7 +189,7 @@ errors."
              (dependency-error-candidates condition))))
   (:documentation
    "This error is signaled if there are multiple candidates for a
-dependency and no resolution strategy has been specified."))
+    dependency and no resolution strategy has been specified."))
 
 (defun ambiguous-dependency (dependency &optional candidates)
   "Convenience function for signaling `ambiguous-dependency' errors."
