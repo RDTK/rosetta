@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used in the frontend package.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -48,8 +48,8 @@
                          &key
                          (read-file? t))
   ;; 1. Guess based on (pathname-type SOURCE)
-  ;; 2. When permitted by READ-FILE?, read contents of SOURCE and
-  ;;    guess based on that.
+  ;; 2. When permitted by READ-FILE? and SOURCE does not look like a
+  ;;    directory, read its contents and guess based on that.
   (or (when-let* ((type (pathname-type source))
                   (key  (string-upcase type)))
         (unless (emptyp key)
@@ -57,7 +57,7 @@
                  'guess-format/pathname-type (make-keyword key)
                  source args)))
 
-      (when read-file?
+      (when (and read-file? (pathname-name source)) ; avoid directories
         (when-let ((content (read-file-into-string source)))
           (apply #'guess-format content args)))))
 
