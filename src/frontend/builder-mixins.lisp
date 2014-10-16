@@ -1,6 +1,6 @@
 ;;;; builder-mixins.lisp --- Mixin classes for builder classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,15 +8,15 @@
 
 ;;; Class `location-attaching-mixin'
 
-(declaim (special *source* *source-content*))
-
 (defvar *source* nil
   "Dynamically bound to the source (e.g. stream, pathname) being
-processed around `parse' calls.")
+   processed around `parse' calls.")
 
 (defvar *source-content* nil
   "Dynamically bound to the contents of the source being
-processed (e.g. contents of a source file) around `parse' calls.")
+   processed (e.g. contents of a source file) around `parse' calls.")
+
+;; TODO do the same for *bounds*? when there is an underlying stream, we can try `file-position'
 
 (defclass location-attaching-mixin ()
   ((locations :initarg  :locations
@@ -83,11 +83,9 @@ location information to elements."))
 
 ;;; `comment-attaching-mixin' mixin class
 
-(declaim (special *processing-comment?*))
-
 (defvar *processing-comment?* nil
   "Dynamically bound to a boolean indicating whether a comment is
-being processed.")
+   being processed.")
 
 (defclass comment-attaching-mixin ()
   ((most-recent-comments :initarg  :most-recent-comments

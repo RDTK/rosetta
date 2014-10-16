@@ -220,14 +220,14 @@ described by FORMAT."))
           (continue (&optional condition)
             :report (lambda (stream)
                       (format stream "~@<Skip ~S and ~
-                                                  continue with the ~
-                                                  next source.~@:>"
+                                      continue with the ~
+                                      next source.~@:>"
                               (maybe-shorten source1)))
             (declare (ignore condition))))))
 
 (defmethod process ((format t) (source pathname) (builder t)
                     &rest args &key &allow-other-keys)
-  "Process wild pathnames."
+  ;; Process wild pathnames.
   (if (wild-pathname-p source)
       (apply #'process format (directory source) builder args)
       (call-next-method)))

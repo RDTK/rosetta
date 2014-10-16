@@ -1,6 +1,6 @@
 ;;;; locations.lisp --- Unit tests for the location machinery.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -188,25 +188,25 @@ instances.")
       ;;  content   bounds   colon *print-length* expected
       `(((nil       nil      nil   nil)           "<No content and/or")
         ((nil       nil      t     nil)           "")
-        (("foo bar" nil      nil   nil)           "| foo bar")
-        (("foo bar" nil      nil   4)             "| foo…")
+        (("foo bar" nil      nil   nil)           "│ foo bar")
+        (("foo bar" nil      nil   4)             "│ foo…")
         (("foo bar" (0 . 0)  nil   nil)           "  v
-| foo bar
+│ foo bar
   ^")
         (("foo bar" (1 . 2)  nil   nil)           "   v
-| foo bar
+│ foo bar
     ^")
         (("foo bar
 baz fez"            (2 . 3)  nil   nil)           "    v
-| foo bar
+│ foo bar
      ^")
         (("foo bar
 baz fez"            (8 . 11) nil   nil)           "  v
-| baz fez
+│ baz fez
      ^")
         (("foo bar
 baz fez"            (8 . 11) nil   4)             "  v
-| baz…
+│ baz…
      ^"))
 
     (let* ((info   (apply #'make-instance 'location-info

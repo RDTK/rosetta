@@ -1,6 +1,6 @@
 ;;;; locations.lisp --- Representation and utilities for source locations.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -147,10 +147,10 @@ narrowed to that bounds. Otherwise return the full source of INFO."
        (format stream (if (and #+sbcl (sb-pretty:pretty-stream-p stream)
                                *print-pretty*)
                           "~@[  ~V@Tv~@:_~]~
-                           ~<| ~@;~/rosetta.frontend:format-content/~:>~
+                           ~<│ ~@;~/rosetta.frontend:format-content/~:>~
                            ~@[~@:_  ~V@T^~]"
                           "~@[  ~V@Tv~&~]~
-                           ~<| ~@;~/rosetta.frontend:format-content/~:>~
+                           ~<│ ~@;~/rosetta.frontend:format-content/~:>~
                            ~@[~&  ~V@T^~]")
                start-column (list info) end-column))
       ((not colon?)

@@ -1,6 +1,6 @@
 ;;;; format-mixins.lisp --- Mixin classes for format classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,8 +12,8 @@
   ()
   (:documentation
    "This class is intended to be mixed into format classes for which
-it is appropriate to attach source information to signaled
-`location-condition's."))
+    it is appropriate to attach source information to signaled
+    `location-condition's."))
 
 (macrolet
     ((define-source-attaching-method (source-class replace-predicate)
@@ -21,15 +21,15 @@ it is appropriate to attach source information to signaled
                                   (source  ,source-class)
                                   (builder t)
                                   &key)
-          "Augment conditions signaled from next methods location
-information based on SOURCE."
-        (handler-bind ((location-condition
-                         (lambda (condition)
-                           (let+ (((&accessors-r/o location) condition)
-                                  ((&accessors (source1 source)) location))
-                             (unless (,replace-predicate source1)
-                               (setf source1 source))))))
-          (call-next-method)))))
+          "Augment conditions signaled from next methods with location
+           information based on SOURCE."
+          (handler-bind ((location-condition
+                           (lambda (condition)
+                             (let+ (((&accessors-r/o location) condition)
+                                    ((&accessors (source1 source)) location))
+                               (unless (,replace-predicate source1)
+                                 (setf source1 source))))))
+            (call-next-method)))))
 
   (define-source-attaching-method pathname pathnamep)
   (define-source-attaching-method puri:uri puri:uri-p))
@@ -46,15 +46,15 @@ information based on SOURCE."
                   'common-sources-mixin :element-type))
   (:documentation
    "This class is intended to be mixed into format classes which
-operate on streams with particular element types and should support
-obtaining such streams from common kinds of sources."))
+    operate on streams with particular element types and should
+    support obtaining such streams from common kinds of sources."))
 
 (defmethod parse ((format  common-sources-mixin)
                   (source  pathname)
                   (builder t)
                   &rest args &key &allow-other-keys)
-  "Open a binary input stream for the file designated by SOURCE and
-call a method specialized on streams."
+  ;; Open a character or binary input stream for the file designated
+  ;; by SOURCE and call a method specialized on streams.
   (with-input-from-file (stream source
                          :element-type (format-element-type format))
     (apply #'parse format stream builder args)))
@@ -92,7 +92,7 @@ call a method specialized on streams."
    :element-type '(unsigned-byte 8))
   (:documentation
    "This class is intended to be mixed into format classes for binary
-formats."))
+    formats."))
 
 ;;; `text-format-mixin' mixin class
 
@@ -103,14 +103,14 @@ formats."))
    :element-type 'character)
   (:documentation
    "This class is intended to be mixed into format classes that
-operate on textual input data."))
+    operate on textual input data."))
 
 (defmethod parse :around ((format  text-format-mixin)
                           (source  pathname)
                           (builder t)
                           &key)
-  "Augment conditions signaled from next methods location information
-based on SOURCE."
+  ;; Augment conditions signaled from next methods with location
+  ;; information based on SOURCE.
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
@@ -125,8 +125,8 @@ based on SOURCE."
                           (source  string)
                           (builder t)
                           &key)
-  "Augment conditions signaled from next methods location information
-based on SOURCE."
+  ;; Augment conditions signaled from next methods location
+  ;; information based on SOURCE.
   (handler-bind ((location-condition
                    (lambda (condition)
                      (let+ (((&accessors-r/o location) condition)
@@ -141,8 +141,8 @@ based on SOURCE."
                   (source  string)
                   (builder t)
                   &rest args &key &allow-other-keys)
-  "Create an input stream for the content of SOURCE and call a method
-specialized on streams."
+  ;; Create an input stream for the content of SOURCE and call a
+  ;; method specialized on streams.
   (with-input-from-string (stream source)
     (apply #'parse format stream builder args)))
 
@@ -150,7 +150,7 @@ specialized on streams."
                   (source  stream)
                   (builder t)
                   &rest args &key &allow-other-keys)
-  "Read the content of SOURCE into a string and call a method
-specialized on strings."
+  ;; Read the content of SOURCE into a string and call a method
+  ;; specialized on strings.
   (let ((content (read-stream-content-into-string source)))
     (apply #'parse format content builder args)))
