@@ -95,7 +95,7 @@
   ;; Format guessing services
   (:export
    #:guess-format/string
-   #:guess-format/pathname-type
+   #:guess-format/pathname
    #:guess-format/uri-scheme)
 
   ;; Format class family

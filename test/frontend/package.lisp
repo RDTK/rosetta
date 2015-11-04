@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -48,17 +48,18 @@
                :mock)))
 
 (service-provider:register-provider/function
- 'guess-format/pathname-type :mock
+ 'guess-format/pathname :mock
  :function (lambda (source &rest args)
              (declare (ignore args))
              (when (string= (pathname-type source) "mock")
                :mock)))
 
 (service-provider:register-provider/function
- 'guess-format/pathname-type :lisp
+ 'guess-format/pathname :lisp
  :function (lambda (source &rest args)
              (declare (ignore args))
-             :mock))
+             (when (string= (pathname-type source) "lisp")
+               :mock)))
 
 (service-provider:register-provider/function
  'guess-format/uri-scheme :mock

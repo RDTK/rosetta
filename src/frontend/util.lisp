@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used in the frontend package.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,11 +38,7 @@
 (defmethod guess-format ((source string) &rest args &key)
   ;; Try all providers of the `guess-format/string' service on
   ;; SOURCE. The first successful providers determines the format.
-  (let ((service (find-service 'guess-format/string)))
-    (iter (for provider in (service-providers service))
-          (when-let ((result (apply #'make-provider service provider
-                                    source args)))
-            (return result)))))
+  (apply #'%try-providers 'guess-format/string source args))
 
 (defmethod guess-format ((source pathname) &rest args
                          &key
@@ -50,12 +46,7 @@
   ;; 1. Guess based on (pathname-type SOURCE)
   ;; 2. When permitted by READ-FILE? and SOURCE does not look like a
   ;;    directory, read its contents and guess based on that.
-  (or (when-let* ((type (pathname-type source))
-                  (key  (string-upcase type)))
-        (unless (emptyp key)
-          (apply #'%make-provider-if-exists
-                 'guess-format/pathname-type (make-keyword key)
-                 source args)))
+  (or (apply #'%try-providers 'guess-format/pathname source args)
 
       (when (and read-file? (pathname-name source)) ; avoid directories
         (when-let ((content (read-file-into-string source)))
@@ -71,6 +62,12 @@
 
       (apply #'guess-format (parse-namestring (puri:uri-path source))
              :read-file? nil args)))
+
+(defun %try-providers (service &rest args)
+  (let ((service (find-service service)))
+    (iter (for provider in (service-providers service))
+          (when-let ((result (apply #'make-provider service provider args)))
+            (return result)))))
 
 (defun %make-provider-if-exists (service provider &rest args)
   (and (find-provider service provider :if-does-not-exist nil)

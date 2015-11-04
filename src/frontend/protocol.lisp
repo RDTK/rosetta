@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol definitions of the rosetta compiler frontend.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -282,14 +282,13 @@ Each provider of the service is called with the source string and
 potentially other arguments and should return the name of the guessed
 format or nil."))
 
-(service-provider:define-service guess-format/pathname-type
+(service-provider:define-service guess-format/pathname
   (:documentation
    "Providers of this service guess the format of a source file by
-looking at the type of its pathname.
+    looking at the pathname.
 
-If a provider is registered for the pathname type, converted into a
-keyword, it is called with the pathname object and should return the
-name of the guessed format or nil."))
+    If a provider is registered, it is called with the pathname object
+    and should return the name of the guessed format or nil."))
 
 (service-provider:define-service guess-format/uri-scheme
   (:documentation
