@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol for data types.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -564,8 +564,6 @@ ARGS."))
 
 ;;; Builder class family
 
-(intern "BUILDER") ;; (documentation 'builder 'dynamic-classes:class-family)
-
-(dynamic-classes:define-findable-class-family builder
-  "This class family consists of classes whose instances implement the
-builder protocol.")
+(service-provider:define-service builder
+  (:documentation
+   "Providers of this service implement the builder protocol."))

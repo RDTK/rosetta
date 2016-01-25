@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol for the model.language module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -58,14 +58,8 @@ LANGUAGE."))
 
 ;;; Languages
 
-(intern "LANGUAGE") ;; for (documentation :LANGUAGE 'rosetta.model:language)
-
-(dynamic-classes:define-findable-class-family language
-    "This family consists of language classes. Each language class is
-used to control the output language when emitting things based on an
-abstract description in form of model component instances.")
-
-(defmethod documentation ((thing symbol) (type (eql 'language)))
-  "Obtain documentation of type LANGUAGE from the language class
-designated by THING."
-  (documentation (find-language-class thing) t))
+(service-provider:define-service language
+  (:documentation
+   "Each provider of this service is used to control the output
+    language when emitting things based on an abstract description in
+    form of model component instances."))

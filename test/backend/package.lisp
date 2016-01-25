@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the backend module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -105,9 +105,6 @@
               (spec       (make-keyword name/short)))
          `(progn
             (eval-when (:compile-toplevel :load-toplevel :execute)
-              (defmethod find-mechanism-class ((spec (eql ,spec)))
-                (find-class ',name))
-
               (defclass ,name (binary-mixin
                                data-holder-mixin
                                offset-type-mixin
@@ -117,7 +114,10 @@
                 (:default-initargs
                  :offset-type +uint16+
                  :length-type +uint8+
-                 :endian      ,endian)))
+                 :endian      ,endian))
+
+              (service-provider:register-provider/class
+               'mechanism ,spec :class ',name))
 
             (defmethod validate-type ((mechanism ,name) (type t)
                                       &key &allow-other-keys)

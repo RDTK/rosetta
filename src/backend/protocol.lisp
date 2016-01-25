@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol of the compiler backend.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -12,17 +12,11 @@
   (:documentation
    "Return a new target object based on TARGET and KEY."))
 
-(dynamic-classes:define-findable-class-family target
-  "This family consists of target classes. Each target class is used
-to control the emission of one kind of thing based on an abstract
-description in form of model component instances.")
-
-(intern "TARGET") ; for (documentation :TARGET 'rosetta.backend:target)
-
-(defmethod documentation ((thing symbol) (type (eql 'target)))
-  "Obtain documentation of type TARGET from the target class
-designated by THING."
-  (documentation (find-target-class thing) t))
+(service-provider:define-service target
+  (:documentation
+   "Each provider of this service is used to control the emission of
+    one kind of thing based on an abstract description in form of
+    model component instances."))
 
 ;;; Backend Context
 
@@ -211,10 +205,8 @@ No methods must not be installed on `emit/setup'."))
 
 (defmethod generate ((node t) (target list) (language t)
                      &key)
-  (let+ (((name &rest args) target)
-         (class (find-target-class name))
-         (instance (apply #'make-instance class args)))
-    (generate node instance language)))
+  (let ((target (apply #'service-provider:make-provider 'target target)))
+    (generate node target language)))
 
 (defmethod generate ((node t) (target symbol) (language t)
                      &key)
@@ -222,10 +214,9 @@ No methods must not be installed on `emit/setup'."))
 
 (defmethod generate ((node t) (target t) (language list)
                      &key)
-  (let+ (((name &rest args) language)
-         (class    (rs.m.l:find-language-class name))
-         (instance (apply #'make-instance class args)))
-    (generate node target instance)))
+  (let ((language (apply #'service-provider:make-provider
+                         'rosetta.model.language::language language)))
+    (generate node target language)))
 
 (defmethod generate ((node t) (target t) (language symbol)
                      &key)

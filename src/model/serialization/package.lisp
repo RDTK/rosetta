@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for model.serialization module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -47,13 +47,7 @@
 
    #:validate-type)
 
-  ;; Mechanism class family
-  (:export
-   #:no-such-mechanism-class
-   #:find-mechanism-class
-   #:mechanism-classes)
-
-  ;; Symbol for mechanism documentation
+  ;; Mechanism service
   (:export
    #:mechanism)
 
@@ -67,26 +61,15 @@
 
   (:documentation
    "This package contains model elements which represent
-serializations.
+    serializations.
 
-Each modeled serialization mechanism specializes the generic
-functions:
+    Each modeled serialization mechanism specializes the generic
+    functions:
 
-* `name'                            [generic function]
+    * `name'                            [generic function]
 
-* `wire-type'                       [generic function]
-* `offset-type'                     [generic function]
-* `length-type'                     [generic function]
+    * `wire-type'                       [generic function]
+    * `offset-type'                     [generic function]
+    * `length-type'                     [generic function]
 
-* `validate-type'                   [generic function]
-
-There is a family of serialization mechanisms which can be manipulated
-using:
-
-* `no-such-mechanism-class'         [condition]
-* `find-mechanism-class'            [generic function]
-* `mechanism-classes'               [function]
-
-See
-
-  (documentation SYMBOL 'rs.m.s:mechanism)"))
+    * `validate-type'                   [generic function]"))

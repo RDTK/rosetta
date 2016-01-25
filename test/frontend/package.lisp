@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -64,16 +64,16 @@
 (service-provider:register-provider/function
  'guess-format/uri-scheme :mock
  :function (lambda (source &rest args)
-             (declare (ignore args))
+             (declare (ignore source args))
              :mock))
-
-(defmethod find-format-class ((spec (eql :mock)))
-  (find-class 'format-mock))
 
 (defclass format-mock ()
   ()
   (:documentation
    "Mock format for unit tests."))
+
+(service-provider:register-provider/class
+ 'format :mock :class 'format-mock)
 
 (defmethod parse ((format  format-mock)
                   (source  t)
@@ -128,9 +128,6 @@
 
 ;;; `mock-builder' mock class
 
-(defmethod find-builder-class ((spec (eql :mock)))
-  (find-class 'mock-builder))
-
 (defclass mock-builder ()
   ((calls :initarg  :calls
           :type     list
@@ -140,6 +137,9 @@
           "Stores the arguments to all `parse' calls."))
   (:documentation
    "Mock builder for unit tests. Delegates to list builder."))
+
+(service-provider:register-provider/class
+ 'rosetta.model.data::builder :mock :class 'mock-builder)
 
 (defmethod parse ((format  format-mock)
                   (source  t)
@@ -170,13 +170,13 @@
 
 ;;; `error-builder' mock class
 
-(defmethod find-builder-class ((spec (eql :error)))
-  (find-class 'error-builder))
-
 (defclass error-builder ()
   ()
   (:documentation
    "Mock builder for unit tests. Signals an error in `parse'."))
+
+(service-provider:register-provider/class
+ 'rosetta.model.data::builder :error :class 'error-builder)
 
 (defmethod parse ((format  format-mock)
                   (source  t)

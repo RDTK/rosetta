@@ -1,6 +1,6 @@
 ;;;; textual-stream-mixin.lisp --- Unit tests for the textual-stream-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,11 +8,11 @@
 
 ;;; Mock mechanism class
 
-(defmethod find-mechanism-class ((spec (eql :mock-for-textual-stream-mixin)))
-  (find-class 'mechanism-mock-for-textual-stream-mixin))
-
 (defclass mechanism-mock-for-textual-stream-mixin (textual-stream-mixin)
   ())
+
+(service-provider:register-provider/class
+ 'mechanism :mock-for-textual-stream-mixin :class 'mechanism-mock-for-textual-stream-mixin)
 
 (defmethod pack ((mechanism   mechanism-mock-for-textual-stream-mixin)
                  (source      t)

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for frontend module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -98,12 +98,6 @@
    #:guess-format/pathname
    #:guess-format/uri-scheme)
 
-  ;; Format class family
-  (:export
-   #:no-such-format-class
-   #:find-format-class
-   #:format-classes)
-
   ;; format mixin classes
   (:export
    #:source-attaching-mixin
@@ -150,19 +144,8 @@
 
   (:documentation
    "This package contains frontend-related protocols and
-infrastructure of the rosetta compiler.
+    infrastructure of the rosetta compiler.
 
-* `guess-format'                    [generic function]
-* `process'                         [generic function]
-* `parse'                           [generic function]
-
-There is a class family of format classes which can be manipulated
-using:
-
-* `no-such-format-class'            [condition]
-* `find-format-class'               [generic function]
-* `format-classes'                  [function]
-
-See
-
-  (documentation SYMBOL 'rs.f:format)"))
+    * `guess-format'                    [generic function]
+    * `process'                         [generic function]
+    * `parse'                           [generic function]"))

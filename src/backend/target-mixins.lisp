@@ -1,6 +1,6 @@
 ;;;; target-mixins.lisp --- Mixins for target classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -72,4 +72,4 @@ ted."))
                      (subseq name 10)
                      name))
                key)))
-    (apply #'make-instance (find-target-class spec) args)))
+    (apply #'service-provider:make-provider 'target spec args)))

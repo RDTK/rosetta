@@ -1,6 +1,6 @@
 ;;;; data-holder-mixin.lisp --- Unit tests for the data-holder-mixin class.x
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,11 +11,11 @@
 (defclass mock-class-for-data-holder-mixin ()
   ())
 
-(defmethod find-mechanism-class ((spec (eql :mock-for-data-holder-mixin)))
-  (find-class 'mechanism-mock-for-data-holder-mixin))
-
 (defclass mechanism-mock-for-data-holder-mixin (data-holder-mixin)
   ())
+
+(service-provider:register-provider/class
+ 'mechanism :mock-for-data-holder-mixin :class 'mechanism-mock-for-data-holder-mixin)
 
 (defmethod unpack ((mechanism   mechanism-mock-for-data-holder-mixin)
                    (source      string)

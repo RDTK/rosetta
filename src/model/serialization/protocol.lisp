@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol functions for serialization model elements.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -126,16 +126,9 @@ to detect and process recursive types.")
 
 ;;; Mechanisms
 
-(intern "MECHANISM") ; for (documentation MECHANISM 'rosetta.model.serialization:mechanism)
-
-(dynamic-classes:define-findable-class-family mechanism
-    "This family consists of serialization mechanism classes. Each
-serialization mechanism class represents a serialization mechanism
-with respect to its principal properties. Instances may in addition
-store specific parameters of a serialization mechanism \(like
-indentation of output for an XML-based mechanism).")
-
-(defmethod documentation ((thing symbol) (type (eql 'mechanism)))
-  "Obtain documentation of type MECHANISM from the mechanism class
-designated by THING."
-  (documentation (find-mechanism-class thing) t))
+(service-provider:define-service mechanism
+  (:documentation
+   "Each provider of this service represents a serialization mechanism
+    with respect to its principal properties. Instances may in
+    addition store specific parameters of a serialization mechanism
+    \(like indentation of output for an XML-based mechanism)."))

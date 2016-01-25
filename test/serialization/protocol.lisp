@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Unit tests for the serialization protocol functions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,13 +8,13 @@
 
 ;;; Mock mechanism
 
-(defmethod find-mechanism-class ((spec (eql :mock-for-protocol)))
-  (find-class 'mechanism-mock-for-protocol))
-
 (defclass mechanism-mock-for-protocol ()
   ((arg :initarg  :arg
         :reader   mechanism-arg
         :initform 0)))
+
+(service-provider:register-provider/class
+ 'mechanism :mock-for-protocol :class 'mechanism-mock-for-protocol)
 
 (defmethod packed-size ((mechanism mechanism-mock-for-protocol)
                         (source    t)
@@ -60,7 +60,7 @@
         (,mechanism                  0))
 
     (if (eq expected-output :error)
-        (ensure-condition 'no-such-mechanism-class
+        (ensure-condition 'service-provider:missing-provider-error
           (packed-size input :does-not-matter))
         (ensure-same (packed-size input :does-not-matter) expected-output
                      :test #'equalp))))
@@ -79,7 +79,7 @@
 
     ;; Test `pack'
     (if (eq expected-output :error)
-        (ensure-condition 'no-such-mechanism-class
+        (ensure-condition 'service-provider:missing-provider-error
           (pack mechanism source destination))
         (ensure-same (pack mechanism source destination)
                      (apply #'values expected-output)
@@ -87,7 +87,7 @@
 
     ;; Test `pack*'
     (if (eq expected-output :error)
-        (ensure-condition 'no-such-mechanism-class
+        (ensure-condition 'service-provider:missing-provider-error
           (pack* mechanism source))
         (ensure-same (pack* mechanism source) :created
                      :test #'eq))))
@@ -105,7 +105,7 @@
         (,mechanism                  :dest (:dest 0)))
 
     (if (eq expected-output :error)
-        (ensure-condition 'no-such-mechanism-class
+        (ensure-condition 'service-provider:missing-provider-error
           (unpack mechanism :does-not-matter destination))
         (ensure-same (unpack mechanism :does-not-matter destination)
                      (apply #'values expected-output)

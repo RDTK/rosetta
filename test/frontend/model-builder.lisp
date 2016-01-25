@@ -1,6 +1,6 @@
 ;;;; model-builder.lisp --- Unit tests for the model-builder class.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -87,8 +87,8 @@
     (let+ (((&flet do-it (spec)
               (let+ ((repository (make-instance 'rs.m.d::base-repository))
                      (builder
-                      (make-instance
-                       (find-builder-class :model)
+                      (service-provider:make-provider
+                       'rosetta.model.data::builder :model
                        :resolver   (make-instance 'search-path-resolver)
                        :locations  (make-instance 'location-repository)
                        :repository repository))
@@ -126,10 +126,11 @@
           "Smoke test for method on `ensure-package'.")
   ensure-package/smoke
 
-  (let+ ((builder (make-instance (find-builder-class :model)
-                                 :resolver   (make-instance 'search-path-resolver)
-                                 :locations  (make-instance 'location-repository)
-                                 :repository (make-instance 'rs.m.d::base-repository)))
+  (let+ ((builder (service-provider:make-provider
+                   'rosetta.model.data::builder :model
+                   :resolver   (make-instance 'search-path-resolver)
+                   :locations  (make-instance 'location-repository)
+                   :repository (make-instance 'rs.m.d::base-repository)))
          ((&flet do-it (args)
             (apply #'ensure-package builder args))))
     (ensure-cases (args expected)

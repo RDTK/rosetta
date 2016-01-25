@@ -1,6 +1,6 @@
 ;;;; languages.lisp --- Builtin programming languages.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,19 +8,16 @@
 
 ;;; Abstract language
 
-(defmethod find-language-class ((spec (eql :abstract)))
-  (find-class 'language-abstract))
-
 (defclass language-abstract ()
   ()
   (:documentation
    "This language is intended to be used as an abstract intermediate
 representation and for debugging purposes."))
 
-;;; Lisp language
+(service-provider:register-provider/class
+ 'language :abstract :class 'language-abstract)
 
-(defmethod find-language-class ((spec (eql :lisp)))
-  (find-class 'language-lisp))
+;;; Lisp language
 
 (defclass language-lisp (unconditional-name-legalizer-mixin)
   ()
@@ -32,10 +29,10 @@ compiled.
 
 See `language-lisp/compiled'."))
 
-;;; Compiled Lisp language
+(service-provider:register-provider/class
+ 'language :lisp :class 'language-lisp)
 
-(defmethod find-language-class ((spec (eql :lisp/compiled)))
-  (find-class 'language-lisp/compiled))
+;;; Compiled Lisp language
 
 (defclass language-lisp/compiled ()
   ()
@@ -44,6 +41,9 @@ See `language-lisp/compiled'."))
 compiled.
 
 See `language-lisp'."))
+
+(service-provider:register-provider/class
+ 'language :lisp/compiled :class 'language-lisp/compiled)
 
 ;;; `common-imperative-language' class
 
@@ -101,15 +101,15 @@ See `language-lisp'."))
 
 [1]  http://cs.smu.ca/~porter/csc/ref/cpp_keywords.html")
 
-(defmethod find-language-class ((spec (eql :c++)))
-  (find-class 'language-c++))
-
 (defclass language-c++ (common-imperative-language)
   ()
   (:default-initargs
    :reserved-words *c++-reserved-words*)
   (:documentation
    "C++ programming language."))
+
+(service-provider:register-provider/class
+ 'language :c++ :class 'language-c++)
 
 ;;; Python language
 
@@ -122,15 +122,15 @@ See `language-lisp'."))
 
 [1] http://docs.python.org/release/2.5.4/ref/keywords.html")
 
-(defmethod find-language-class ((spec (eql :python)))
-  (find-class 'language-python))
-
 (defclass language-python (common-imperative-language)
   ()
   (:default-initargs
    :reserved-words *python-reserved-words*)
   (:documentation
    "Python programming language."))
+
+(service-provider:register-provider/class
+ 'language :python :class 'language-python)
 
 ;;; Java language
 
@@ -147,12 +147,12 @@ See `language-lisp'."))
 
 [1] http://www.jwrider.com/riderist/java/javaidrs.htm")
 
-(defmethod find-language-class ((spec (eql :java)))
-  (find-class 'language-java))
-
 (defclass language-java (common-imperative-language)
   ()
   (:default-initargs
    :reserved-words *java-reserved-words*)
   (:documentation
    "Java programming language."))
+
+(service-provider:register-provider/class
+ 'language :java :class 'language-java)

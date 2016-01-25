@@ -1,6 +1,6 @@
 ;;;; textual-mixin.lisp --- Unit tests for the textual-mixin class.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,11 +8,11 @@
 
 ;;; Mock mechanism class
 
-(defmethod find-mechanism-class ((spec (eql :mock-for-textual-mixin)))
-  (find-class 'mechanism-mock-for-textual-mixin))
-
 (defclass mechanism-mock-for-textual-mixin (textual-mixin)
   ())
+
+(service-provider:register-provider/class
+ 'mechanism :mock-for-textual-mixin :class 'mechanism-mock-for-textual-mixin)
 
 (defmethod pack ((mechanism   mechanism-mock-for-textual-mixin)
                  (source      t)

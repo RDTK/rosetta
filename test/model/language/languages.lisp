@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Unit test for builtin languages of the model.language module.
 ;;;;
-;;;; Copyright (C) 2013 Jan Moringen
+;;;; Copyright (C) 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,7 +18,8 @@
                           method class-name))
          ,case-name
 
-         (let ((language (make-instance (find-language-class ,(make-keyword name)))))
+         (let ((language (service-provider:make-provider
+                          'language ,(make-keyword name))))
            ,(if (length= 1 cases)
                 `(ensure-same (,method language) ,@cases)
                 `(ensure-cases (input expected)

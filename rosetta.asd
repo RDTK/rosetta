@@ -77,7 +77,6 @@ See `version/list' for details on keyword parameters."
                 (:version :let-plus                      "0.2")
                 :more-conditions
                 (:version :utilities.print-items         "0.1")
-                :cl-dynamic-classes
                 (:version :architecture.service-provider "0.1")
 
                 :puri

@@ -1,6 +1,6 @@
 ;;;; builder-mixins.lisp --- Test for the builder mixins of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -180,8 +180,9 @@ bar"))
   ensure-package
 
   ;;; TODO(jmoringe, 2012-11-28): use simple builder
-  (let* ((builder (make-instance (find-builder-class :model)
-                                 :repository (make-instance 'rs.m.d::base-repository)))
+  (let* ((builder (service-provider:make-provider
+                   'rosetta.model.data::builder :model
+                   :repository (make-instance 'rs.m.d::base-repository)))
          (root    (let ((package (ensure-package
                                   builder :qname '(:absolute))))
                     (add-child builder package "at root")))

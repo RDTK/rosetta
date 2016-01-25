@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for model.data module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -184,13 +184,7 @@
    #:make-node
    #:add-child)
 
-  ;; Builder class family
-  (:export
-   #:no-such-builder-class
-   #:find-builder-class
-   #:builder-classes)
-
   (:documentation
    "This package contains protocols and classes which can be used to
-define data-type classes for use with the rosetta backend. In
-Addition, some classes for common data-types are included."))
+    define data-type classes for use with the rosetta backend. In
+    Addition, some classes for common data-types are included."))

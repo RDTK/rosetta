@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Serialization protocol of the rosetta system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -65,11 +65,9 @@ describes a part of SCHEMA and store it in DESTINATION."))
          `(progn
             (defmethod ,method ((mechanism list) ,@args/typed
                                 &rest rest-args &key)
-              (let+ (((mechanism-name &rest mechanism-args) mechanism)
-                     (mechanism-class    (find-mechanism-class mechanism-name))
-                     (mechanism-instance
-                      (apply #'make-instance mechanism-class mechanism-args)))
-                (apply #',method mechanism-instance ,@args rest-args)))
+              (let ((mechanism (apply #' service-provider:make-provider
+                                         'mechanism mechanism)))
+                (apply #',method mechanism ,@args rest-args)))
 
             (defmethod ,method ((mechanism symbol) ,@args/typed
                                 &rest rest-args &key)

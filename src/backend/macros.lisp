@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Macros for backends.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -133,12 +133,12 @@ OPTIONS have the same meaning as in `cl:defclass'."
   (let ((spec       (make-keyword name))
         (class-name (format-symbol *package* "TARGET-~A" name)))
     `(progn
-       (defmethod find-target-class ((spec (eql ,spec)))
-         (find-class ',class-name))
-
        (defclass ,class-name (,@superclasses)
          (,@slots)
-         ,@options))))
+         ,@options)
+
+       (service-provider:register-provider/class
+        'target ,spec :class ',class-name))))
 
 (defmacro define-target/method (name superclasses slots
                                 &body options)
@@ -186,14 +186,15 @@ have to be symbols."
     `(define-target ,name (,@mixins ,superclass)
          ()
        (:default-initargs
-        :mechanism (make-instance (rs.m.s:find-mechanism-class ,mechanism)))
+        :mechanism (service-provider:make-provider 'mechanism ,mechanism))
        (:documentation
         ,(format nil "~A~2%This target class generates code that ~
                       implements the ~(~A~) mechanism.~@[~2%~A~]"
                  (documentation superclass 'type)
                  mechanism
-                 (when-let ((mechanism (find-mechanism-class mechanism)))
-                   (documentation mechanism 'type)))))))
+                 (when-let ((mechanism (service-provider:find-provider
+                                        'mechanism mechanism)))
+                   (documentation mechanism t)))))))
 
 (defmacro define-mechanism-target/method ((mechanism method)
                                           (&rest mixins))
@@ -214,8 +215,9 @@ which have to be symbols."
                         mechanism.~@[~2%~A~]~@[~2%~A~]"
                    name superclass method mechanism
                    (documentation superclass 'type)
-                   (when-let ((mechanism (find-mechanism-class mechanism)))
-                     (documentation mechanism 'type)))))))
+                   (when-let ((mechanism (service-provider:find-provider
+                                          'mechanism mechanism)))
+                     (documentation mechanism t)))))))
 
 (defmacro define-mechanism-targets
     (mechanism

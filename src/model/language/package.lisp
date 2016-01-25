@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for model.language module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -22,11 +22,9 @@
    #:legal-name?
    #:legalize-name)
 
-  ;; Language class family
+  ;; Language service
   (:export
-   #:no-such-language-class
-   #:find-language-class
-   #:language-classes)
+   #:language)
 
   ;; Name legalizer mixins
   (:export
@@ -69,14 +67,4 @@
 
   (:documentation
    "This package contains functions and classes which model
-programming languages.
-
-There is a class family of languages which can be manipulated using:
-
-* `no-such-language-class'          [condition]
-* `find-language-class'             [generic function]
-* `language-classes'                [function]
-
-See
-
-  (documentation SYMBOL 'rs.m.l:language)"))
+    programming languages."))

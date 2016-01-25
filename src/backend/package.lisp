@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Package definition for the backend module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -90,11 +90,9 @@
   (:export
    #:make-target-like)
 
-  ;; Target class family
+  ;; Target service
   (:export
-   #:no-such-target-class
-   #:find-target-class
-   #:target-classes)
+   #:target)
 
   (:export
    #:code-generating-target-mixin)
@@ -148,25 +146,16 @@
 
   (:documentation
    "This package contains backend-related protocols and infrastructure
-of the rosetta compiler.
+    of the rosetta compiler.
 
-* `generate'                        [generic function]
+    * `generate'                        [generic function]
 
-There is a family of targets which can be manipulated using:
+    The names of some important targets are:
 
-* `no-such-target-class'            [condition]
-* `find-target-class'               [generic function]
-* `target-classes'                  [function]
+    * :class
+    * :reference
 
-The names of some important targets are:
-
-* :class
-* :reference
-
-* :packed-size :packed-size/method
-* :pack        :pack/method
-* :unpack      :unpack/method
-
-See
-
-  (documentation SYMBOL 'rs.b:target)"))
+    * :packed-size :packed-size/method
+    * :pack        :pack/method
+    * :unpack      :unpack/method
+    "))

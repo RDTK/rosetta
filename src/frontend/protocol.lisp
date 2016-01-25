@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol definitions of the rosetta compiler frontend.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -246,10 +246,8 @@ described by FORMAT."))
 
 (defmethod process ((format list) (source t) (builder t)
                     &rest args &key &allow-other-keys)
-  (let+ (((name &rest initargs) format)
-         (class    (find-format-class name))
-         (instance (apply #'make-instance class initargs)))
-    (apply #'process instance source builder args)))
+  (let ((format (apply #'service-provider:make-provider 'format format)))
+    (apply #'process format source builder args)))
 
 (defmethod process ((format symbol) (source t) (builder t)
                     &rest args &key &allow-other-keys)
@@ -261,10 +259,9 @@ described by FORMAT."))
 
 (defmethod process ((format t) (source t) (builder cons)
                     &rest args &key &allow-other-keys)
-  (let+ (((name &rest initargs) builder)
-         (class    (find-builder-class name))
-         (instance (apply #'make-instance class initargs)))
-    (apply #'process format source instance args)))
+  (let ((builder (apply #'service-provider:make-provider
+                        'rosetta.model.data::builder builder)))
+    (apply #'process format source builder args)))
 
 (defmethod process ((format t) (source t) (builder symbol)
                     &rest args &key &allow-other-keys)
@@ -298,21 +295,15 @@ the scheme of the source URI.
 If a provider is registered for the URI scheme, it is called with the
 URI object and should return name of the guessed format or nil."))
 
-(intern "FORMAT") ;; for (documentation :FORMAT 'rosetta.frontend:format)
-
-(dynamic-classes:define-findable-class-family format
-  "This family consists of input format classes. Each input format
-class is associated with input sources, encodings and syntax. Input
-formats may be file-based, stream-based, buffer-based, may use textual
-or binary encodings and may be expressed using different kind of
-grammars. Furthermore, input formats may describe semantically
-different aspects like data types and software system components."
-  (:package *package*))
-
-(defmethod documentation ((thing symbol) (type (eql 'format)))
-  "Obtain documentation of type FORMAT from the target class
-designated by THING."
-  (documentation (find-format-class thing) t))
+(service-provider:define-service format
+  (:documentation
+   "Each provider of this service is associated with input sources,
+    encodings and syntax. Input formats may be file-based,
+    stream-based, buffer-based, may use textual or binary encodings
+    and may be expressed using different kind of
+    grammars. Furthermore, input formats may describe semantically
+    different aspects like data types and software system
+    components."))
 
 ;;; Comment attaching protocol
 

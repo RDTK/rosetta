@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Unit tests for the protocol of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -124,9 +124,11 @@
        (format-guessing-error
         (ensure-condition 'format-guessing-error  (do-it)))
        (no-such-format-class
-        (ensure-condition 'no-such-format-class  (do-it)))
+        (ensure-condition 'service-provider:missing-provider-error
+          (do-it)))
        (no-such-builder-class
-        (ensure-condition 'no-such-builder-class (do-it)))
+        (ensure-condition 'service-provider:missing-provider-error
+          (do-it)))
        (t
         (ensure (typep (do-it) expected)))))))
 

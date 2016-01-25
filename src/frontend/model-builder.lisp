@@ -1,13 +1,10 @@
 ;;;; model-builder.lisp --- Builder for rosetta.model.data objects.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rosetta.frontend)
-
-(defmethod find-builder-class ((spec (eql :model)))
-  (find-class 'model-builder))
 
 (defclass model-builder (source-level-caching-mixin
                          dependency-delegating-mixin
@@ -19,6 +16,9 @@
   (:documentation
    "This builder produces nodes by creating instances of classes from
 the rosetta.model.data package."))
+
+(service-provider:register-provider/class
+ 'rosetta.model.data::builder :model :class 'model-builder)
 
 (defmacro define-make-node (kind (&rest args) &body body)
   (let+ (((kind &optional (class (unless body
