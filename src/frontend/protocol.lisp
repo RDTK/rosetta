@@ -210,8 +210,8 @@ described by FORMAT."))
 
 (defmethod process ((format t) (source sequence) (builder t)
                     &rest args &key &allow-other-keys)
-  "Process a collection of sources."
-  (when (stringp source)
+  ;; Process a collection of sources.
+  (when (typep source '(or string (cons t (not list))))
     (return-from process (call-next-method)))
 
   (iter (for source1 in-sequence source)
