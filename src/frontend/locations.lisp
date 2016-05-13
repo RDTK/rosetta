@@ -186,10 +186,12 @@
         (cond
           ((and start-column+1 end-column+1 start-line+1 end-line+1
                 (= start-line+1 end-line+1))
-           (format stream "columns ~D to ~D of ~@[line ~D of ~]~A"
+           (format stream "columns ~:_~D ~:_to ~:_~D ~:_of ~
+                           ~:_~@[line ~:_~D of ~:_~]~A"
                    start-column+1 end-column+1 start-line+1 source-label))
           (t
-           (format stream "~@[column ~D of ~]~@[line ~D of ~]~A"
+           (format stream "~@[column ~:_~D ~:_of ~:_~]~
+                           ~@[line ~:_~D ~:_of ~:_~]~A"
                    start-column+1 start-line+1 source-label)))
         ;; Grep-like format.
         (format stream "~A~@[:~D~]~@[:~D~]"
