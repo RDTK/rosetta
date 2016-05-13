@@ -1,6 +1,6 @@
 ;;;; locations.lisp --- Representation and utilities for source locations.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,24 +14,24 @@
                    :initform nil
                    :documentation
                    "Stores the source that was being parsed when the
-error occurred.")
+                    error occurred.")
    (source-content :initarg  :source-content
                    :type     (or null string)
                    :accessor source-content
                    :initform nil
                    :documentation
                    "Stores the source that was being parsed when the
-error occurred.")
+                    error occurred.")
    (bounds         :initarg  :bounds
                    :type     (or null bounds/cons)
                    :accessor bounds
                    :initform nil
                    :documentation
                    "Optionally stores bounds of interesting region
-within source string."))
+                    within source string."))
   (:documentation
    "Instances of this class represent a location within a source
-string."))
+    string."))
 
 (defmethod shared-initialize :after ((instance   location-info)
                                      (slot-names t)
@@ -98,7 +98,7 @@ string."))
 
 (defun format-content (stream info &optional colon? at?)
   "If INFO contains bounds information, return the source of INFO
-narrowed to that bounds. Otherwise return the full source of INFO."
+   narrowed to that bounds. Otherwise return the full source of INFO."
   (declare (ignore at?))
 
   (let+ (((&accessors-r/o (content source-content) bounds) info)
@@ -159,11 +159,11 @@ narrowed to that bounds. Otherwise return the full source of INFO."
 (defun format-location (stream info &optional colon? at?)
   "Format the `location-info' object INFO onto STREAM.
 
-If COLON? is non-nil, produce a human-readable description. Otherwise
-produce a parser-friendly representation.
+   If COLON? is non-nil, produce a human-readable
+   description. Otherwise produce a parser-friendly representation.
 
-If AT? is non-nil, and the source of INFO is a string, print the
-abbreviated string. Otherwise print <string>."
+   If AT? is non-nil, and the source of INFO is a string, print the
+   abbreviated string. Otherwise print <string>."
   (let+ (((&accessors-r/o source) info)
          (start-line+1   (when-let ((line (line info :of :start)))
                            (1+ line)))
@@ -206,7 +206,7 @@ abbreviated string. Otherwise print <string>."
           "Associates source locations to elements."))
   (:documentation
    "Instances of this class associate (typically) `location-info'
-instances to arbitrary objects."))
+    instances to arbitrary objects."))
 
 (defmethod location-of ((repository location-repository)
                         (thing      t))
@@ -219,9 +219,9 @@ instances to arbitrary objects."))
 
 ;;; Utility functions
 
+;;; Return the position of the rightmost newline character left of
+;;; POSITION in STRING or 0 if there is none.
 (defun %position-of-newline-before (string position)
-  "Return the position of the rightmost newline character left of
-POSITION in STRING or 0 if there is none."
   (if-let ((newline-position (position #\Newline string
                                        :end      position
                                        :from-end t)))

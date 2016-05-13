@@ -15,34 +15,34 @@
 (defgeneric source-content (thing)
   (:documentation
    "Return the content as string of the source associated to THING.
-Return nil if the content is not available."))
+    Return nil if the content is not available."))
 
 (defgeneric bounds (thing)
   (:documentation
    "Return the bounds of the region of the source string associated to
-THING as a cons cell
+    THING as a cons cell
 
-  (START . END)
+      (START . END)
 
-. Return nil if the information is not available."))
+    . Return nil if the information is not available."))
 
 (defgeneric line (thing &key of)
   (:documentation
    "Return the line within the source string associated to
-THING. Return nil if the information is not available. Line numbers
-start at 0.
+    THING. Return nil if the information is not available. Line
+    numbers start at 0.
 
-OF can be :START or :END and controls whether the line of the
-beginning or end of the region associated to THING is used."))
+    OF can be :START or :END and controls whether the line of the
+    beginning or end of the region associated to THING is used."))
 
 (defgeneric column (thing &key of)
   (:documentation
    "Return the column within the source string associated to
-THING. Return nil if the information is not available. Column numbers
-start at 0.
+    THING. Return nil if the information is not available. Column
+    numbers start at 0.
 
-OF can be :START or :END and controls whether the line of the
-beginning or end of the region associated to THING is used."))
+    OF can be :START or :END and controls whether the line of the
+    beginning or end of the region associated to THING is used."))
 
 (defgeneric location= (left right
                        &key
@@ -51,26 +51,26 @@ beginning or end of the region associated to THING is used."))
                        compare-bounds?)
   (:documentation
    "Compare locations LEFT and RIGHT for equality and return non-nil
-if they can be considered equal under the requested comparison.
+    if they can be considered equal under the requested comparison.
 
-COMPARE-SOURCE? controls whether sources should be compared.
+    COMPARE-SOURCE? controls whether sources should be compared.
 
-COMPARE-SOURCE-CONTENT? controls whether the contents of sources
-should be compared.
+    COMPARE-SOURCE-CONTENT? controls whether the contents of sources
+    should be compared.
 
-COMPARE-BOUNDS? controls whether bounds should be compared."))
+    COMPARE-BOUNDS? controls whether bounds should be compared."))
 
 ;;; Location repository protocol
 
 (defgeneric location-of (repository thing)
   (:documentation
    "Return a `location-info' instance for THING in REPOSITORY or nil
-if there is no such information."))
+    if there is no such information."))
 
 (defgeneric (setf location-of) (new-value repository thing)
   (:documentation
    "Set the location information for THING within REPOSITORY to
-NEW-VALUE."))
+    NEW-VALUE."))
 
 ;;; Processing protocol
 ;;;
@@ -100,39 +100,39 @@ NEW-VALUE."))
                           &allow-other-keys)
   (:documentation
    "Try to guess the format of content in SOURCE. Return the name of
-the format.
+    the format.
 
-IF-NOT-GUESSABLE controls the behavior in case the format of SOURCE
-cannot be guessed. The following values are allowed:
+    IF-NOT-GUESSABLE controls the behavior in case the format of
+    SOURCE cannot be guessed. The following values are allowed:
 
-  a function
+      a function
 
-    Make a `format-guessing-error' error and call IF-NOT-GUESSABLE
-    with it as the sole argument.
+        Make a `format-guessing-error' error and call IF-NOT-GUESSABLE
+        with it as the sole argument.
 
-  nil
+      nil
 
-    Return nil.
+        Return nil.
 
-READ-FILE? controls whether the contents of files may be read if that
-seems necessary to determine the format."))
+    READ-FILE? controls whether the contents of files may be read if
+    that seems necessary to determine the format."))
 
 (defgeneric process (format source builder
                      &key &allow-other-keys)
   (:argument-precedence-order builder source format)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
-described by FORMAT. Return an object that representing the parsed
-content which is constructed using BUILDER.
+    described by FORMAT. Return an object that representing the parsed
+    content which is constructed using BUILDER.
 
-FORMAT and BUILDER can be designators or FORMAT and BUILDER
-classes."))
+    FORMAT and BUILDER can be designators or FORMAT and BUILDER
+    classes."))
 
 (defgeneric parse (format source builder
                    &key &allow-other-keys)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
-described by FORMAT."))
+    described by FORMAT."))
 
 ;; error handling
 
@@ -275,9 +275,9 @@ described by FORMAT."))
   (:documentation
    "Providers of this service guess the format of a string.
 
-Each provider of the service is called with the source string and
-potentially other arguments and should return the name of the guessed
-format or nil."))
+    Each provider of the service is called with the source string and
+    potentially other arguments and should return the name of the
+    guessed format or nil."))
 
 (service-provider:define-service guess-format/pathname
   (:documentation
@@ -290,10 +290,11 @@ format or nil."))
 (service-provider:define-service guess-format/uri-scheme
   (:documentation
    "Providers of this service guess the format of a source based on
-the scheme of the source URI.
+    the scheme of the source URI.
 
-If a provider is registered for the URI scheme, it is called with the
-URI object and should return name of the guessed format or nil."))
+    If a provider is registered for the URI scheme, it is called with
+    the URI object and should return name of the guessed format or
+    nil."))
 
 (service-provider:define-service format
   (:documentation
@@ -310,22 +311,23 @@ URI object and should return name of the guessed format or nil."))
 (defgeneric most-recent-comment (builder for)
   (:documentation
    "Return the most recent comment (usually a string) encountered by
-BUILDER for object FOR or nil if there is no such comment."))
+    BUILDER for object FOR or nil if there is no such comment."))
 
 (defgeneric (setf most-recent-comment) (new-value builder for)
   (:documentation
    "Set NEW-VALUE (usually a string) as the most recent comment
-encountered by BUILDER for object FOR."))
+    encountered by BUILDER for object FOR."))
 
 (defgeneric comment (builder for)
   (:documentation
    "Return the complete comment object (usually a string, concatenated
-from individual comment strings) BUILDER created for object FOR."))
+    from individual comment strings) BUILDER created for object
+    FOR."))
 
 (defgeneric (setf comment) (new-value builder for)
   (:documentation
    "Install NEW-VALUE as the complete comment object BUILDER should
-associate to object FOR."))
+    associate to object FOR."))
 
 (defgeneric comment? (builder thing)
   (:documentation
@@ -334,7 +336,7 @@ associate to object FOR."))
 (defgeneric prettify (builder comment)
   (:documentation
    "Try to clean up COMMENT, e.g. by removing unnecessary whitespace,
-and return the result."))
+    and return the result."))
 
 ;;; Dependency resolution protocol
 
@@ -343,23 +345,23 @@ and return the result."))
                      if-does-not-exist)
   (:documentation
    "Use RESOLVER to resolve the dependency described by FORMAT,
-and LOCATION.
+    and LOCATION.
 
-FORMAT can be nil to indicate that the format is not known and should
-be derived from LOCATION, if possible.
+    FORMAT can be nil to indicate that the format is not known and
+    should be derived from LOCATION, if possible.
 
-IF-DOES-NOT-EXIST controls the behavior in case RESOLVER cannot
-resolve the combination of FORMAT and LOCATION. The following values
-are allowed:
+    IF-DOES-NOT-EXIST controls the behavior in case RESOLVER cannot
+    resolve the combination of FORMAT and LOCATION. The following
+    values are allowed:
 
-  a function
+      a function
 
-    Make a `cannot-resolve-dependency' error and call
-    IF-DOES-NOT-EXIST with it as the sole argument.
+        Make a `cannot-resolve-dependency' error and call
+        IF-DOES-NOT-EXIST with it as the sole argument.
 
-  nil
+      nil
 
-    Return nil."))
+        Return nil."))
 
 (defmethod resolve ((resolver t) (format t) (location t)
                     &key
@@ -437,38 +439,38 @@ are allowed:
 (defgeneric search-path (resolver)
   (:documentation
    "Return the list of paths consulted by RESOLVER to resolve pathname
-dependencies."))
+    dependencies."))
 
 (defgeneric (setf search-path) (new-value resolver)
   (:documentation
    "Set the list of paths consulted by RESOLVER to resolve pathname
-dependencies to NEW-VALUE."))
+    dependencies to NEW-VALUE."))
 
 (defgeneric if-ambiguous (resolver)
   (:documentation
    "Return the policy RESOLVER applies when encountering ambiguous
-dependencies."))
+    dependencies."))
 
 (defgeneric (setf if-ambiguous) (new-value resolver)
   (:documentation
    "Set the policy RESOLVER applies when encountering ambiguous
-dependencies to NEW-VALUE."))
+    dependencies to NEW-VALUE."))
 
 (defgeneric merge-locations (builder location base)
   (:documentation
    "Like `cl:merge-pathnames' or `puri:merge-uris', return the result
-of merging LOCATION and BASE in a way suitable for BUILDER."))
+    of merging LOCATION and BASE in a way suitable for BUILDER."))
 
 (defgeneric probe-location (builder location)
   (:documentation
    "Return non-nil if BUILDER can determine that LOCATION refers to an
-existing entity (e.g. LOCATION is a pathname referring to an existing
-file or a URI referring to an existing resource)."))
+    existing entity (e.g. LOCATION is a pathname referring to an
+    existing file or a URI referring to an existing resource)."))
 
 ;; Default behavior
 
 (defmethod probe-location ((builder t) (location t))
-  "Default behavior consists in failing to probe LOCATION."
+  ;; Default behavior consists in failing to probe LOCATION.
   nil)
 
 ;;; Ensure package protocol
@@ -479,7 +481,7 @@ file or a URI referring to an existing resource)."))
                             &allow-other-keys)
   (:documentation
    "Use builder to create the package designated by QNAME and its
-parents, if necessary. Return the created package."))
+    parents, if necessary. Return the created package."))
 
 (defmethod ensure-package ((builder t)
                            &rest args

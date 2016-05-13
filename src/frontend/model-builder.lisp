@@ -15,7 +15,7 @@
   ()
   (:documentation
    "This builder produces nodes by creating instances of classes from
-the rosetta.model.data package."))
+    the rosetta.model.data package."))
 
 (service-provider:register-provider/class
  'rosetta.model.data::builder :model :class 'model-builder)

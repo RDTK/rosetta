@@ -1,6 +1,6 @@
 ;;;; resolvers.lisp --- Dependency resolvers for use with builders.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,18 +13,19 @@
                  :initform nil
                  :documentation
                  "Stores a list of locations (such as pathnames) which
-are consulted when trying to resolve a pathname dependency.")
+                  are consulted when trying to resolve a pathname
+                  dependency.")
    (if-ambiguous :initarg  :if-ambiguous
                  :type     (or (eql :first) symbol function)
                  :accessor if-ambiguous
                  :initform #'error
                  :documentation
                  "Stores a policy which is applied when the resolver
-encounters an ambiguous dependency."))
+                  encounters an ambiguous dependency."))
   (:documentation
    "Instances of this resolver class try to resolve pathname
-dependencies by using a list of pathnames in which dependencies should
-be searched for."))
+    dependencies by using a list of pathnames in which dependencies
+    should be searched for."))
 
 (defmethod merge-locations ((resolver search-path-resolver)
                             (location pathname)

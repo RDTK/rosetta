@@ -1,6 +1,6 @@
 ;;;; format-mixins.lisp --- Mixin classes for format classes.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -21,8 +21,8 @@
                                   (source  ,source-class)
                                   (builder t)
                                   &key)
-          "Augment conditions signaled from next methods with location
-           information based on SOURCE."
+          ;; Augment conditions signaled from next methods with
+          ;; location information based on SOURCE.
           (handler-bind ((location-condition
                            (lambda (condition)
                              (let+ (((&accessors-r/o location) condition)

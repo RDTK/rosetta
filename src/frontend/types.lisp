@@ -1,6 +1,6 @@
 ;;;; types.lisp --- Types used in the frontend module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,8 +9,9 @@
 ;;; Location-related types
 
 (deftype bounds/cons ()
-  "Upper and lower bound of a region within a string. Upper bound can
-  be nil if not known or applicable."
+  "Upper and lower bound of a region within a string.
+
+   Upper bound can be nil if not known or applicable."
   '(and (cons non-negative-integer
               (or non-negative-integer null))
         (satisfies %valid-bounds)))

@@ -1,6 +1,6 @@
 ;;;; builder-mixins.lisp --- Mixin classes for builder classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,10 +24,10 @@
               :initform nil
               :documentation
               "Stores a location repository, for example an instance
-of the `location-repository' class."))
+               of the `location-repository' class."))
   (:documentation
    "This mixin adds to builder classes the ability to associate source
-location information to elements."))
+    location information to elements."))
 
 (macrolet
     ((define-method (name)
@@ -94,18 +94,19 @@ location information to elements."))
                          :initform (make-hash-table :test #'eq)
                          :documentation
                          "Associates most recently parsed comment
-elements to their respective parent elements for later association to
-the appropriate child elements.")
+                          elements to their respective parent elements
+                          for later association to the appropriate
+                          child elements.")
    (assoc                :initarg  :assoc
                          :type     hash-table
                          :accessor %assoc
                          :initform (make-hash-table :test #'eq)
                          :documentation
                          "Associates comment elements to the elements
-to which the comments refer."))
+                          to which the comments refer."))
   (:documentation
    "This mixin adds to builder classes the ability to associate
-comment elements to the elements to which they refer."))
+    comment elements to the elements to which they refer."))
 
 (defmethod most-recent-comment ((builder comment-attaching-mixin)
                                 (for     t))
@@ -213,7 +214,7 @@ comment elements to the elements to which they refer."))
   ()
   (:documentation
    "This class is intended to be mixed into builder classes which rely
-on a root package being present in the type repository."))
+    on a root package being present in the type repository."))
 
 (defmethod shared-initialize :after ((instance   root-package-creating-mixin)
                                      (slot-names t)
@@ -228,13 +229,14 @@ on a root package being present in the type repository."))
                :reader   repository
                :documentation
                "Stores forward references encountered during the
-building process."))
+                building process."))
   (:default-initargs
    :repository (missing-required-initarg
                 'lazy-resolver-mixin :repository))
   (:documentation
    "This mixin adds to builder classes the ability to treat initially
-unresolved references as forward references and resolve them later."))
+    unresolved references as forward references and resolve them
+    later."))
 
 (macrolet
     ((define-resolver-methods (find? make? kind)
@@ -330,10 +332,11 @@ unresolved references as forward references and resolve them later."))
              :initform nil
              :documentation
              "Stores an object implementing the resolver protocol
-which is consulted when dependencies have to be resolved."))
+              which is consulted when dependencies have to be
+              resolved."))
   (:documentation
    "This class is intended to be mixed into builder classes which have
-to resolve dependencies."))
+    to resolve dependencies."))
 
 (defmethod make-node ((builder dependency-delegating-mixin)
                       (kind    (eql :dependency/file))
@@ -355,11 +358,11 @@ to resolve dependencies."))
           :initform (make-hash-table :test #'equal)
           :reader   %cache
           :documentation
-          "Stores a mapping from previously processed sources two the
-respectively produced results."))
+          "Stores a mapping from previously processed sources to the
+           respectively produced results."))
   (:documentation
    "This class is intended to be mixed into builder classes which
-cache parsing results."))
+    cache parsing results."))
 
 (defmethod process :around ((format  t)
                             (source  t)
@@ -389,16 +392,17 @@ cache parsing results."))
                :reader   normalizer
                :documentation
                "Stores a function which is called to normalize
-names. The function has to accept the unnormalized names as its sole
-argument and return the normalized name."))
+                names. The function has to accept the unnormalized
+                names as its sole argument and return the normalized
+                name."))
   (:default-initargs
    :normalizer (missing-required-initarg 'name-normalizing-mixin :normalizer))
   (:documentation
    "This mixin class adds to builder classes on-the-fly normalization
-of names in created/searched nodes.
+    of names in created/searched nodes.
 
-The actual normalization is performed by a function supplied when
-constructing the builder instance."))
+    The actual normalization is performed by a function supplied when
+    constructing the builder instance."))
 
 (macrolet
     ((define-name-normalizing-method (name)
