@@ -118,19 +118,20 @@
 
         ;; Format guessing.
         ((:guess            #P"file.mock"        list)               t)
-        ((:guess            (#P"1.mock" #P"2.mock") list)            (cons t (cons t null))))
+        ((:guess            (#P"1.mock" #P"2.mock") list)            (cons t (cons t null)))
+        (((:guess :fail t)  #P"file.mock"        list)               format-guessing-error))
     (let+ (((&flet do-it () (apply #'process args))))
-     (case expected
-       (format-guessing-error
-        (ensure-condition 'format-guessing-error  (do-it)))
-       (no-such-format-class
-        (ensure-condition 'service-provider:missing-provider-error
-          (do-it)))
-       (no-such-builder-class
-        (ensure-condition 'service-provider:missing-provider-error
-          (do-it)))
-       (t
-        (ensure (typep (do-it) expected)))))))
+      (case expected
+        (format-guessing-error
+         (ensure-condition 'format-guessing-error (do-it)))
+        (no-such-format-class
+         (ensure-condition 'service-provider:missing-provider-error
+           (do-it)))
+        (no-such-builder-class
+         (ensure-condition 'service-provider:missing-provider-error
+           (do-it)))
+        (t
+         (ensure (typep (do-it) expected)))))))
 
 (addtest (rosetta.frontend.protocol-root
           :documentation

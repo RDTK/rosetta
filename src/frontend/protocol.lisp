@@ -246,7 +246,9 @@
 
 (defmethod process ((format list) (source t) (builder t)
                     &rest args &key &allow-other-keys)
-  (let ((format (apply #'service-provider:make-provider 'format format)))
+  (let ((format (if (eq (first format) :guess)
+                    (apply #'guess-format source (rest format))
+                    (apply #'service-provider:make-provider 'format format))))
     (apply #'process format source builder args)))
 
 (defmethod process ((format symbol) (source t) (builder t)
@@ -255,7 +257,7 @@
 
 (defmethod process ((format (eql :guess)) (source t) (builder t)
                     &rest args &key &allow-other-keys)
-  (apply #'process (guess-format source) source builder args))
+  (apply #'process (list format) source builder args))
 
 (defmethod process ((format t) (source t) (builder cons)
                     &rest args &key &allow-other-keys)

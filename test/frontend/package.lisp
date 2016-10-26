@@ -49,9 +49,9 @@
 
 (service-provider:register-provider/function
  'guess-format/pathname :mock
- :function (lambda (source &rest args)
+ :function (lambda (source &rest args &key fail &allow-other-keys)
              (declare (ignore args))
-             (when (string= (pathname-type source) "mock")
+             (when (and (not fail) (string= (pathname-type source) "mock"))
                :mock)))
 
 (service-provider:register-provider/function
