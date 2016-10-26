@@ -1,6 +1,6 @@
 ;;;; format-mixins.lisp --- Test for format mixin classes of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,10 +14,10 @@
 (defmacro define-format-mixin-suite (class &body options)
   (let+ ((suite-name (format-symbol *package* "~A-ROOT"        class))
          (mock-name  (format-symbol *package* "~A-MOCK-FORMAT" class))
-         ((&plist-r/o (initargs :initargs)) (reduce #'append options)))
+         ((&plist-r/o (initargs :initargs) (superclasses :superclasses '(format-mock)))
+          (reduce #'append options)))
    `(progn
-      (defclass ,mock-name (format-mock
-                            ,class)
+      (defclass ,mock-name (,@superclasses ,class)
         ())
 
       (deftestsuite ,suite-name (format-mixins-root)
@@ -59,6 +59,31 @@ EXPECTED can be an object which is then used in BODY."
                  (parse format source builder))))
          (declare (ignorable ,result-var))
          ,@body))))
+
+;;; `common-sources-mixin' mixin class
+
+(define-format-mixin-suite common-sources-mixin
+  (:superclasses ())
+  (:initargs     (:element-type 'character)))
+
+(defmethod parse ((format  common-sources-mixin-mock-format)
+                  (source  stream)
+                  (builder t)
+                  &key location location-name location-type)
+  (list location location-name location-type))
+
+(addtest (common-sources-mixin-root
+          :documentation
+          "Smoke test for the `parse' method specialized on
+           `common-sources-mixin'.")
+  parse/smoke
+
+  (let ((this-file #.(or *compile-file-pathname* *load-pathname*)))
+    (ensure-format-cases (common-sources-mixin-mock-format
+                          :element-type 'character)
+        (`(,this-file
+           ,(list this-file (pathname-name this-file) (pathname-type this-file))))
+      (ensure-same (parse format source builder) expected :test #'equal))))
 
 ;;; `binary-format-mixin' mixin class
 

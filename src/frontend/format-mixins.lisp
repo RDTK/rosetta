@@ -52,17 +52,30 @@
 (defmethod parse ((format  common-sources-mixin)
                   (source  pathname)
                   (builder t)
-                  &rest args &key &allow-other-keys)
+                  &rest args
+                  &key
+                  (location      source)
+                  (location-name (pathname-name location))
+                  (location-type (pathname-type location))
+                  &allow-other-keys)
   ;; Open a character or binary input stream for the file designated
   ;; by SOURCE and call a method specialized on streams.
   (with-input-from-file (stream source
                          :element-type (format-element-type format))
-    (apply #'parse format stream builder args)))
+    (apply #'parse format stream builder
+           :location      location
+           :location-name location-name
+           :location-type location-type
+           (remove-from-plist args :location :location-name :location-type))))
 
 (defmethod parse ((format  common-sources-mixin)
                   (source  puri:uri)
                   (builder t)
-                  &rest args &key &allow-other-keys)
+                  &rest args &key
+                  (location      source)
+                  (location-name nil    location-name-supplied?)
+                  (location-type nil    location-type-supplied?)
+                  &allow-other-keys)
   (if (member (puri:uri-scheme source) '(:http :https))
       (let+ (((&values stream code &ign &ign &ign close?)
               (drakma:http-request source :want-stream t)))
@@ -79,7 +92,20 @@
                        source (stream-element-type stream)
                        format (format-element-type format)))
                (t
-                (apply #'parse format stream builder args)))
+                (let+ ((path nil)
+                       ((&flet path ()
+                          (or path
+                              (setf path (pathname (puri:uri-path location)))))))
+                 (apply #'parse format stream builder
+                        :location      location
+                        :location-name (if location-name-supplied?
+                                           location-name
+                                           (pathname-name (path)))
+                        :location-type (if location-type-supplied?
+                                           location-type
+                                           (pathname-type (path)))
+                        (remove-from-plist
+                         args :location :location-name :location-type)))))
           (when close? (close stream))))
       (call-next-method)))
 
