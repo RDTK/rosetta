@@ -306,20 +306,24 @@
   (when-let ((unresolved (rs.m.d::forward-references (repository builder))))
     (iter (for ((kind . qname) . object) in unresolved)
           (restart-case
-              (error 'processing-error
-                     :location (if (and (compute-applicable-methods #'locations (list builder))
-                                        (locations builder))
-                                   (location-of (locations builder) object)
-                                   (make-instance 'location-info))
-                     :builder  builder
-                     :cause    (make-instance
-                                'simple-error
-                                :format-control "~@<Unresolved forward ~
-                                                 reference to the ~A ~
-                                                 named ~
-                                                 ~/rosetta.model:print-name-expression/.~@:>"
-                                :format-arguments (list kind qname)))
-            (continue ()
+              ;; The `progn' prevents the continue restart from being
+              ;; associated with the signaled condition.
+              (progn
+                (error 'processing-error
+                       :location (if (and (compute-applicable-methods
+                                           #'locations (list builder))
+                                          (locations builder))
+                                     (location-of (locations builder) object)
+                                     (make-instance 'location-info))
+                       :builder  builder
+                       :cause    (make-instance
+                                  'simple-error
+                                  :format-control "~@<Unresolved ~
+                                                   forward reference ~
+                                                   to the ~A named ~
+                                                   ~/rosetta.model:print-name-expression/.~@:>"
+                                  :format-arguments (list kind qname))))
+            (continue (&optional condition)
               :report (lambda (stream)
                         (format stream "~@<Ignore the unresolved ~
                                         reference and continue.~@:>")))))))
