@@ -1,4 +1,4 @@
-;;;; macros.lisp --- Package definition for the backend module.
+;;;; package.lisp --- Package definition for the backend module.
 ;;;;
 ;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
