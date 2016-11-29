@@ -1,6 +1,6 @@
 ;;;; rosetta.asd --- System definition for the rosetta system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -194,9 +194,9 @@ See `version/list' for details on keyword parameters."
                               (:file       "emitter-lisp")
                               (:file       "emitter-lisp-serializer"))))
 
-  :in-order-to  ((test-op (test-op :rosetta-test))))
+  :in-order-to  ((test-op (test-op :rosetta/test))))
 
-(defsystem :rosetta-test
+(defsystem :rosetta/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -282,5 +282,5 @@ See `version/list' for details on keyword parameters."
                               (:file       "emitter-lisp")
                               (:file       "emitter-lisp-serializer")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rosetta-test))))
+(defmethod perform ((op test-op) (system (eql (find-system :rosetta/test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
