@@ -326,7 +326,8 @@
             (continue (&optional condition)
               :report (lambda (stream)
                         (format stream "~@<Ignore the unresolved ~
-                                        reference and continue.~@:>")))))))
+                                        reference and continue.~@:>"))
+              (declare (ignore condition)))))))
 
 ;;; `dependency-delegating-mixin' mixin class
 
