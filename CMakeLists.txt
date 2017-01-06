@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2012, 2013 Jan Moringen
+# Copyright (C) 2012-2017 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 #
@@ -154,6 +154,7 @@ enable_testing()
 
 configure_lisp_redirect(test
                         "--eval \"(proclaim (quote (optimize (debug 3) (safety 3) (speed 0))))\"
+                         --eval \"(load-system :${SYSTEM_NAME}/test)\"
                          --eval \"(asdf:test-system :${SYSTEM_NAME})\"")
 add_test(NAME    "${SYSTEM_NAME}"
          COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test.cmake")
