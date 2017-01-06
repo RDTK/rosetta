@@ -282,5 +282,6 @@ See `version/list' for details on keyword parameters."
                               (:file       "emitter-lisp")
                               (:file       "emitter-lisp-serializer")))))
 
-(defmethod perform ((op test-op) (system (eql (find-system :rosetta/test))))
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rosetta/test))))
   (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
