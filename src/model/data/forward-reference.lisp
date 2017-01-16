@@ -1,6 +1,6 @@
 ;;;; forward-reference.lisp --- Representation of not-yet-defined things.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -31,7 +31,7 @@ the reference and eventually replace (via `change-class') the forward
 reference object with the desired object."))
 
 (defmethod name ((thing forward-reference))
-  (format nil "F<~A~[ ~A~]>" (kind thing) (getf (args thing) :name)))
+  (format nil "F<~A~@[ ~A~]>" (kind thing) (getf (args thing) :name)))
 
 (defmethod qname ((thing forward-reference))
   (list :absolute (name thing)))
