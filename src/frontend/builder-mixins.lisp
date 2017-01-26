@@ -1,6 +1,6 @@
 ;;;; builder-mixins.lisp --- Mixin classes for builder classes.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -386,7 +386,9 @@
                (stream   nil)
                (t        (cons format source)))))
     (if key
-        (values (ensure-gethash key (%cache builder) (call-next-method)))
+        (values-list (ensure-gethash
+                      key (%cache builder)
+                      (multiple-value-list (call-next-method))))
         (call-next-method))))
 
 ;;; `name-normalizing-mixin' mixin class

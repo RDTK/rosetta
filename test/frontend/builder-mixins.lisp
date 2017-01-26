@@ -1,6 +1,6 @@
 ;;;; builder-mixins.lisp --- Test for the builder mixins of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -65,7 +65,10 @@ object which is then used in BODY."
               (formats  (mapcar #'first formats-and-sources))
               (sources  (mapcar #'second formats-and-sources))
               ((&flet do-it ()
-                 (lastcar (mapcar (rcurry #'process builder) formats sources)))))
+                 (lastcar (mapcar (lambda (format source)
+                                    (multiple-value-list
+                                     (process format source builder)))
+                                  formats sources)))))
          (case expected
            (parse-error1     (ensure-condition 'parse-error1 (do-it)))
            (processing-error (ensure-condition 'processing-error (do-it)))
@@ -108,7 +111,8 @@ object which is then used in BODY."
                       (import
                        (&whole structure &ign (comment1 comment2 field) &rest &ign)
                        resolved)
-                      &rest &ign) result)
+                      &rest &ign)
+              (first result))
              ((&flet remove-duplicates/plist (list)
                 (alist-plist (remove-duplicates (plist-alist list)
                                                 :key #'car :from-end t))))
@@ -145,7 +149,8 @@ comment2")))
     (let+ (((expected/structure expected/field) expected)
            ((&whole package &ign
              (import (&whole structure &ign (field) &rest &ign) &ign)
-             &rest &ign) result))
+             &rest &ign)
+            (first result)))
       (ensure-same (comment builder structure) expected/structure)
       (ensure-same (comment builder field)     expected/field))))
 
@@ -247,6 +252,13 @@ bar"))
 
 (define-builder-mixin-suite source-level-caching-mixin ())
 
+(defmethod parse ((format  format-mock)
+                  (source  t)
+                  (builder source-level-caching-mixin-mock-builder)
+                  &rest args &key)
+  (declare (ignore args))
+  (values (call-next-method) 5))
+
 (addtest (source-level-caching-mixin-root
           :documentation
           "Test management of duplicate parsing requests.")
@@ -276,10 +288,13 @@ bar"))
          ;; Some sources not equal => should produce multiple `parse'
          ;; calls.
          `(nil ((:mock ,source1) (:mock ,source2)
-                (:mock ,source3))                  (,source1 ,source3)))
-
-     (ensure-same (mapcar #'second (calls builder)) expected
-                  :test #'equal))))
+                (:mock ,source3))
+                                                   (,source1 ,source3)))
+      ;; Check second return value.
+      (ensure-same (second result) 5)
+      ;; Check builder calls.
+      (ensure-same (mapcar #'second (calls builder)) expected
+                   :test #'equal))))
 
 ;;; `name-normalizing-mixin' mixin class
 
@@ -304,5 +319,5 @@ bar"))
          ((:relative "foo" "test")
           (:relative "foo" "test")
           (:relative "foo" "test" "field"))))
-    (let ((root `(:package (,result) :name "")))
+    (let ((root `(:package (,(first result)) :name "")))
       (iter (for spec in expected) (ensure (lookup root t spec))))))
