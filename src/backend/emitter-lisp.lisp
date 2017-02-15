@@ -1,6 +1,6 @@
 ;;;; emitter-lisp.lisp --- Generate Lisp classes data type definitions.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -90,19 +90,25 @@
        (invoke-with-package
         (find-package '#:cl-user) #'call-next-method)))))
 
-(defmethod emit :after ((node     documentation-mixin)
-                        (target   target-class)
-                        (language language-lisp))
-  (when-let ((name          (context-get *context* :name :default nil))
-             (documentation (documentation1 node)))
-    (setf (documentation name 'type) documentation)))
+(defmethod emit :around ((node     documentation-mixin)
+                         (target   target-class)
+                         (language language-lisp))
+  (if-let ((name          (context-get *context* :name :default nil))
+           (documentation (documentation1 node)))
+    `(multiple-value-prog1
+         ,(call-next-method)
+       (setf (documentation ',name 'type) ,documentation))
+    (call-next-method)))
 
-(defmethod emit :after ((node     documentation-mixin)
-                        (target   method-target-mixin)
-                        (language language-lisp))
-  (when-let ((name          (context-get *context* :name :default nil))
-             (documentation (documentation1 node)))
-    (setf (documentation name 'function) documentation)))
+(defmethod emit :around ((node     documentation-mixin)
+                         (target   method-target-mixin)
+                         (language language-lisp))
+  (if-let ((name          (context-get *context* :name :default nil))
+           (documentation (documentation1 node)))
+    `(multiple-value-prog1
+         ,(call-next-method)
+       (setf (documentation ',name 'function) ,documentation))
+    (call-next-method)))
 
 (defmethod emit :after ((node     t)
                         (target   code-generating-target-mixin)
