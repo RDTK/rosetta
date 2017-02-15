@@ -70,6 +70,8 @@
    #:lookup
    #:query
 
+   #:define-sequence-composite-mixin
+
    #:define-mapping-composite-mixin)
 
   ;; Builder protocol

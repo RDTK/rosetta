@@ -36,6 +36,62 @@
                         "~@<Cyclic parent relation ~{~A~^ -> ~}.~@:>"
                         (list* thing (ancestors new-value)))))
 
+;;; `sequence-composite-mixin' mixin class
+
+(defclass sequence-composite-mixin ()
+  ()
+  (:documentation
+   "Intended to be mixed into sequence composite classes.
+
+    That is, children are organized as sequence."))
+
+(defmacro define-sequence-composite-mixin
+    (name
+     &key
+     (class-name       (format-symbol *package* "~A-MIXIN" name))
+     (kind             (make-keyword name))
+     (kind-specializer (typecase kind
+                         (keyword `(eql ,kind))
+                         (t       kind)))
+     (slot-name        (format-symbol *package* "~A" name))
+     (accessor-name    (format-symbol *package* "%~A" slot-name))
+     (set-parent?      t))
+  "Define a class named NAME which implements to composite
+   protocol (i.e `contents')."
+  `(progn
+     (defclass ,class-name (sequence-composite-mixin)
+       ((,slot-name :type     vector
+                    :accessor ,accessor-name
+                    :initform (make-array 0 :adjustable t :fill-pointer 0)
+                    :documentation
+                    ,(format nil "Stores the contents of kind ~A of ~
+                                  the container."
+                             kind)))
+       (:documentation
+        ,(format nil "This class is intended to be mixed into classes ~
+                      which implement the composite protocol for ~
+                      kind ~A."
+                 kind)))
+
+     (defmethod contents ((container ,class-name)
+                          (kind      ,kind-specializer))
+       (coerce (,accessor-name container) 'list))
+
+     (defmethod contents ((container ,class-name)
+                          (kind      (eql t)))
+       ,(typecase kind
+          (keyword
+           `(nconc (when (next-method-p)
+                     (call-next-method))
+                   (contents container ,kind)))
+          (t
+           `(call-next-method))))
+
+     (defmethod print-items:print-items append ((object ,class-name))
+       `((,',kind
+          ,(length (,accessor-name object))
+          ,',(format nil " (~C ~~D)" (aref (string name) 0)))))))
+
 ;;; `mapping-composite-mixin' mixin class
 
 (defclass mapping-composite-mixin ()
