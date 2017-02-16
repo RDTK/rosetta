@@ -21,8 +21,10 @@
  'rosetta.model.data::builder :model :class 'model-builder)
 
 (defmacro define-make-node (kind (&rest args) &body body)
-  (let+ (((kind &optional (class (unless body
-                                   (find-symbol (string kind) :rosetta.model.data))))
+  (let+ (((kind &key
+                (class    (unless body
+                            (find-symbol (string kind) *package*)))
+                (kind-var (gensym "KIND")))
           (ensure-list kind))
          (args (mapcar #'ensure-list args))
          ((&flet make-supplied-var (name)
@@ -44,8 +46,8 @@
          ((&flet+ make-initarg ((name &optional &ign &ign))
             `(when ,(make-supplied-var name)
                (list ,(make-keyword name) ,name)))))
-   `(defmethod make-node ((builder model-builder)
-                          (kind    (eql ,kind))
+   `(defmethod make-node ((builder   model-builder)
+                          (,kind-var (eql ,kind))
                           ,@(when class '(&rest args))
                           &key
                           ,@(mapcar #'make-parameter args)
@@ -114,19 +116,23 @@
                          type
                          (documentation string        nil)))
 
-(define-make-node (:field base-field) ((name          string)
-                                       type
-                                       (documentation string nil)))
+(define-make-node (:field :class base-field)
+    ((name          string)
+     type
+     (documentation string nil)))
 
-(define-make-node (:structure base-structure) ((name          string)
-                                               (qname         name/absolute &ign)
-                                               (documentation string        nil)))
+(define-make-node (:structure :class base-structure)
+    ((name          string)
+     (qname         name/absolute &ign)
+     (documentation string        nil)))
 
-(define-make-node (:array base-array) (element-type index-type))
+(define-make-node (:array :class base-array)
+    (element-type index-type))
 
-(define-make-node (:package package1) ((name          string)
-                                       (qname         name/absolute &ign)
-                                       (documentation string        nil)))
+(define-make-node (:package :class package1)
+    ((name          string)
+     (qname         name/absolute &ign)
+     (documentation string        nil)))
 
 (defmethod add-child ((builder model-builder) ; TODO(jmoringe, 2012-04-24):
                       (parent  rs.m.d::base-repository)
