@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the frontend module.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -139,7 +139,7 @@
    "Mock builder for unit tests. Delegates to list builder."))
 
 (service-provider:register-provider/class
- 'rosetta.model.data::builder :mock :class 'mock-builder)
+ 'rosetta.model::builder :mock :class 'mock-builder)
 
 (defmethod parse ((format  format-mock)
                   (source  t)
@@ -176,7 +176,7 @@
    "Mock builder for unit tests. Signals an error in `parse'."))
 
 (service-provider:register-provider/class
- 'rosetta.model.data::builder :error :class 'error-builder)
+ 'rosetta.model::builder :error :class 'error-builder)
 
 (defmethod parse ((format  format-mock)
                   (source  t)

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for model.data module.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -18,6 +18,11 @@
 
    #:rosetta
    #:rosetta.model)
+
+  (:import-from #:rosetta.model
+   #:find-node
+   #:make-node
+   #:add-child)
 
   ;; Conditions
   (:export

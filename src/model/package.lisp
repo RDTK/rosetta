@@ -35,6 +35,12 @@
    #:qname
    #:qname/kind)
 
+  ;; Builder protocol
+  (:export
+   #:find-node
+   #:make-node
+   #:add-child)
+
   ;; Utility functions
   (:export
    #:print-qname

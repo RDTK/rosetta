@@ -186,7 +186,7 @@ bar"))
 
   ;;; TODO(jmoringe, 2012-11-28): use simple builder
   (let* ((builder (service-provider:make-provider
-                   'rosetta.model.data::builder :model
+                   'rosetta.model::builder :model
                    :repository (make-instance 'rs.m.d::base-repository)))
          (root    (let ((package (ensure-package
                                   builder :qname '(:absolute))))

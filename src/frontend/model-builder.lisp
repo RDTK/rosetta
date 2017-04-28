@@ -18,7 +18,7 @@
     the rosetta.model.data package."))
 
 (service-provider:register-provider/class
- 'rosetta.model.data::builder :model :class 'model-builder)
+ 'rosetta.model::builder :model :class 'model-builder)
 
 (defmacro define-make-node (kind (&rest args) &body body)
   (let+ (((kind &key

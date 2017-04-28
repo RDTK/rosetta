@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol definitions of the rosetta compiler frontend.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -262,7 +262,7 @@
 (defmethod process ((format t) (source t) (builder cons)
                     &rest args &key &allow-other-keys)
   (let ((builder (apply #'service-provider:make-provider
-                        'rosetta.model.data::builder builder)))
+                        'rosetta.model::builder builder)))
     (apply #'process format source builder args)))
 
 (defmethod process ((format t) (source t) (builder symbol)
