@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the model module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -41,5 +41,4 @@
    #:print-name-expression)
 
   (:documentation
-   "This package contains general model-related functions and
-classes."))
+   "General model-related functions and classes."))
