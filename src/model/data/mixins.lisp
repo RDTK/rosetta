@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixins class for the model.data module.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -70,36 +70,6 @@ items."
   `((:type ,(print-items (type1 object))
            ": ~/print-items:format-print-items/"
            ((:after :name)))))
-
-;;; `parented-mixin' mixin class
-
-(defclass parented-mixin ()
-  ((parent :initarg  :parent
-           :accessor parent
-           :initform nil
-           :documentation
-           "Stores the parent of the type."))
-  (:documentation
-   "This class is intended to be mixed into classes that have an
-associated parent object."))
-
-(defmethod qname ((thing parented-mixin))
-  (if-let ((parent (parent thing)))
-    (append (qname parent) (list (name thing)))
-    (list :absolute (name thing))))
-
-(defmethod qname/kind ((thing parented-mixin))
-  (let ((cell (cons (name thing) (kind thing))))
-    (if-let ((parent (parent thing)))
-      (append (qname/kind parent) (list cell))
-      (list :absolute cell))))
-
-(defmethod (setf parent) :before ((new-value t)
-                                  (thing     parented-mixin))
-  (when (member thing (ancestors new-value))
-    (simple-child-error new-value thing
-                        "~@<Cyclic parent relation ~{~A~^ -> ~}.~@:>"
-                        (list* thing (ancestors new-value)))))
 
 ;;; `composite-mixin' mixin class
 

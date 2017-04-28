@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions used in the model.data module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -45,83 +45,21 @@ optionally CAUSE."
 
 ;;; Relation errors
 
-(define-condition child-error (data-type-error)
-  ((key :initarg  :key
-        :reader   data-type-error-key
-        :documentation
-        ""))
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<Child ~S caused an error within type ~S.~@:>"
-             (data-type-error-key  condition)
-             (data-type-error-type condition))))
-  (:documentation
-   "This class serves as a superclass for errors related to composite
-types and their children."))
-
-(define-condition chainable-child-error (child-error
-                                         chainable-condition)
-  ()
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<Child ~S caused an error within type ~
-                     ~S~/more-conditions::maybe-print-cause/~@:>"
-             (data-type-error-key  condition)
-             (data-type-error-type condition)
-             condition)))
-  (:documentation
-   "This error is signaled when a child-related error is caused by
-some other condition. It can also serve as a superclass for more
-specific child-related errors."))
-
-(defun chainable-child-error (type child &optional cause)
-  "Signal a `chainable-child-error' for TYPE and CHILD which has been
-caused by CAUSE."
-  (apply #'error 'chainable-child-error
-         :type type
-         :key  child
-         (when cause
-           (list :cause cause))))
-
-(define-condition simple-child-error (child-error
-                                      simple-condition)
-  ()
-  (:report
-   (lambda (condition stream)
-     (format stream "~@<Error for child ~S in type ~A: ~?~@:>"
-             (data-type-error-key               condition)
-             (data-type-error-type              condition)
-             (simple-condition-format-control   condition)
-             (simple-condition-format-arguments condition))))
-  (:documentation
-   "This condition can be used to signal child-related error which
-include a simple description of the error."))
-
-(defun simple-child-error (type child format-control
-                           &rest format-arguments)
-  "Signal a `simple-child-error' for TYPE and CHILD with a report
-generated from FORMAT-CONTROL and FORMAT-ARGUMENTS."
-  (error 'simple-child-error
-         :type             type
-         :key              child
-         :format-control   format-control
-         :format-arguments format-arguments))
-
 (define-condition no-such-child (child-error)
   ()
   (:report
    (lambda (condition stream)
      (format stream "~@<The requested child type ~S could not be found ~
                      within the type ~S.~@:>"
-             (data-type-error-key  condition)
-             (data-type-error-type condition))))
+             (child-condition-key           condition)
+             (container-condition-container condition))))
   (:documentation
    "This error is signaled when a requested child type cannot be found
 within the specified container type."))
 
 (defun no-such-child (type key)
   "Signal a `no-such-child' error for TYPE and KEY."
-  (error 'no-such-child :type type :key key))
+  (error 'no-such-child :container type :key key))
 
 (define-condition duplicate-child-key (child-error)
   ((existing :initarg  :existing
@@ -133,9 +71,9 @@ within the specified container type."))
    (lambda (condition stream)
      (format stream "~@<The child key ~S is already in use~@[ by child ~
                      ~A~] within type ~S.~@:>"
-             (data-type-error-key      condition)
-             (data-type-error-existing condition)
-             (data-type-error-type     condition))))
+             (child-condition-key           condition)
+             (data-type-error-existing      condition)
+             (container-condition-container condition))))
   (:documentation
    "This error is signaled when a attempt is made to add child to a
 composite structure using a key that which is already in use."))
@@ -144,7 +82,7 @@ composite structure using a key that which is already in use."))
   "Signal a `duplicate-child-key' error for TYPE, KEY and optionally
 EXISTING."
   (apply #'error 'duplicate-child-key
-         :type type
-         :key  key
+         :container type
+         :key       key
          (when existing
            (list :existing existing))))

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the model module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -13,6 +13,9 @@
 
    #:rosetta.test)
 
+  (:shadowing-import-from #:rosetta.model
+   #:root)
+
   (:export
    #:model-root)
 
@@ -21,7 +24,7 @@
 
 (cl:in-package #:rosetta.model.test)
 
-(deftestsuite model-root (root)
+(deftestsuite model-root (rosetta.test:root)
   ()
   (:documentation
    "Root unit test suite for the model module."))

@@ -1,6 +1,6 @@
 ;;;; rosetta.asd --- System definition for the rosetta system.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -95,7 +95,9 @@ See `version/list' for details on keyword parameters."
                  :serial     t
                  :components ((:file       "package")
                               (:file       "types")
-                              (:file       "protocol")))
+                              (:file       "conditions")
+                              (:file       "protocol")
+                              (:file       "mixins")))
 
                 (:module     "model-data-early"
                  :pathname   "src/model/data"

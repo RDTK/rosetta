@@ -30,6 +30,55 @@ form
 where NAME-COMPONENT is a string and KIND is the `kind' of the object
 corresponding to NAME-COMPONENT."))
 
+;;; Parent protocol
+
+(defgeneric parent (thing)
+  (:documentation
+   "Assuming the data type THING is contained in a composite data type,
+    return that data type. Otherwise return nil.
+
+    Note: this method does not reflect super/subtype relations like
+    integer/uint32, but composition relations like structure/field or
+    tuple/item.
+
+    See: `ancestors', `root'."))
+
+(defgeneric ancestors (thing
+                       &key
+                       include-self?)
+  (:documentation
+   "Return the list of transitive `parent's of THING.
+
+    INCLUDE-SELF? controls whether THING is included at the beginning
+    of the returned list.
+
+    See: `parent', `root'."))
+
+(defgeneric root (thing)
+  (:documentation
+   "Return the ancestor of THING which does not have a parent (the
+    \"root\").
+
+    See: `parent', `ancestors'."))
+
+;; Default behavior
+
+(defmethod parent ((thing t))
+  ;; Default behavior is to not return a parent.
+  nil)
+
+(defmethod ancestors ((thing t)
+                      &key
+                      (include-self? t))
+  (let ((from-parents (when-let ((parent (parent thing)))
+                        (ancestors parent))))
+    (if include-self? (cons thing from-parents) from-parents)))
+
+(defmethod root ((thing t))
+  (if-let ((parent (parent thing)))
+    (root parent)
+    thing))
+
 ;;; Builder protocol
 ;;;
 ;;; As a general convention throughout the protocol, the value nil can

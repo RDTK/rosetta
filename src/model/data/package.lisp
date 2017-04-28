@@ -20,6 +20,23 @@
    #:rosetta.model)
 
   (:import-from #:rosetta.model
+   #:container-condition
+   #:container-condition-container
+
+   #:child-condition
+   #:child-condition-key
+
+   #:child-error
+
+   #:chainable-child-error
+
+   #:simple-child-error
+
+   #:parent
+   #:ancestors
+   #:root
+   #:parented-mixin
+
    #:find-node
    #:make-node
    #:add-child)

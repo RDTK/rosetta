@@ -12,7 +12,8 @@
    #:cl
    #:alexandria
    #:iterate
-   #:let-plus)
+   #:let-plus
+   #:more-conditions)
 
   ;; Types
   (:export
@@ -27,6 +28,20 @@
    #:name
    #:name-expression)
 
+  ;; Conditions
+  (:export
+   #:container-condition
+   #:container-condition-container
+
+   #:child-condition
+   #:child-condition-key
+
+   #:child-error
+
+   #:chainable-child-error ; condition and function
+
+   #:simple-child-error)   ; condition and function
+
   ;; Name protocol
   (:export
    #:kind
@@ -34,6 +49,12 @@
    #:name
    #:qname
    #:qname/kind)
+
+  ;; Parent protocol
+  (:export
+   #:parent
+   #:ancestors
+   #:root)
 
   ;; Builder protocol
   (:export
