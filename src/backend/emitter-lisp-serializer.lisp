@@ -1,10 +1,18 @@
 ;;;; emitter-serializer-base-lisp.lisp --- Emitter for lisp serialization code.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rosetta.backend)
+
+(declaim (inline string-to-octets octets-to-string))
+(defun string-to-octets (string)
+  #+sbcl (sb-ext:string-to-octets string)
+  #-sbcl (babel:string-to-octets string))
+(defun octets-to-string (octets)
+  #+sbcl (sb-ext:octets-to-string octets)
+  #-sbcl (babel:octets-to-string octets))
 
 ;;; Serialization code for fundamental types
 
@@ -14,10 +22,10 @@
   (let+ (((&env-r/o source-var offset-var destination-var
                     (endian (endian-for (mechanism target) node))))
          (packer (%packer-name node endian)))
-    `(progn
-       ,@(when source-var
-           `((setf (,packer ,destination-var ,offset-var) ,source-var)))
-       ,(generate node :packed-size language))))
+        `(progn
+           ,@(when source-var
+               `((setf (,packer ,destination-var ,offset-var) ,source-var)))
+           ,(generate node :packed-size language))))
 
 (defmethod emit ((node     fixed-width-mixin)
                  (target   target-unpack)
@@ -36,7 +44,7 @@
   (let+ (((&env-r/o source-var))
          ((&with-gensyms temp-var)))
     (if source-var
-        `(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
+        `(let ((,temp-var (string-to-octets ,source-var)))
            ,(let+ (((&env (:source-var temp-var))))
               (generate +octet-vector+ target language)))
         0)))
@@ -47,7 +55,7 @@
   (let+ (((&env-r/o source-var))
          ((&with-gensyms temp-var)))
     (if source-var
-        `(let ((,temp-var (sb-ext:string-to-octets ,source-var)))
+        `(let ((,temp-var (string-to-octets ,source-var)))
            ,(let+ (((&env (:source-var temp-var))))
               (generate +octet-vector+ target language)))
         0)))
@@ -61,7 +69,7 @@
        (prog1
            ,(let+ (((&env (:destination-var vector-var))))
               (generate +octet-vector+ target language))
-         (setf ,destination-var (sb-ext:octets-to-string ,vector-var))))))
+         (setf ,destination-var (octets-to-string ,vector-var))))))
 
 (defmethod emit ((node     type-octet-vector)
                  (target   target-pack)

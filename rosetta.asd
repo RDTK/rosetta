@@ -83,7 +83,9 @@ See `version/list' for details on keyword parameters."
                 (:version :drakma                        "1.3.2")
                 :flexi-streams
 
-                :nibbles)
+                :nibbles
+
+                (:feature (:not :sbcl) :babel))
   :components  ((:module     "src"
                  :serial     t
                  :components ((:file       "package")
