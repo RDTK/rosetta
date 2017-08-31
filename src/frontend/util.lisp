@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used in the frontend package.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -50,7 +50,8 @@
 
       (when (and read-file? (pathname-name source)) ; avoid directories
         (when-let ((content (read-file-into-string source)))
-          (apply #'guess-format content args)))))
+          (apply #'guess-format content
+                 (remove-from-plist args :read-file?))))))
 
 (defmethod guess-format ((source puri:uri) &rest args &key)
   ;; 1. Guess based on (puri:uri-scheme SOURCE)

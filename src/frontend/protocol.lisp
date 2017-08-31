@@ -137,7 +137,7 @@
 ;; error handling
 
 (defmethod guess-format :around ((source t)
-                                 &key
+                                 &rest args &key
                                  (if-not-guessable #'error))
   (tagbody
    :start
@@ -165,7 +165,8 @@
                      value))))))
        (return-from guess-format
          (or (handler-bind ((error #'handle-fail))
-               (call-next-method))
+               (apply #'call-next-method source
+                      (remove-from-plist args :if-not-guessable)))
              (handle-fail))))))
 
 (define-condition-translating-method
