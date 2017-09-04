@@ -36,6 +36,14 @@
                         "~@<Cyclic parent relation ~{~A~^ -> ~}.~@:>"
                         (list* thing (ancestors new-value)))))
 
+(defmethod architecture.builder-protocol:relate ((builder  t)
+                                                 (relation (eql :parent))
+                                                 (left     parented-mixin)
+                                                 (right    t)
+                                                 &key)
+  (setf (parent left) right)
+  left)
+
 ;;; `sequence-composite-mixin' mixin class
 
 (defclass sequence-composite-mixin ()
@@ -90,7 +98,38 @@
      (defmethod print-items:print-items append ((object ,class-name))
        `((,',kind
           ,(length (,accessor-name object))
-          ,',(format nil " (~C ~~D)" (aref (string name) 0)))))))
+          ,',(format nil " (~C ~~D)" (aref (string name) 0)))))
+
+     (defmethod architecture.builder-protocol:relate ((builder  t)
+                                                      (relation (eql ,kind))
+                                                      (left     ,class-name)
+                                                      (right    t)
+                                                      &rest args &key)
+       (when args
+         (error "~A ~A ~A ~A does not accept args ~S" builder relation left right args))
+       (vector-push-extend right (,accessor-name left))
+       left)
+
+     ,@(when set-parent?
+         `((defmethod architecture.builder-protocol:relate :around ((builder  t)
+                                                                    (relation (eql ,kind))
+                                                                    (left     ,class-name)
+                                                                    (right    parented-mixin)
+                                                                    &key)
+             (architecture.builder-protocol:relate builder :parent right left)
+             (call-next-method))))
+
+     (defmethod architecture.builder-protocol:node-relations ((builder  t)
+                                                              (node     ,class-name))
+       (list* `(,,kind . *)
+              (when (next-method-p) (call-next-method))))
+
+     (defmethod architecture.builder-protocol:node-relation ((builder  t)
+                                                             (relation (eql ,kind))
+                                                             (node     ,class-name))
+       (coerce (,accessor-name node) 'list)) ; TODO
+
+     ',class-name))
 
 ;;; `mapping-composite-mixin' mixin class
 
@@ -219,5 +258,41 @@
        `((,',(make-keyword name)
           ,(hash-table-count (,accessor-name object))
           ,',(format nil " (~C ~~D)" (aref (string name) 0)))))
+
+     (defmethod architecture.builder-protocol:relate ((builder  t)
+                                                      (relation (eql ,(make-keyword name)))
+                                                      (left     ,class-name)
+                                                      (right    t)
+                                                      &rest args &key key)
+       ,@(when key-type
+           `((check-type key ,key-type)))
+       (assert (length= 2 args))
+
+       (setf (gethash ,(funcall make-key-form 'relation 'key)
+                      (,accessor-name left))
+             right)
+       left)
+
+     ,@(when set-parent?
+         `((defmethod architecture.builder-protocol:relate :around ((builder  t)
+                                                                    (relation (eql ,(make-keyword name)))
+                                                                    (left     ,class-name)
+                                                                    (right    parented-mixin)
+                                                                    &key)
+             (architecture.builder-protocol:relate builder :parent right left)
+             (call-next-method))))
+
+     (defmethod architecture.builder-protocol:node-relations ((builder  t)
+                                                              (node     ,class-name))
+       (list* `(,,(make-keyword name) . (:map . :key))
+              (when (next-method-p) (call-next-method))))
+
+     (defmethod architecture.builder-protocol:node-relation ((builder  t)
+                                                             (relation (eql ,(make-keyword name)))
+                                                             (node     ,class-name))
+       (loop :for key :being :the :hash-keys :of (,accessor-name node) :using (:hash-value value)
+             :collect `(:key ,key) :into args
+             :collect value :into values
+             :finally (return (values values args))))
 
      ',class-name))

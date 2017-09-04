@@ -1,6 +1,6 @@
 ;;;; model-builder.lisp --- Builder for rosetta.model.data objects.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -153,3 +153,28 @@
 
 (define-make-node :rule (lhs rhs)
   (cons lhs rhs))
+
+;;; Adapter
+
+(defmethod architecture.builder-protocol:node-kind ((builder model-builder)
+                                                    (node    t))
+  (kind node))
+
+(defmethod architecture.builder-protocol:make-node ((builder model-builder)
+                                                    (kind    t)
+                                                    &rest args &key)
+  (if (next-method-p)
+      (call-next-method)
+      (apply #'make-node builder kind args)))
+
+(defmethod architecture.builder-protocol:relate ((builder  model-builder)
+                                                 (relation t)
+                                                 (left     t)
+                                                 (right    t)
+                                                 &rest args &key)
+  (if (next-method-p)
+      (call-next-method)
+      (progn
+        (assert (null args))
+        (add-child builder left right)
+        left)))

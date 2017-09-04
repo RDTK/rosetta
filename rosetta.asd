@@ -78,6 +78,7 @@ See `version/list' for details on keyword parameters."
                 :more-conditions
                 (:version :utilities.print-items         "0.1")
                 (:version :architecture.service-provider "0.1")
+                (:version :architecture.builder-protocol "0.3")
 
                 :puri
                 (:version :drakma                        "1.3.2")
