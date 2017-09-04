@@ -81,3 +81,42 @@
          :key              child
          :format-control   format-control
          :format-arguments format-arguments))
+
+(define-condition no-such-child (child-error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The requested child ~S could not be found ~
+                     within ~S.~@:>"
+             (child-condition-key           condition)
+             (container-condition-container condition))))
+  (:documentation
+   "Signaled when a requested child type cannot be found within the
+    specified container type."))
+
+(defun no-such-child (container key)
+  "Signal a `no-such-child' error for CONTAINER and KEY."
+  (error 'no-such-child :container container :key key))
+
+(define-condition duplicate-child-key (child-error)
+  ((existing :initarg  :existing
+             :reader   duplicate-child-key-existing
+             :initform nil
+             :documentation
+             "Stores the existing child."))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The child key ~S is already in use~@[ by child ~
+                     ~A~] within type ~S.~@:>"
+             (child-condition-key           condition)
+             (duplicate-child-key-existing  condition)
+             (container-condition-container condition))))
+  (:documentation
+   "Signaled when a attempt is made to add child to a composite
+    structure using a key that which is already in use."))
+
+(defun duplicate-child-key (container key &optional existing)
+  "Signal a `duplicate-child-key-error' for CONTAINER, KEY and
+   optionally EXISTING."
+  (apply #'error 'duplicate-child-key :container container :key key
+         (when existing (list :existing existing))))

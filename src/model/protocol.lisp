@@ -79,6 +79,237 @@ corresponding to NAME-COMPONENT."))
     (root parent)
     thing))
 
+;;; Composite protocol
+
+(defgeneric composite? (thing)
+  (:documentation
+   "Return non-nil when THING is composed of other things."))
+
+(defgeneric contents (container kind)
+  (:documentation
+   "Return a sequence of the elements in CONTAINER which are of kind
+    KIND.
+
+    If KIND is t, the returned sequence consists of all elements
+    contained in CONTAINER."))
+
+(defgeneric contents/plist (container)
+  (:documentation
+   "Return a plist of kinds and elements for the elements of
+    CONTAINER."))
+
+(defgeneric lookup (container kind key
+                    &key
+                    if-does-not-exist
+                    if-exists)
+  (:documentation
+   "Retrieve the element of kind KIND identified by KEY,
+    i.e. associated to the (KIND KEY) pair, within CONTAINER.
+
+    IF-DOES-NOT-EXIST controls whether an error should be signaled
+    if (KIND KEY) does not designate a element within CONTAINER. The
+    following values are allowed:
+
+      a function
+
+        Make a `no-such-child' error and call IF-DOES-NOT-EXIST with
+        it as the sole argument.
+
+      nil
+
+        nil is returned.
+
+    IF-EXISTS is accepted for parity with the `setf' method and
+    ignored."))
+
+(defgeneric (setf lookup) (new-value container kind key
+                           &key
+                           if-does-not-exist
+                           if-exists)
+  (:documentation
+   "Associate NEW-VALUE with the (KIND KEY) pair in CONTAINER.
+
+    IF-DOES-NOT-EXIST is accepted for parity with the `lookup' method
+    and ignored.
+
+    IF-EXISTS controls the behavior in case something is already
+    associated with (KIND KEY) in CONTAINER. The following values are
+    allowed:
+
+      :KEEP
+
+        Do not modify CONTAINER and return the existing value.
+
+      :SUPERSEDE
+
+        Replace the existing value with NEW-VALUE.
+
+      a function
+
+        Make a `duplicate-child-key' error and call IF-EXISTS with it as
+        the sole argument."))
+
+(defmethod composite? ((thing t))
+  nil)
+
+(defmethod contents ((container t) (kind t))
+  ;; Default behavior is to not return any contents.
+  '())
+
+(defmethod lookup ((container t)
+                   (kind      t)
+                   (key       t)
+                   &key &allow-other-keys)
+  ;; Default behavior is to not return a result.
+  nil)
+
+(defmethod lookup ((container t)
+                   (kind      t)
+                   (key       list)
+                   &key &allow-other-keys)
+  (cond
+    ;;
+    ((and (typep key 'name/absolute) (root container))
+     (lookup (root container) kind (cons :relative (rest key))
+             :if-does-not-exist nil))
+
+    ;; If KEY is not a relative name, we cannot do anything with it =>
+    ;; call next method (which is probably the default behavior of
+    ;; just returning nil).
+    ((not (typep key 'name/relative))
+     (call-next-method))
+
+    ;; A relative name without components refers to the context object
+    ;; itself => return CONTAINER.
+    ((length= 1 key)
+     container)
+
+    ;; A relative name with a single component => we can perform a
+    ;; direct lookup in CONTAINER.
+    ((length= 2 key)
+     (lookup container kind (second key)
+             :if-does-not-exist nil))
+
+    ;; A relative name with more than one component => lookup first
+    ;; name component and recur on the result and remaining
+    ;; components.
+    (t
+     (when-let ((parent (lookup container t (second key)
+                                :if-does-not-exist nil)))
+       (lookup parent kind (cons :relative (nthcdr 2 key))
+               :if-does-not-exist nil)))))
+
+(defmethod lookup :around ((container t)
+                           (kind      t)
+                           (key       t)
+                           &key
+                           (if-does-not-exist #'error)
+                           &allow-other-keys)
+  (let+ (((&flet handle-does-not-exist (&optional condition)
+            (declare (ignore condition))
+            (etypecase if-does-not-exist
+              (null
+               (return-from lookup nil))
+              (function
+               (restart-case
+                   (funcall if-does-not-exist
+                            (make-condition 'no-such-child
+                                            :container container
+                                            :key       (list kind key)))
+                 (use-value (value)
+                   :report (lambda (stream)
+                             (format stream "~@<Use a given value that ~
+                                             should be used in place ~
+                                             of the missing ~
+                                             value.~@:>"))
+                   :interactive (lambda ()
+                                  (format *query-io* "Value (evaluated): ")
+                                  (finish-output *query-io*)
+                                  (list (eval (read *query-io*))))
+                   value)
+                 (store-value (value)
+                   :report (lambda (stream)
+                             (format stream "~@<Store a value to be ~
+                                             used in place of the ~
+                                             missing value.~@:>"))
+                   :interactive (lambda ()
+                                  (format *query-io* "Replacement value (evaluated): ")
+                                  (finish-output *query-io*)
+                                  (list (eval (read *query-io*))))
+                   (setf (lookup container kind key) value))))))))
+    (or (handler-bind
+            (((or simple-error no-such-child) #'handle-does-not-exist))
+          (call-next-method))
+        (handle-does-not-exist))))
+
+(defmethod (setf lookup) :around ((new-value  t)
+                                  (container  t)
+                                  (kind       t)
+                                  (key        t)
+                                  &rest args
+                                  &key
+                                  (if-exists #'error)
+                                  &allow-other-keys)
+  (when-let ((existing (apply #'lookup container kind key
+                              :if-does-not-exist nil
+                              (remove-from-plist
+                               args :if-exists :if-does-not-exist))))
+    (etypecase if-exists
+      ((eql :keep)
+       (return-from lookup existing))
+      ((eql :supersede))
+      (function
+       (restart-case
+           (funcall if-exists
+                    (make-condition 'duplicate-child-key
+                                    :container container
+                                    :key       (list kind key)))
+         (continue (&optional condition)
+           :report (lambda (stream)
+                     (format stream "~@<Replace the existing value ~S ~
+                                     with ~S.~@:>"
+                             existing new-value))
+           (declare (ignore condition)))
+         (keep ()
+           :report (lambda (stream)
+                     (format stream "~@<Keep the existing value ~
+                                     ~S.~@:>"
+                             existing))
+           (return-from lookup existing))))))
+
+  (call-next-method))
+
+(defgeneric query (container kind key)
+  (:documentation
+   "Retrieve the element of kind KIND identified by KEY,
+    i.e. associated to the (KIND KEY) pair, within CONTAINER.
+
+    KIND can be a symbol or a list of the form
+
+      (OR ALTERNATIVE1 ALTERNATIVE2 ...)
+
+    KEY can be usually be a `cl:string', a `name/relative' or a
+    `name/absolute'. In addition, KEY can be a list of the form
+
+      (OR ALTERNATIVE1 ALTERNATIVE2 ...)"))
+
+(defmethod query ((container t)
+                  (kind      t)
+                  (key       t))
+  (lookup container kind key :if-does-not-exist nil))
+
+(defmethod query ((container t)
+                  (kind      t)
+                  (key       list))
+  (if (eq (first key) 'or)
+      (some (curry #'query container kind) (rest key))
+      (call-next-method)))
+
+(defmethod query ((container t)
+                  (kind      list)
+                  (key       t))
+  (some (lambda (kind) (query container kind key)) kind))
+
 ;;; Builder protocol
 ;;;
 ;;; As a general convention throughout the protocol, the value nil can

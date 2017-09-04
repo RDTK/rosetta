@@ -40,7 +40,11 @@
 
    #:chainable-child-error ; condition and function
 
-   #:simple-child-error)   ; condition and function
+   #:simple-child-error    ; condition and function
+
+   #:no-such-child         ; condition and function
+
+   #:duplicate-child-key)  ; condition and function
 
   ;; Name protocol
   (:export
@@ -55,6 +59,18 @@
    #:parent
    #:ancestors
    #:root)
+
+  ;; Composite protocol
+  (:export
+   #:composite?
+
+   #:contents
+   #:contents/plist
+
+   #:lookup
+   #:query
+
+   #:define-mapping-composite-mixin)
 
   ;; Builder protocol
   (:export

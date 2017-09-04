@@ -32,10 +32,23 @@
 
    #:simple-child-error
 
+   #:no-such-child
+
+   #:duplicate-child-key
+
    #:parent
    #:ancestors
    #:root
    #:parented-mixin
+
+   #:composite?
+   #:contents
+   #:contents/plist
+   #:lookup
+   #:query
+
+   #:define-mapping-composite-mixin
+   #:mapping-composite-mixin
 
    #:find-node
    #:make-node
