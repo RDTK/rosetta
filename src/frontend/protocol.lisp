@@ -119,7 +119,7 @@
 
 (defgeneric process (format source builder
                      &key &allow-other-keys)
-  (:argument-precedence-order builder source format)
+  (:argument-precedence-order builder format source)
   (:documentation
    "Parse content of SOURCE assuming it uses the format or syntax
     described by FORMAT. Return an object that representing the parsed
@@ -245,18 +245,19 @@
     (t
      (call-next-method))))
 
-(defmethod process ((format list) (source t) (builder t)
+(defmethod process ((format cons) (source t) (builder t)
                     &rest args &key &allow-other-keys)
-  (let ((format (if (eq (first format) :guess)
-                    (apply #'guess-format source (rest format))
-                    (apply #'service-provider:make-provider 'format format))))
-    (apply #'process format source builder args)))
+  (cond
+    ((not (eq (first format) :guess))
+     (let ((format (apply #'service-provider:make-provider 'format format)))
+       (apply #'process format source builder args)))
+    ((typep source '(and sequence (not string)))
+     (call-next-method))
+    (t
+     (let ((format (apply #'guess-format source (rest format))))
+       (apply #'process format source builder args)))))
 
 (defmethod process ((format symbol) (source t) (builder t)
-                    &rest args &key &allow-other-keys)
-  (apply #'process (list format) source builder args))
-
-(defmethod process ((format (eql :guess)) (source t) (builder t)
                     &rest args &key &allow-other-keys)
   (apply #'process (list format) source builder args))
 
