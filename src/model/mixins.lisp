@@ -153,6 +153,7 @@
      (accessor-name     (format-symbol *package* "%~A" slot-name))
      (key-type          'string)
      (key-class         key-type)
+     (relation-args?    nil)
      (make-key-form     (typecase kind
                           (keyword (lambda (kind-var key-var)
                                      (declare (ignore kind-var))
@@ -191,7 +192,9 @@
 
      (defmethod contents ((container ,class-name)
                           (kind      ,kind-specializer))
-       (hash-table-values (,accessor-name container)))
+       ,(if relation-args?
+            `(mapcar #'car (hash-table-values (,accessor-name container)))
+            `(hash-table-values (,accessor-name container))))
 
      (defmethod contents ((container ,class-name)
                           (kind      (eql t)))
@@ -212,8 +215,11 @@
 
        (or (when (next-method-p)
              (call-next-method))
-           (values (gethash ,(funcall make-key-form 'kind 'key)
-                            (,accessor-name container)))))
+           ,(if relation-args?
+                `(car (gethash ,(funcall make-key-form 'kind 'key)
+                               (,accessor-name container)))
+                `(values (gethash ,(funcall make-key-form 'kind 'key)
+                                  (,accessor-name container))))))
 
      (defmethod lookup ((container ,class-name)
                         (kind      (eql t))
@@ -224,9 +230,10 @@
 
        (or (when (next-method-p)
              (call-next-method))
-           (cdr (find key (hash-table-alist (,accessor-name container))
-                      :test #'equal
-                      :key  (compose #',key-func/any-kind #'car)))))
+           (,(if relation-args? 'cadr 'cdr)
+            (find key (hash-table-alist (,accessor-name container))
+                  :test #'equal
+                  :key  (compose #',key-func/any-kind #'car)))))
 
      (defmethod (setf lookup) ((new-value t)
                                (container ,class-name)
@@ -238,7 +245,10 @@
 
        (setf (gethash ,(funcall make-key-form 'kind 'key)
                       (,accessor-name container))
-             new-value))
+             ,(if relation-args?
+                  `(cons new-value '())
+                  'new-value))
+       new-value)
 
      ,@(when set-parent?
          `((defmethod (setf lookup) :around ((new-value parented-mixin)
@@ -266,11 +276,14 @@
                                                       &rest args &key key)
        ,@(when key-type
            `((check-type key ,key-type)))
-       (assert (length= 2 args))
+       ,@(when (not relation-args?)
+           `((assert (length= 2 args))))
 
        (setf (gethash ,(funcall make-key-form 'relation 'key)
                       (,accessor-name left))
-             right)
+             ,(if relation-args?
+                  `(cons right (remove-from-plist args :key))
+                  'right))
        left)
 
      ,@(when set-parent?
@@ -290,9 +303,14 @@
      (defmethod architecture.builder-protocol:node-relation ((builder  t)
                                                              (relation (eql ,(make-keyword name)))
                                                              (node     ,class-name))
-       (loop :for key :being :the :hash-keys :of (,accessor-name node) :using (:hash-value value)
-             :collect `(:key ,key) :into args
-             :collect value :into values
-             :finally (return (values values args))))
+       ,(if relation-args?
+            `(loop :for key :being :the :hash-keys :of (,accessor-name node) :using (:hash-value value)
+                :collect `(:key ,key ,@(cdr value)) :into args
+                :collect (car value) :into values
+                :finally (return (values values args)))
+            `(loop :for key :being :the :hash-keys :of (,accessor-name node) :using (:hash-value value)
+                :collect `(:key ,key) :into args
+                :collect value :into values
+                :finally (return (values values args)))))
 
      ',class-name))

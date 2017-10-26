@@ -86,12 +86,13 @@ items."
      accessor-name
      key-type
      key-class
+     relation-args?
      make-key-form
      key-func/any-kind
      set-parent?)
   #.(documentation 'define-mapping-composite-mixin 'function)
   (declare (ignore class-name kind kind-specializer slot-name
-                   accessor-name key-type key-class
+                   accessor-name key-type key-class relation-args?
                    make-key-form key-func/any-kind set-parent?))
   `(define-mapping-composite-mixin ,name ,@args))
 
