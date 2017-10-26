@@ -63,6 +63,7 @@
                          (t       kind)))
      (slot-name        (format-symbol *package* "~A" name))
      (accessor-name    (format-symbol *package* "%~A" slot-name))
+     (relation-args?   nil)
      (set-parent?      t))
   "Define a class named NAME which implements to composite
    protocol (i.e `contents')."
@@ -83,7 +84,9 @@
 
      (defmethod contents ((container ,class-name)
                           (kind      ,kind-specializer))
-       (coerce (,accessor-name container) 'list))
+       ,(if relation-args?
+            `(map 'list #'car (,accessor-name container))
+            `(coerce (,accessor-name container) 'list)))
 
      (defmethod contents ((container ,class-name)
                           (kind      (eql t)))
@@ -105,9 +108,15 @@
                                                       (left     ,class-name)
                                                       (right    t)
                                                       &rest args &key)
-       (when args
-         (error "~A ~A ~A ~A does not accept args ~S" builder relation left right args))
-       (vector-push-extend right (,accessor-name left))
+       ,@(unless relation-args?
+           `((when args
+               (error "~A ~A ~A ~A does not accept args ~S"
+                      builder relation left right args))))
+       (vector-push-extend
+        ,(if relation-args?
+             `(cons right args)
+             'right)
+        (,accessor-name left))
        left)
 
      ,@(when set-parent?
@@ -121,13 +130,18 @@
 
      (defmethod architecture.builder-protocol:node-relations ((builder  t)
                                                               (node     ,class-name))
-       (list* `(,,kind . *)
+       (list* '(,kind . *)
               (when (next-method-p) (call-next-method))))
 
      (defmethod architecture.builder-protocol:node-relation ((builder  t)
                                                              (relation (eql ,kind))
                                                              (node     ,class-name))
-       (coerce (,accessor-name node) 'list)) ; TODO
+       ,(if relation-args?
+            `(loop :for (right . args) :across (,accessor-name node)
+                :collect right :into all-rights
+                :collect args :into all-args
+                :finally (return (values all-rights all-args)))
+            `(coerce (,accessor-name node) 'list))) ; TODO
 
      ',class-name))
 
@@ -297,7 +311,7 @@
 
      (defmethod architecture.builder-protocol:node-relations ((builder  t)
                                                               (node     ,class-name))
-       (list* `(,,(make-keyword name) . (:map . :key))
+       (list* '(,(make-keyword name) . (:map . :key))
               (when (next-method-p) (call-next-method))))
 
      (defmethod architecture.builder-protocol:node-relation ((builder  t)
