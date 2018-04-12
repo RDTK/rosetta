@@ -1,6 +1,6 @@
 ;;;; rosetta.asd --- System definition for the rosetta system.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,6 +74,7 @@ See `version/list' for details on keyword parameters."
   :description "Cross-compiler for robotic systems components and frameworks."
   :depends-on  (:alexandria
                 :split-sequence
+                :iterate
                 (:version :let-plus                      "0.2")
                 :more-conditions
                 (:version :utilities.print-items         "0.1")
